@@ -714,7 +714,8 @@ var ps   = n => seta(n)+' '+Math.abs(n)+'%';
 // ── Estado ───────────────────────────────────────
 var inited   = {};
 var curPage  = 'mar';
-var mesSelecionado = null;\nvar chartReg = {};  // registry para destruir charts antes de recriar
+var mesSelecionado = null;
+var chartReg = {};  // registry para destruir charts antes de recriar
 
 function destroyChart(id) {
   if(chartReg[id]){try{chartReg[id].destroy();}catch(e){} delete chartReg[id];}
