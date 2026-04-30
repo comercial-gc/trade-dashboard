@@ -1358,8 +1358,7 @@ function buildMobContent(pageId, mesData){
   else if(pageId==='cli'){
     var el=document.getElementById('mobCliContent');
     if(!el)return;
-    var maxT=D.clientes[0].t;
-    el.innerHTML='<div class="mob-section-title">TOP CLIENTES</div>'+
+    if(!D.clientes||!D.clientes.length){el.innerHTML='<div class="mob-section-title">TOP CLIENTES</div>'+'<p style="padding:16px;color:var(--muted)">Sem dados disponíveis.</p>';return;}\n    var maxT=D.clientes[0].t;\n    el.innerHTML='<div class="mob-section-title">TOP CLIENTES</div>'+
     D.clientes.map((c,i)=>{
       var mp=c.a>c.b&&c.a>c.p?'a':c.b>c.p?'b':'p';
       var mcor=mp==='a'?'#005F8E':mp==='b'?'#C25A00':'#2D6A2B';
