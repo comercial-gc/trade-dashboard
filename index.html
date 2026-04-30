@@ -714,7 +714,7 @@ var ps   = n => seta(n)+' '+Math.abs(n)+'%';
 // ── Estado ───────────────────────────────────────
 var inited   = {};
 var curPage  = 'mar';
-var chartReg = {};  // registry para destruir charts antes de recriar
+var mesSelecionado = null;\nvar chartReg = {};  // registry para destruir charts antes de recriar
 
 function destroyChart(id) {
   if(chartReg[id]){try{chartReg[id].destroy();}catch(e){} delete chartReg[id];}
@@ -738,7 +738,7 @@ function nav(btn, id) {
   document.getElementById('pg-'+id).classList.add('on');
   curPage = id;
   // Sempre re-renderiza com mês atual ao navegar
-  var curMesData = (D.meses&&D.meses[D.mesAtualIdx])||D.mesAtual;
+  var curMesData = mesSelecionado||(D.meses&&D.meses[D.mesAtualIdx])||D.mesAtual;
   if(!inited[id]){ inited[id]=true; setTimeout(()=>initCharts(id, curMesData),80); }
   else { setTimeout(()=>initCharts(id, curMesData),80); }
 }
@@ -758,7 +758,7 @@ function mobNav(btn, id) {
   });
   curPage = id;
   window.scrollTo(0,0);
-  var curMD=(D.meses&&D.meses[D.mesAtualIdx])||D.mesAtual;
+  var curMD=mesSelecionado||(D.meses&&D.meses[D.mesAtualIdx])||D.mesAtual;
   if(!inited[id]){inited[id]=true;setTimeout(()=>{initCharts(id,curMD);buildMobContent(id,curMD);},80);}
   else{setTimeout(()=>{initCharts(id,curMD);buildMobContent(id,curMD);},80);}
 }
@@ -1003,7 +1003,7 @@ function populateSelectors(){
 
 function trocarMes(idx){
   idx=parseInt(idx);
-  if(D.meses&&D.meses[idx]) renderMes(D.meses[idx]);
+  if(D.meses&&D.meses[idx]){mesSelecionado=D.meses[idx];renderMes(mesSelecionado);}
   // sincroniza chips mobile
   document.querySelectorAll('.mob-mes-chip').forEach((c,i)=>{c.classList.toggle('on',i===idx);});
 }
@@ -1013,7 +1013,7 @@ function trocarMesChip(chip,idx){
   chip.classList.add('on');
   var sel=document.getElementById('mesSeletor');
   if(sel)sel.value=idx;
-  if(D.meses&&D.meses[idx]) renderMes(D.meses[idx]);
+  if(D.meses&&D.meses[idx]){mesSelecionado=D.meses[idx];renderMes(mesSelecionado);}
   else renderMes(D.mesAtual);
 }
 
@@ -1388,7 +1388,7 @@ window.addEventListener('load', function(){
 
   // Renderiza dados iniciais
   var initMes = (D.meses&&D.meses.length>0) ? D.meses[D.mesAtualIdx||0] : D.mesAtual;
-  renderMes(initMes);
+mesSelecionado = initMes;\n  renderMes(initMes);
 
   // Charts desktop
   setTimeout(function(){
