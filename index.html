@@ -1388,12 +1388,13 @@ window.addEventListener('load', function(){
 
   // Renderiza dados iniciais
   var initMes = (D.meses&&D.meses.length>0) ? D.meses[D.mesAtualIdx||0] : D.mesAtual;
-mesSelecionado = initMes;\n  renderMes(initMes);
+  mesSelecionado = initMes;
+  renderMes(initMes);
 
   // Charts desktop
   setTimeout(function(){
     inited['mar']=true;
-    initCharts('mar');
+    initCharts('mar', initMes);
     // Build mobile content para página inicial
     buildMobContent('mar', initMes);
   }, 100);
