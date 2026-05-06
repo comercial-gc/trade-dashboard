@@ -1481,9 +1481,11 @@ function cliGetDados(){
 }
 
 function cliGetPeriodo(){
-  var meses = D.meses || [];
+  var todosMeses = D.meses || [];
+  // Usar apenas meses com dados de clientes
+  var meses = todosMeses.filter(function(m){ return m.clientes && m.clientes.length > 0; });
   if(!meses.length) return {cur:[], prev:[], curLabel:'—', prevLabel:'—', n:0};
-  // Encontrar índice âncora baseado no mês selecionado (cliCurMes)
+  // Índice âncora: mês selecionado (ou último disponível com dados)
   var ancIdx = meses.length - 1;
   if(cliCurMes && cliCurMes.mesIdx !== undefined){
     var found = -1;
@@ -1492,12 +1494,12 @@ function cliGetPeriodo(){
     }
     if(found >= 0) ancIdx = found;
   }
-  // Só este período: somente o mês âncora
+  // Só este período
   if(cliPeriodo==='none'){
     var cur = [meses[ancIdx]];
     return {cur:cur, prev:[], curLabel:cur[0].label, prevLabel:'—', n:1};
   }
-  // Períodos comparativos: n meses terminando no mês âncora
+  // n meses terminando no âncora (só meses com dados)
   var n = cliPeriodo==='1m'?1:cliPeriodo==='3m'?3:cliPeriodo==='6m'?6:12;
   var cur  = meses.slice(Math.max(0, ancIdx-n+1), ancIdx+1);
   var prev = ancIdx >= n ? meses.slice(Math.max(0, ancIdx-n*2+1), ancIdx-n+1) : [];
