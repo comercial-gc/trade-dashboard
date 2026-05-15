@@ -527,8 +527,13 @@ canvas{max-height:230px}
     <div class="cc"><div class="cc-h"><div class="cc-t">🚞 Paineiras Corcovado</div><div class="cc-s" id="shareSubPai">Trade 50,43% · Parque 49,57%</div></div><canvas id="d_pai" style="max-height:190px"></canvas><div class="donut-val" id="shareValPai">50,43%</div><div class="donut-sub" id="shareSubPai2">share trade Mar/26</div></div>
   </div>
 
-  <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade — Jul/2025 a Mar/2026</div><div class="cc-s">% do canal trade no total · dados disponíveis a partir de Jul/25</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas></div>
+  <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade</div><div class="cc-s">% do canal trade no total · dados disponíveis a partir de Jul/25</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas></div>
 
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Mês</span>
+    <select id="share-mes-sel" onchange="shareSetMes(this.value)" style="appearance:none;background:var(--bg);border:1.5px solid var(--border);color:var(--navy);font-family:Outfit,sans-serif;font-size:10.5px;font-weight:600;padding:6px 28px 6px 11px;border-radius:8px;cursor:pointer;outline:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236B8A9E' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 9px center;">
+    </select>
+  </div>
   <div class="row3">
     <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — AquaRio</div></div><canvas id="c_share_aqua"></canvas></div>
     <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — BioParque</div></div><canvas id="c_share_bio"></canvas></div>
@@ -709,7 +714,9 @@ var D = {mesAtual:{label:"MAI/2026",nome:"MAIO 2026",short:"MAI",diaAtual:15,dia
 
 // ── Helpers ──────────────────────────────────────
 var meses   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-var mesesSh = ['Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26'];
+var mesesSh = ['Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26','Mar/26','Abr/26','Mai/26','Jun/26'];
+// mesesSh dinâmico: 6 fixos de 2025 + meses reais de 2026
+var mesesShDyn = ['Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25'].concat((D.meses||[]).map(function(m){return m.label.replace('JAN','Jan').replace('FEV','Fev').replace('MAR','Mar').replace('ABR','Abr').replace('MAI','Mai').replace('JUN','Jun').replace('JUL','Jul').replace('AGO','Ago').replace('SET','Set').replace('OUT','Out').replace('NOV','Nov').replace('DEZ','Dez').replace('/2026','/26');}));
 var gc = {display:true,color:'rgba(0,0,0,.04)'};
 var gn = {display:false};
 var fK = v => v>=1000?(v/1000).toFixed(0)+'k':v;
@@ -958,7 +965,7 @@ function initShare(mesData){
   var sbEl=document.getElementById('shareBadge');if(sbEl)sbEl.textContent=mesLbl;
 
   mkChart('c_share_evo',{type:'line',data:{
-    labels:mesesSh,
+    labels:mesesShDyn,
     datasets:[
       {label:'AquaRio %',data:D.share.aqua,borderColor:'rgba(0,95,142,1)',backgroundColor:'rgba(0,95,142,.07)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'rgba(0,95,142,1)',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true,yAxisID:'y'},
       {label:'BioParque %',data:D.share.bio,borderColor:'rgba(194,90,0,1)',backgroundColor:'transparent',borderWidth:2,borderDash:[4,3],pointRadius:4,pointBackgroundColor:'rgba(194,90,0,1)',tension:.3,yAxisID:'y'},
@@ -968,36 +975,83 @@ function initShare(mesData){
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{grid:gc,position:'left',ticks:{callback:v=>v+'%'},title:{display:true,text:'Aqua/Bio %',font:{size:10}}},y2:{grid:{display:false},position:'right',ticks:{callback:v=>v+'%'},title:{display:true,text:'Paineiras %',font:{size:10}}}}}});
 
-  // Gráficos Share 2025 x 2026 por parque
-  var shareLbls=(D.meses||[]).map(function(m){return m.label;});
-  if(!shareLbls.length) shareLbls=mesesSh.slice(-3);
+  // Popular dropdown de mês para Share 25x26
+  var shareMesSel=document.getElementById('share-mes-sel');
+  if(shareMesSel){
+    shareMesSel.innerHTML='';
+    var allOpt=document.createElement('option');allOpt.value='all';allOpt.textContent='Todos os meses';shareMesSel.appendChild(allOpt);
+    (D.meses||[]).forEach(function(m,i){
+      var opt=document.createElement('option');opt.value=i;opt.textContent=m.label;
+      if(i===(D.mesAtualIdx||0)) opt.selected=true;
+      shareMesSel.appendChild(opt);
+    });
+  }
+  shareRenderBarras(D.mesAtualIdx||0);
+}
+
+// ── Share: renderizar barras por mês ─────────────────────────
+function shareSetMes(val){
+  var idx = val==='all' ? 'all' : parseInt(val);
+  shareRenderBarras(idx);
+}
+
+function shareRenderBarras(mesIdx){
   var bO={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:10,font:{size:10}}}},
     scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
             y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}},
               title:{display:true,text:'% share trade',font:{size:9}}}}};
-  mkChart('c_share_aqua',{type:'bar',data:{
-    labels:shareLbls,
-    datasets:[
-      {label:'Share Trade 25',data:D.share.aqua25,backgroundColor:'rgba(0,180,216,.35)',borderRadius:4,borderWidth:0},
-      {label:'Share Trade 26',data:D.share.aqua, backgroundColor:'rgba(0,95,142,.85)', borderRadius:4,borderWidth:0}
-    ]
-  },options:bO});
-  mkChart('c_share_bio',{type:'bar',data:{
-    labels:shareLbls,
-    datasets:[
-      {label:'Share Trade 25',data:D.share.bio25,backgroundColor:'rgba(255,140,42,.35)',borderRadius:4,borderWidth:0},
-      {label:'Share Trade 26',data:D.share.bio,  backgroundColor:'rgba(194,90,0,.85)', borderRadius:4,borderWidth:0}
-    ]
-  },options:bO});
-  mkChart('c_share_pai',{type:'bar',data:{
-    labels:shareLbls,
-    datasets:[
-      {label:'Share Trade 25',data:D.share.pai25,backgroundColor:'rgba(86,195,84,.35)',borderRadius:4,borderWidth:0},
-      {label:'Share Trade 26',data:D.share.pai,  backgroundColor:'rgba(45,106,43,.85)',borderRadius:4,borderWidth:0}
-    ]
-  },options:bO});
+  var mesesList = D.meses||[];
+  var lbls, a26, a25, b26, b25, p26, p25;
+  if(mesIdx==='all'){
+    // Todos os meses com dados
+    lbls = mesesList.map(function(m){return m.label;});
+    a26=mesesList.map(function(m){return m.aqua&&m.aqua.share26||0;});
+    a25=mesesList.map(function(m){return m.aqua&&m.aqua.share25||0;});
+    b26=mesesList.map(function(m){return m.bio&&m.bio.share26||0;});
+    b25=mesesList.map(function(m){return m.bio&&m.bio.share25||0;});
+    p26=mesesList.map(function(m){return m.pai&&m.pai.share26||0;});
+    p25=mesesList.map(function(m){return m.pai&&m.pai.share25||0;});
+  } else {
+    // Mês específico — 1 barra por parque
+    var mm = mesesList[mesIdx]||mesesList[mesesList.length-1];
+    lbls = ['AquaRio','BioParque','Paineiras'];
+    a26=[mm.aqua&&mm.aqua.share26||0]; a25=[mm.aqua&&mm.aqua.share25||0];
+    b26=[mm.bio&&mm.bio.share26||0];   b25=[mm.bio&&mm.bio.share25||0];
+    p26=[mm.pai&&mm.pai.share26||0];   p25=[mm.pai&&mm.pai.share25||0];
+    // Para mês único: 3 barras lado a lado por parque
+    lbls=['AquaRio','BioParque','Paineiras'];
+    a26=[mm.aqua&&mm.aqua.share26||0,mm.bio&&mm.bio.share26||0,mm.pai&&mm.pai.share26||0];
+    a25=[mm.aqua&&mm.aqua.share25||0,mm.bio&&mm.bio.share25||0,mm.pai&&mm.pai.share25||0];
+    // Para mês único renderizar os 3 juntos em 1 chart e esconder os outros
+    mkChart('c_share_aqua',{type:'bar',data:{
+      labels:lbls,
+      datasets:[
+        {label:'Share Trade 25',data:a25,backgroundColor:['rgba(0,180,216,.35)','rgba(255,140,42,.35)','rgba(86,195,84,.35)'],borderRadius:4,borderWidth:0},
+        {label:'Share Trade 26',data:a26,backgroundColor:['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)'],borderRadius:4,borderWidth:0}
+      ]
+    },options:bO});
+    var b2=document.getElementById('c_share_bio');if(b2)b2.parentElement.parentElement.style.display='none';
+    var b3=document.getElementById('c_share_pai');if(b3)b3.parentElement.parentElement.style.display='none';
+    return;
+  }
+  // Mostrar os 3 cards novamente (caso volte de mês único)
+  var b2=document.getElementById('c_share_bio');if(b2)b2.parentElement.parentElement.style.display='';
+  var b3=document.getElementById('c_share_pai');if(b3)b3.parentElement.parentElement.style.display='';
+  mkChart('c_share_aqua',{type:'bar',data:{labels:lbls,datasets:[
+    {label:'Share Trade 25',data:a25,backgroundColor:'rgba(0,180,216,.35)',borderRadius:4,borderWidth:0},
+    {label:'Share Trade 26',data:a26,backgroundColor:'rgba(0,95,142,.85)',borderRadius:4,borderWidth:0}
+  ]},options:bO});
+  mkChart('c_share_bio',{type:'bar',data:{labels:lbls,datasets:[
+    {label:'Share Trade 25',data:b25,backgroundColor:'rgba(255,140,42,.35)',borderRadius:4,borderWidth:0},
+    {label:'Share Trade 26',data:b26,backgroundColor:'rgba(194,90,0,.85)',borderRadius:4,borderWidth:0}
+  ]},options:bO});
+  mkChart('c_share_pai',{type:'bar',data:{labels:lbls,datasets:[
+    {label:'Share Trade 25',data:p25,backgroundColor:'rgba(86,195,84,.35)',borderRadius:4,borderWidth:0},
+    {label:'Share Trade 26',data:p26,backgroundColor:'rgba(45,106,43,.85)',borderRadius:4,borderWidth:0}
+  ]},options:bO});
 }
+
 
 // ── CLIENTES ─────────────────────────────
 // ════════════════════════════════════════
