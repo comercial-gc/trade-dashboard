@@ -529,9 +529,10 @@ canvas{max-height:230px}
 
   <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade — Jul/2025 a Mar/2026</div><div class="cc-s">% do canal trade no total · dados disponíveis a partir de Jul/25</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas></div>
 
-  <div class="row2">
-    <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — AquaRio</div></div><canvas id="c_share_aqua"></canvas></div>
-    <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — Paineiras</div></div><canvas id="c_share_pai"></canvas></div>
+  <div class="row3">
+    <div class="cc"><div class="cc-h"><div class="cc-t">Evolução do Share — AquaRio</div></div><canvas id="c_share_aqua"></canvas></div>
+    <div class="cc"><div class="cc-h"><div class="cc-t">Evolução do Share — BioParque</div></div><canvas id="c_share_bio"></canvas></div>
+    <div class="cc"><div class="cc-h"><div class="cc-t">Evolução do Share — Paineiras</div></div><canvas id="c_share_pai"></canvas></div>
   </div>
 
   <div class="nota">ℹ️ <strong>Nota:</strong> Os dados de share para Jan–Jun/2025 não estão disponíveis. Série histórica disponível a partir de Jul/2025.</div>
@@ -967,23 +968,28 @@ function initShare(mesData){
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{grid:gc,position:'left',ticks:{callback:v=>v+'%'},title:{display:true,text:'Aqua/Bio %',font:{size:10}}},y2:{grid:{display:false},position:'right',ticks:{callback:v=>v+'%'},title:{display:true,text:'Paineiras %',font:{size:10}}}}}});
 
-  var sh26A=D.share.aqua.slice(-3);
-  var sh26P=D.share.pai.slice(-3);
-  var lbls3=meses.slice(0,3);
-  mkChart('c_share_aqua',{type:'bar',data:{
-    labels:lbls3,
-    datasets:[
-      {label:'2025',data:[null,null,null],backgroundColor:'rgba(0,180,216,.45)',borderRadius:4,borderWidth:0},
-      {label:'2026',data:sh26A,backgroundColor:'rgba(0,95,142,.85)',borderRadius:4,borderWidth:0}
-    ]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:10,font:{size:11}}}},scales:{x:{grid:gn},y:{grid:gc,ticks:{callback:v=>v+'%'}}}}});
-  mkChart('c_share_pai',{type:'bar',data:{
-    labels:lbls3,
-    datasets:[
-      {label:'2025',data:[null,null,null],backgroundColor:'rgba(86,195,84,.45)',borderRadius:4,borderWidth:0},
-      {label:'2026',data:sh26P,backgroundColor:'rgba(45,106,43,.85)',borderRadius:4,borderWidth:0}
-    ]
-  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:10,font:{size:11}}}},scales:{x:{grid:gn},y:{grid:gc,ticks:{callback:v=>v+'%'}}}}});
+  var shareOpts={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}}}}}; 
+  mkChart('c_share_aqua',{type:'line',data:{
+    labels:mesesSh,
+    datasets:[{label:'AquaRio %',data:D.share.aqua,
+      borderColor:'rgba(0,95,142,1)',backgroundColor:'rgba(0,95,142,.1)',
+      borderWidth:2.5,pointRadius:4,pointBackgroundColor:'rgba(0,95,142,1)',
+      pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true}]
+  },options:shareOpts});
+  mkChart('c_share_bio',{type:'line',data:{
+    labels:mesesSh,
+    datasets:[{label:'BioParque %',data:D.share.bio,
+      borderColor:'rgba(194,90,0,1)',backgroundColor:'rgba(194,90,0,.1)',
+      borderWidth:2.5,pointRadius:4,pointBackgroundColor:'rgba(194,90,0,1)',
+      pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true}]
+  },options:shareOpts});
+  mkChart('c_share_pai',{type:'line',data:{
+    labels:mesesSh,
+    datasets:[{label:'Paineiras %',data:D.share.pai,
+      borderColor:'rgba(45,106,43,1)',backgroundColor:'rgba(45,106,43,.1)',
+      borderWidth:2.5,pointRadius:4,pointBackgroundColor:'rgba(45,106,43,1)',
+      pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true}]
+  },options:shareOpts});
 }
 
 // ── CLIENTES ─────────────────────────────
