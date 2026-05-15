@@ -979,9 +979,9 @@ function initShare(mesData){
   var shareMesSel=document.getElementById('share-mes-sel');
   if(shareMesSel){
     shareMesSel.innerHTML='';
-    var allOpt=document.createElement('option');allOpt.value='all';allOpt.textContent='Todos os meses';shareMesSel.appendChild(allOpt);
-    (D.meses||[]).forEach(function(m,i){
-      var opt=document.createElement('option');opt.value=i;opt.textContent=m.label;
+    var allOpt=document.createElement('option');allOpt.value='all';allOpt.textContent='Consolidado (todos os meses)';shareMesSel.appendChild(allOpt);
+    (D.meses||[]).forEach(function(mm,i){
+      var opt=document.createElement('option');opt.value=i;opt.textContent=mm.label;
       if(i===(D.mesAtualIdx||0)) opt.selected=true;
       shareMesSel.appendChild(opt);
     });
@@ -989,10 +989,8 @@ function initShare(mesData){
   shareRenderBarras(D.mesAtualIdx||0);
 }
 
-// ── Share: renderizar barras por mês ─────────────────────────
 function shareSetMes(val){
-  var idx = val==='all' ? 'all' : parseInt(val);
-  shareRenderBarras(idx);
+  shareRenderBarras(val==='all'?'all':(parseInt(val)));
 }
 
 function shareRenderBarras(mesIdx){
@@ -1001,57 +999,56 @@ function shareRenderBarras(mesIdx){
     scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
             y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}},
               title:{display:true,text:'% share trade',font:{size:9}}}}};
-  var mesesList = D.meses||[];
-  var lbls, a26, a25, b26, b25, p26, p25;
+  var mesesList=D.meses||[];
+  // Garantir que os 3 cards estejam visíveis
+  ['c_share_bio','c_share_pai'].forEach(function(cid){
+    var el=document.getElementById(cid);
+    if(el)el.closest('.cc').style.display='';
+  });
   if(mesIdx==='all'){
-    // Todos os meses com dados
-    lbls = mesesList.map(function(m){return m.label;});
-    a26=mesesList.map(function(m){return m.aqua&&m.aqua.share26||0;});
-    a25=mesesList.map(function(m){return m.aqua&&m.aqua.share25||0;});
-    b26=mesesList.map(function(m){return m.bio&&m.bio.share26||0;});
-    b25=mesesList.map(function(m){return m.bio&&m.bio.share25||0;});
-    p26=mesesList.map(function(m){return m.pai&&m.pai.share26||0;});
-    p25=mesesList.map(function(m){return m.pai&&m.pai.share25||0;});
+    // CONSOLIDADO: cada gráfico mostra todos os meses no eixo X
+    var lbls=mesesList.map(function(mm){return mm.label;});
+    var aq26=mesesList.map(function(mm){return mm.aqua&&mm.aqua.share26||0;});
+    var aq25=mesesList.map(function(mm){return mm.aqua&&mm.aqua.share25||0;});
+    var bi26=mesesList.map(function(mm){return mm.bio&&mm.bio.share26||0;});
+    var bi25=mesesList.map(function(mm){return mm.bio&&mm.bio.share25||0;});
+    var pa26=mesesList.map(function(mm){return mm.pai&&mm.pai.share26||0;});
+    var pa25=mesesList.map(function(mm){return mm.pai&&mm.pai.share25||0;});
+    mkChart('c_share_aqua',{type:'bar',data:{labels:lbls,datasets:[
+      {label:'Share Trade 25',data:aq25,backgroundColor:'rgba(0,180,216,.35)',borderRadius:4,borderWidth:0},
+      {label:'Share Trade 26',data:aq26,backgroundColor:'rgba(0,95,142,.85)',borderRadius:4,borderWidth:0}
+    ]},options:bO});
+    mkChart('c_share_bio',{type:'bar',data:{labels:lbls,datasets:[
+      {label:'Share Trade 25',data:bi25,backgroundColor:'rgba(255,140,42,.35)',borderRadius:4,borderWidth:0},
+      {label:'Share Trade 26',data:bi26,backgroundColor:'rgba(194,90,0,.85)',borderRadius:4,borderWidth:0}
+    ]},options:bO});
+    mkChart('c_share_pai',{type:'bar',data:{labels:lbls,datasets:[
+      {label:'Share Trade 25',data:pa25,backgroundColor:'rgba(86,195,84,.35)',borderRadius:4,borderWidth:0},
+      {label:'Share Trade 26',data:pa26,backgroundColor:'rgba(45,106,43,.85)',borderRadius:4,borderWidth:0}
+    ]},options:bO});
   } else {
-    // Mês específico — 1 barra por parque
-    var mm = mesesList[mesIdx]||mesesList[mesesList.length-1];
-    lbls = ['AquaRio','BioParque','Paineiras'];
-    a26=[mm.aqua&&mm.aqua.share26||0]; a25=[mm.aqua&&mm.aqua.share25||0];
-    b26=[mm.bio&&mm.bio.share26||0];   b25=[mm.bio&&mm.bio.share25||0];
-    p26=[mm.pai&&mm.pai.share26||0];   p25=[mm.pai&&mm.pai.share25||0];
-    // Para mês único: 3 barras lado a lado por parque
-    lbls=['AquaRio','BioParque','Paineiras'];
-    a26=[mm.aqua&&mm.aqua.share26||0,mm.bio&&mm.bio.share26||0,mm.pai&&mm.pai.share26||0];
-    a25=[mm.aqua&&mm.aqua.share25||0,mm.bio&&mm.bio.share25||0,mm.pai&&mm.pai.share25||0];
-    // Para mês único renderizar os 3 juntos em 1 chart e esconder os outros
-    mkChart('c_share_aqua',{type:'bar',data:{
-      labels:lbls,
-      datasets:[
-        {label:'Share Trade 25',data:a25,backgroundColor:['rgba(0,180,216,.35)','rgba(255,140,42,.35)','rgba(86,195,84,.35)'],borderRadius:4,borderWidth:0},
-        {label:'Share Trade 26',data:a26,backgroundColor:['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)'],borderRadius:4,borderWidth:0}
-      ]
-    },options:bO});
-    var b2=document.getElementById('c_share_bio');if(b2)b2.parentElement.parentElement.style.display='none';
-    var b3=document.getElementById('c_share_pai');if(b3)b3.parentElement.parentElement.style.display='none';
-    return;
+    // MÊS ESPECÍFICO: cada gráfico mostra 2 barras — 2025 e 2026
+    var mm=mesesList[mesIdx]||mesesList[mesesList.length-1];
+    if(!mm) return;
+    var mesLblBar=mm.label;
+    var lblsMes=['2025','2026'];
+    mkChart('c_share_aqua',{type:'bar',data:{labels:lblsMes,datasets:[{
+      label:'🐠 AquaRio',
+      data:[mm.aqua&&mm.aqua.share25||0, mm.aqua&&mm.aqua.share26||0],
+      backgroundColor:['rgba(0,180,216,.45)','rgba(0,95,142,.85)'],borderRadius:6,borderWidth:0
+    }]},options:bO});
+    mkChart('c_share_bio',{type:'bar',data:{labels:lblsMes,datasets:[{
+      label:'🦁 BioParque',
+      data:[mm.bio&&mm.bio.share25||0, mm.bio&&mm.bio.share26||0],
+      backgroundColor:['rgba(255,140,42,.45)','rgba(194,90,0,.85)'],borderRadius:6,borderWidth:0
+    }]},options:bO});
+    mkChart('c_share_pai',{type:'bar',data:{labels:lblsMes,datasets:[{
+      label:'🚞 Paineiras',
+      data:[mm.pai&&mm.pai.share25||0, mm.pai&&mm.pai.share26||0],
+      backgroundColor:['rgba(86,195,84,.45)','rgba(45,106,43,.85)'],borderRadius:6,borderWidth:0
+    }]},options:bO});
   }
-  // Mostrar os 3 cards novamente (caso volte de mês único)
-  var b2=document.getElementById('c_share_bio');if(b2)b2.parentElement.parentElement.style.display='';
-  var b3=document.getElementById('c_share_pai');if(b3)b3.parentElement.parentElement.style.display='';
-  mkChart('c_share_aqua',{type:'bar',data:{labels:lbls,datasets:[
-    {label:'Share Trade 25',data:a25,backgroundColor:'rgba(0,180,216,.35)',borderRadius:4,borderWidth:0},
-    {label:'Share Trade 26',data:a26,backgroundColor:'rgba(0,95,142,.85)',borderRadius:4,borderWidth:0}
-  ]},options:bO});
-  mkChart('c_share_bio',{type:'bar',data:{labels:lbls,datasets:[
-    {label:'Share Trade 25',data:b25,backgroundColor:'rgba(255,140,42,.35)',borderRadius:4,borderWidth:0},
-    {label:'Share Trade 26',data:b26,backgroundColor:'rgba(194,90,0,.85)',borderRadius:4,borderWidth:0}
-  ]},options:bO});
-  mkChart('c_share_pai',{type:'bar',data:{labels:lbls,datasets:[
-    {label:'Share Trade 25',data:p25,backgroundColor:'rgba(86,195,84,.35)',borderRadius:4,borderWidth:0},
-    {label:'Share Trade 26',data:p26,backgroundColor:'rgba(45,106,43,.85)',borderRadius:4,borderWidth:0}
-  ]},options:bO});
 }
-
 
 // ── CLIENTES ─────────────────────────────
 // ════════════════════════════════════════
