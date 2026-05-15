@@ -968,12 +968,7 @@ function initShare(mesData){
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{grid:gc,position:'left',ticks:{callback:v=>v+'%'},title:{display:true,text:'Aqua/Bio %',font:{size:10}}},y2:{grid:{display:false},position:'right',ticks:{callback:v=>v+'%'},title:{display:true,text:'Paineiras %',font:{size:10}}}}}});
 
-  // Gráficos de evolução individual por parque (série completa disponível)
-  var shareOpts = {responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},
-            y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}},
-              title:{display:true,text:'% share trade',font:{size:9}}}}};
+  var shareOpts={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}}}}}; 
   mkChart('c_share_aqua',{type:'line',data:{
     labels:mesesSh,
     datasets:[{label:'AquaRio %',data:D.share.aqua,
@@ -995,6 +990,7 @@ function initShare(mesData){
       borderWidth:2.5,pointRadius:4,pointBackgroundColor:'rgba(45,106,43,1)',
       pointBorderColor:'#fff',pointBorderWidth:2,tension:.35,fill:true}]
   },options:shareOpts});
+}
 
 // ── CLIENTES ─────────────────────────────
 // ════════════════════════════════════════
