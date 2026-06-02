@@ -610,9 +610,16 @@ canvas{max-height:230px}
         <option value="3m" selected>vs Últimos 3 meses</option>
         <option value="6m">vs Últimos 6 meses</option>
         <option value="12m">vs Últimos 12 meses</option>
+        <option value="custom">📅 Personalizado</option>
       </select>
-    </div>
-  </div>
+      <div id="cli-custom-panel" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1.5px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">De</span>
+          <select class="cli-select" id="cli-custom-de" onchange="cliApplyCustom()" style="min-width:120px;"></select>
+          <span style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Até</span>
+          <select class="cli-select" id="cli-custom-ate" onchange="cliApplyCustom()" style="min-width:120px;"></select>
+        </div>
+      </div>
 </div>
 
 <!-- ABAS -->
@@ -1487,6 +1494,8 @@ var cliParque   = 'all';
 var cliPeriodo  = '3m';
 var cliCurMes   = null;
 var cliCharts   = {};
+var cliCustomDe  = 0;
+var cliCustomAte = 0;
 
 function cliDestroyChart(id){
   if(cliCharts[id]){try{cliCharts[id].destroy();}catch(e){} delete cliCharts[id];}
@@ -1538,6 +1547,43 @@ function cliSetParque(p, btn){
 
 function cliSetPeriodo(v){
   cliPeriodo = v;
+  var panel = document.getElementById('cli-custom-panel');
+  if(panel) panel.style.display = (v==='custom') ? 'block' : 'none';
+  if(v==='custom'){ cliPopulateCustomSels(); return; }
+  cliRenderAtivo();
+}
+
+function cliPopulateCustomSels(){
+  var todosMeses = (D.meses2025||[]).concat(D.meses||[]);
+  var meses = todosMeses.filter(function(m){ return m.clientes && m.clientes.length > 0; });
+  if(!meses.length) return;
+  function fillSel(id, selectedIdx){
+    var sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = '';
+    meses.forEach(function(m, i){
+      var opt = document.createElement('option');
+      opt.value = i; opt.textContent = m.label;
+      if(i === selectedIdx) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  fillSel('cli-custom-de', 0);
+  fillSel('cli-custom-ate', meses.length - 1);
+  cliApplyCustom();
+}
+
+function cliApplyCustom(){
+  var todosMeses = (D.meses2025||[]).concat(D.meses||[]);
+  var meses = todosMeses.filter(function(m){ return m.clientes && m.clientes.length > 0; });
+  var selDe  = document.getElementById('cli-custom-de');
+  var selAte = document.getElementById('cli-custom-ate');
+  if(!selDe || !selAte) return;
+  var idxDe  = parseInt(selDe.value);
+  var idxAte = parseInt(selAte.value);
+  if(idxDe > idxAte){ selDe.value = idxAte; idxDe = idxAte; }
+  cliCustomDe  = idxDe;
+  cliCustomAte = idxAte;
   cliRenderAtivo();
 }
 
@@ -1572,10 +1618,19 @@ function cliGetDados(){
 
 function cliGetPeriodo(){
   var todosMeses = (D.meses2025||[]).concat(D.meses||[]);
-  // Usar apenas meses com dados de clientes
   var meses = todosMeses.filter(function(m){ return m.clientes && m.clientes.length > 0; });
   if(!meses.length) return {cur:[], prev:[], curLabel:'—', prevLabel:'—', n:0};
-  // Índice âncora: mês selecionado (ou último disponível com dados)
+  var lbl = function(arr){
+    return arr.length===1 ? arr[0].label : arr[0].label+' → '+arr[arr.length-1].label;
+  };
+  if(cliPeriodo==='custom'){
+    var de  = Math.min(cliCustomDe,  meses.length-1);
+    var ate = Math.min(cliCustomAte, meses.length-1);
+    if(de > ate) de = ate;
+    var cur = meses.slice(de, ate+1);
+    return {cur:cur, prev:[], curLabel:lbl(cur), prevLabel:'—', n:cur.length};
+  }
+  // Índice âncora: mês selecionado (ou último com dados)
   var ancIdx = meses.length - 1;
   if(cliCurMes && cliCurMes.mesIdx !== undefined){
     var found = -1;
@@ -1584,18 +1639,13 @@ function cliGetPeriodo(){
     }
     if(found >= 0) ancIdx = found;
   }
-  // Só este período
   if(cliPeriodo==='none'){
     var cur = [meses[ancIdx]];
     return {cur:cur, prev:[], curLabel:cur[0].label, prevLabel:'—', n:1};
   }
-  // n meses terminando no âncora (só meses com dados)
   var n = cliPeriodo==='1m'?1:cliPeriodo==='3m'?3:cliPeriodo==='6m'?6:12;
   var cur  = meses.slice(Math.max(0, ancIdx-n+1), ancIdx+1);
   var prev = ancIdx >= n ? meses.slice(Math.max(0, ancIdx-n*2+1), ancIdx-n+1) : [];
-  var lbl  = function(arr){
-    return arr.length===1 ? arr[0].label : arr[0].label+' → '+arr[arr.length-1].label;
-  };
   return {cur:cur, prev:prev, curLabel:lbl(cur), prevLabel:prev.length?lbl(prev):'—', n:n};
 }
 
