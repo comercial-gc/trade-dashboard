@@ -1789,53 +1789,65 @@ function cliRenderAgencia(){
   var ag = document.getElementById('cli-ag-sel').value;
   if(!ag || !dados[ag]) return;
 
+  // histórico completo para Melhor Mês
   var allMes = (D.meses2025||[]).concat(D.meses||[]).map(function(m){return m.label;});
-  var vals   = allMes.map(function(lbl){return dados[ag][lbl]||0;});
-  var total  = vals.reduce(function(s,v){return s+v;},0);
-  if(!total) return;
+  var allVals = allMes.map(function(lbl){return dados[ag][lbl]||0;});
+  if(!allVals.some(function(v){return v>0;})) return;
 
-  // KPIs
-  var n3=vals.slice(-3),p3=vals.slice(-6,-3);
-  var n6=vals.slice(-6),p6=vals.slice(-12,-6);
-  var s3=n3.reduce(function(s,v){return s+v;},0), sp3=p3.reduce(function(s,v){return s+v;},0);
-  var s6=n6.reduce(function(s,v){return s+v;},0), sp6=p6.reduce(function(s,v){return s+v;},0);
-  var mx = Math.max.apply(null,vals);
-  var bMIdx = vals.indexOf(mx);
+  // período filtrado pelo seletor
+  var per = cliGetPeriodo();
+  var perMes = per.cur.map(function(m){return m.label;});
+  var perVals = perMes.map(function(lbl){return dados[ag][lbl]||0;});
+  var totalPer = perVals.reduce(function(s,v){return s+v;},0);
+
+  // melhor mês no histórico completo
+  var mx = Math.max.apply(null,allVals);
+  var bMIdx = allVals.indexOf(mx);
   var bMLabel = allMes[bMIdx]||'—';
-  var pc3 = sp3>0 ? ((s3-sp3)/sp3*100).toFixed(1) : null;
-  var pc6 = sp6>0 ? ((s6-sp6)/sp6*100).toFixed(1) : null;
   var pName = cliParque==='a'?'AquaRio':cliParque==='b'?'BioParque':cliParque==='p'?'Paineiras':'Todos';
 
-  document.getElementById('cli-ag-kpis').innerHTML =
-    '<div class="cli-kpi-card"><div class="cli-kpi-label">Total período</div>'
-    +'<div class="cli-kpi-val" style="color:'+cor+'">'+fN(total)+'</div>'
-    +'<div class="cli-kpi-sub">bilhetes '+pName+'</div></div>'
-    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Últimos 3 meses</div>'
-    +'<div class="cli-kpi-val" style="color:'+cor+'">'+fN(s3)+'</div>'
-    +(pc3!==null?'<div class="cli-kpi-delta '+(parseFloat(pc3)>=0?'up':'dn')+'">'
-      +(parseFloat(pc3)>=0?'▲ +':'▼ ')+Math.abs(pc3)+'% vs anterior</div>':'<div class="cli-kpi-sub">sem comparativo</div>')
-    +'</div>'
-    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Últimos 6 meses</div>'
-    +'<div class="cli-kpi-val" style="color:'+cor+'">'+fN(s6)+'</div>'
-    +(pc6!==null?'<div class="cli-kpi-delta '+(parseFloat(pc6)>=0?'up':'dn')+'">'
-      +(parseFloat(pc6)>=0?'▲ +':'▼ ')+Math.abs(pc6)+'% vs anterior</div>':'<div class="cli-kpi-sub">sem comparativo</div>')
-    +'</div>'
-    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Melhor mês</div>'
-    +'<div class="cli-kpi-val" style="color:'+cor+'">'+bMLabel+'</div>'
-    +'<div class="cli-kpi-sub">'+fN(mx)+' bilhetes</div></div>';
+  // delta vs período anterior
+  var perDelta = '';
+  if(per.prev && per.prev.length){
+    var prevVals = per.prev.map(function(m){return dados[ag][m.label]||0;});
+    var totalPrev = prevVals.reduce(function(s,v){return s+v;},0);
+    if(totalPrev>0){
+      var dp = ((totalPer-totalPrev)/totalPrev*100).toFixed(1);
+      perDelta = '<div class="cli-kpi-delta '+(parseFloat(dp)>=0?'up':'dn')+'">'+(parseFloat(dp)>=0?'▲ +':'▼ ')+Math.abs(dp)+'% vs anterior</div>';
+    }
+  }
 
-  // Gráfico de barras mensal
+  // KPIs
+  document.getElementById('cli-ag-kpis').innerHTML =
+    '<div class="cli-kpi-card"><div class="cli-kpi-label">Total no período</div>'
+    +'<div class="cli-kpi-val" style="color:'+cor+'">'+fN(totalPer)+'</div>'
+    +'<div class="cli-kpi-sub">bilhetes '+pName+' · '+per.curLabel+'</div>'
+    +(perDelta?perDelta:'')
+    +'</div>'
+    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Meses no período</div>'
+    +'<div class="cli-kpi-val" style="color:'+cor+'">'+perMes.length+'</div>'
+    +'<div class="cli-kpi-sub">meses selecionados</div></div>'
+    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Melhor mês (histórico)</div>'
+    +'<div class="cli-kpi-val" style="color:'+cor+'">'+bMLabel+'</div>'
+    +'<div class="cli-kpi-sub">'+fN(mx)+' bilhetes</div></div>'
+    +'<div class="cli-kpi-card"><div class="cli-kpi-label">Média mensal (período)</div>'
+    +'<div class="cli-kpi-val" style="color:'+cor+'">'+fN(perMes.length>0?Math.round(totalPer/perMes.length):0)+'</div>'
+    +'<div class="cli-kpi-sub">bilhetes/mês</div></div>';
+
+  // gráfico de barras — apenas período selecionado
   cliDestroyChart('cli-ag-bar');
   var barEl = document.getElementById('cli-ag-bar');
   if(barEl){
     cliCharts['cli-ag-bar'] = new Chart(barEl, {
       type:'bar',
       data:{
-        labels:allMes,
+        labels:perMes,
         datasets:[{
           label:ag.slice(0,30),
-          data:vals,
-          backgroundColor:corL,
+          data:perVals,
+          backgroundColor:perVals.map(function(v){
+            return v===Math.max.apply(null,perVals)?cor:corL;
+          }),
           borderColor:cor,
           borderWidth:1.5,
           borderRadius:3
@@ -1853,15 +1865,17 @@ function cliRenderAgencia(){
     });
   }
 
-  // Gráfico delta (variação vs mês anterior)
-  var deltas = vals.map(function(v,i){return i===0?0:v-vals[i-1];});
+  // gráfico delta
+  var deltas = perVals.map(function(v,i){return i===0?0:v-perVals[i-1];});
   cliDestroyChart('cli-ag-delta');
   var deltaEl = document.getElementById('cli-ag-delta');
-  if(deltaEl){
+  var deltaCC = deltaEl?deltaEl.closest('.cc'):null;
+  if(deltaCC) deltaCC.style.display='';
+  if(deltaEl && perMes.length > 1){
     cliCharts['cli-ag-delta'] = new Chart(deltaEl, {
       type:'bar',
       data:{
-        labels:allMes.slice(1),
+        labels:perMes.slice(1),
         datasets:[{
           label:'Δ vs mês anterior',
           data:deltas.slice(1),
@@ -1881,141 +1895,29 @@ function cliRenderAgencia(){
         }
       }
     });
+  } else if(deltaEl && deltaCC){
+    deltaCC.style.display='none';
   }
 
-  // Insights automáticos
-  var lastV=vals[vals.length-1], prevV=vals.length>1?vals[vals.length-2]:0;
+  // insights
+  var lastV=perVals[perVals.length-1]||0, prev1V=perVals.length>1?perVals[perVals.length-2]:0;
   var insights='';
-  var pct1 = prevV>0 ? ((lastV-prevV)/prevV*100).toFixed(1) : null;
+  var pct1 = prev1V>0 ? ((lastV-prev1V)/prev1V*100).toFixed(1) : null;
   var trend = pct1!==null ? parseFloat(pct1) : 0;
   insights += '<div class="cli-insight '+(trend>0?'good':trend<0?'alert':'')+'"><strong>Tendência recente:</strong> '
-    +allMes[allMes.length-1]+': '+fN(lastV)+' bilhetes'
-    +(pct1!==null?' ('+(trend>=0?'▲ +':'▼ ')+Math.abs(pct1)+'% vs '+allMes[allMes.length-2]+')':'')
+    +(perMes[perMes.length-1]||'—')+': '+fN(lastV)+' bilhetes'
+    +(pct1!==null?' ('+(trend>=0?'▲ +':'▼ ')+Math.abs(pct1)+'% vs '+(perMes[perMes.length-2]||'—')+')'  :'  ')
     +'.</div>';
-  var zeros = allMes.filter(function(lbl,i){return vals[i]===0;});
-  if(zeros.length) insights += '<div class="cli-insight warn"><strong>Meses sem venda:</strong> '+zeros.join(', ')+'. Verifique sazonalidade ou relacionamento comercial.</div>';
-  if(pc3!==null&&parseFloat(pc3)<-20) insights += '<div class="cli-insight alert"><strong>⚠ Alerta:</strong> Queda de '+Math.abs(pc3)+'% nos últimos 3 meses vs período anterior.</div>';
-  if(pc3!==null&&parseFloat(pc3)>50)  insights += '<div class="cli-insight good"><strong>✓ Destaque:</strong> Crescimento de +'+pc3+'% nos últimos 3 meses. Oportunidade para ampliar parceria.</div>';
+  var zeros = perMes.filter(function(lbl,i){return perVals[i]===0;});
+  if(zeros.length) insights += '<div class="cli-insight warn"><strong>Meses sem venda no período:</strong> '+zeros.join(', ')+'.</div>';
+  if(per.prev && per.prev.length){
+    var prevValsKpi = per.prev.map(function(m){return dados[ag][m.label]||0;});
+    var totPrevKpi = prevValsKpi.reduce(function(s,v){return s+v;},0);
+    if(totPrevKpi>0){
+      var pc = ((totalPer-totPrevKpi)/totPrevKpi*100).toFixed(1);
+      if(parseFloat(pc)<-20) insights += '<div class="cli-insight alert"><strong>⚠ Alerta:</strong> Queda de '+Math.abs(pc)+'% no período vs anterior.</div>';
+      if(parseFloat(pc)>50)  insights += '<div class="cli-insight good"><strong>✓ Destaque:</strong> Crescimento de +'+pc+'% no período. Ampliar parceria.</div>';
+    }
+  }
   document.getElementById('cli-ag-insights').innerHTML = insights;
 }
-
-
-// ── INSIGHTS ──────────────────────────────────────────────────────────
-function cliRenderInsights(){
-  var fN = function(n){return Number(Math.round(n)).toLocaleString('pt-BR');};
-  var per = cliGetPeriodo();
-  var el = document.getElementById('cli-insights-content');
-  if(!per.cur.length){
-    el.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:12px">Sem dados para o período selecionado.</div>';
-    return;
-  }
-  if(!per.prev.length){
-    var {dados} = cliGetDados();
-    var agencias = Object.keys(dados).map(function(ag){
-      return {ag:ag, vC:cliTot(dados,ag,per.cur), vP:0, delta:cliTot(dados,ag,per.cur)};
-    }).filter(function(x){return x.vC>0;});
-    agencias.sort(function(a,b){return b.vC-a.vC;});
-    var metade=Math.ceil(agencias.length/2);
-    var grupos=[{lista:agencias.slice(0,metade),titulo:'Grandes Agências',safe:'G'},
-                {lista:agencias.slice(metade),titulo:'Agências Emergentes',safe:'P'}];
-    var lbls=per.cur.map(function(m){return m.label;});
-    var allHtml='', toChart=[];
-    grupos.forEach(function(g){
-      var top10=g.lista.slice(0,10);
-      if(!top10.length) return;
-      allHtml+='<div style="margin-bottom:28px;">';
-      allHtml+='<div style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--navy);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);">'+g.titulo+'</div>';
-      allHtml+='<div style="display:grid;grid-template-columns:1fr;gap:8px;">';
-      top10.forEach(function(x,i){
-        var cid='ic-'+g.safe+'v'+i;
-        allHtml+='<div style="background:var(--white);border-radius:10px;padding:11px 13px;box-shadow:var(--shadow);border-left:3px solid var(--up);">';
-        allHtml+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
-        allHtml+='<div style="font-size:11px;font-weight:600;color:var(--navy);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ x.ag +'</div>';
-        allHtml+='<div style="font-size:11.5px;font-weight:800;color:var(--up);margin-left:8px;flex-shrink:0">'+ fN(x.vC) +' bil.</div>';
-        allHtml+='</div>';
-        allHtml+='<div style="display:flex;justify-content:space-between;margin-bottom:5px">';
-        allHtml+='<span style="font-size:9px;color:var(--muted)">'+ lbls[0] +': '+fN(dados[x.ag]&&dados[x.ag][lbls[0]]||0)+'</span>';
-        allHtml+='<span style="font-size:9px;color:var(--navy);font-weight:700">'+ lbls[lbls.length-1] +': '+fN(dados[x.ag]&&dados[x.ag][lbls[lbls.length-1]]||0)+'</span>';
-        allHtml+='</div>';
-        allHtml+='<canvas id="'+cid+'" style="max-height:45px;width:100%"></canvas>';
-        allHtml+='</div>';
-        var vals=per.cur.map(function(m){return dados[x.ag]&&dados[x.ag][m.label]||0;});
-        toChart.push({id:cid, lbls:lbls, vals:vals, isUp:true});
-      });
-      allHtml+='</div></div>';
-    });
-    el.innerHTML=allHtml;
-    setTimeout(function(){
-      toChart.forEach(function(tc){
-        var canvas=document.getElementById(tc.id);
-        if(!canvas)return;
-        new Chart(canvas,{type:'line',data:{labels:tc.lbls,datasets:[{data:tc.vals,borderColor:'rgba(27,138,76,.75)',backgroundColor:'rgba(27,138,76,.08)',borderWidth:1.5,pointRadius:2,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return fN(ctx.parsed.y)+' bilhetes';}}},},scales:{x:{display:true,ticks:{font:{size:7},maxRotation:0,color:'#6B8A9E'}},y:{display:false}}}});
-      });
-    },100);
-    return;
-  }
-  var {dados} = cliGetDados();
-  var allMesLabels = (D.meses2025||[]).concat(D.meses||[]).map(function(m){return m.label;});
-  var agencias = Object.keys(dados).map(function(ag){
-    var vC=cliTot(dados,ag,per.cur), vP=cliTot(dados,ag,per.prev);
-    return {ag:ag, vC:vC, vP:vP, delta:vC-vP};
-  }).filter(function(x){return x.vC>0||x.vP>0;});
-  agencias.sort(function(a,b){return (b.vC+b.vP)-(a.vC+a.vP);});
-  var metade=Math.ceil(agencias.length/2);
-  var grupos=[{lista:agencias.slice(0,metade),titulo:'Grandes Agências',safe:'G'},
-              {lista:agencias.slice(metade),  titulo:'Agências Emergentes',safe:'P'}];
-  var periodoMeses=per.prev.concat(per.cur);
-  var lbls=periodoMeses.map(function(m){return m.label;});
-  var allHtml='';
-  var toChart=[];
-  grupos.forEach(function(g){
-    var top10up=g.lista.slice().sort(function(a,b){return b.delta-a.delta;}).slice(0,10).filter(function(x){return x.delta>0;});
-    var top10dn=g.lista.slice().sort(function(a,b){return a.delta-b.delta;}).slice(0,10).filter(function(x){return x.delta<0;});
-    allHtml+='<div style="margin-bottom:28px;">';
-    allHtml+='<div style="font-family:Bebas Neue,sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--navy);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);">'+g.titulo+'</div>';
-    allHtml+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">';
-    function col(lista, isUp){
-      var lbl=isUp?'▲ Maiores Crescimentos':'▼ Maiores Quedas';
-      var cor=isUp?'var(--up)':'var(--dn)';
-      var bor=isUp?'var(--up)':'var(--dn)';
-      var h='<div><div style="font-size:9px;font-weight:700;color:'+cor+';text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">'+lbl+'</div>';
-      if(!lista.length) return h+'<div style="color:var(--muted);font-size:11px;padding:8px 0">Sem dados no período</div></div>';
-      lista.forEach(function(x,i){
-        var cid='ic-'+g.safe+(isUp?'u':'d')+i;
-        var dStr=isUp?('▲ +'+fN(x.delta)):('▼ '+fN(Math.abs(x.delta)));
-        var dCor=isUp?'var(--up)':'var(--dn)';
-        h+='<div style="background:var(--white);border-radius:10px;padding:11px 13px;box-shadow:var(--shadow);margin-bottom:8px;border-left:3px solid '+bor+';">';
-        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
-        h+='<div style="font-size:11px;font-weight:600;color:var(--navy);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.ag+'</div>';
-        h+='<div style="font-size:11.5px;font-weight:800;color:'+dCor+';margin-left:8px;flex-shrink:0">'+dStr+'</div>';
-        h+='</div>';
-        h+='<div style="display:flex;justify-content:space-between;margin-bottom:5px">';
-        h+='<span style="font-size:9px;color:var(--muted)">'+per.prevLabel+': '+fN(x.vP)+'</span>';
-        h+='<span style="font-size:9px;color:var(--navy);font-weight:700">'+per.curLabel+': '+fN(x.vC)+'</span>';
-        h+='</div>';
-        h+='<canvas id="'+cid+'" style="max-height:45px;width:100%"></canvas>';
-        h+='</div>';
-        var vals=periodoMeses.map(function(m){return dados[x.ag]&&dados[x.ag][m.label]||0;});
-        toChart.push({id:cid, lbls:lbls, vals:vals, isUp:isUp});
-      });
-      return h+'</div>';
-    }
-    allHtml+=col(top10up,true)+col(top10dn,false);
-    allHtml+='</div></div>';
-  });
-  el.innerHTML=allHtml;
-  setTimeout(function(){
-    toChart.forEach(function(tc){
-      var canvas=document.getElementById(tc.id);
-      if(!canvas)return;
-      var bCor=tc.isUp?'rgba(27,138,76,.75)':'rgba(192,57,43,.75)';
-      var bgCor=tc.isUp?'rgba(27,138,76,.08)':'rgba(192,57,43,.08)';
-      new Chart(canvas,{type:'line',data:{labels:tc.lbls,datasets:[{data:tc.vals,borderColor:bCor,backgroundColor:bgCor,borderWidth:1.5,pointRadius:2,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return fN(ctx.parsed.y)+' bilhetes';}}},},scales:{x:{display:true,ticks:{font:{size:7},maxRotation:0,color:'#6B8A9E'}},y:{display:false}}}});
-    });
-  },100);
-}
-
-</script>
-</body>
-</html>
-
