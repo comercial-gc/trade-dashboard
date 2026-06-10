@@ -758,7 +758,7 @@ function mobNav2(btn, id) {
   document.getElementById('pg-'+id).classList.add('on');
   // Sincroniza botões desktop
   document.querySelectorAll('.np').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'+id+"'))b.classList.add('on');
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"))b.classList.add('on');
     else b.classList.remove('on');
   });
   curPage = id;
