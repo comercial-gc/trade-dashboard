@@ -16,8 +16,8 @@
   --shadow:0 4px 24px rgba(13,27,42,.10);
   --up:#1B8A4C;--dn:#C0392B;--up-bg:#E6F7EE;--dn-bg:#FEECEC;
   --topbar-h:54px;
-  --mob-nav-h:56px;
-  --mob-mes-h:40px;
+  --mob-topbar-h:48px;
+  --mob-nav2-h:44px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);overflow-x:hidden}
@@ -163,14 +163,10 @@ canvas{max-height:230px}
 /* ═══════════════════════════════════════════
    MOBILE NAV BAR (bottom)
    ═══════════════════════════════════════════ */
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-nav-h) + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:var(--navy);border-top:1px solid rgba(255,255,255,.1);z-index:300;flex-direction:row;align-items:stretch;justify-content:space-around;box-shadow:0 -4px 20px rgba(0,0,0,.3)}
-.mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:transparent;border:none;cursor:pointer;padding:6px 2px;color:rgba(255,255,255,.45);transition:color .2s;font-family:'Outfit',sans-serif}
-.mob-nav-btn.on{color:var(--aqua-l)}
-.mob-nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.mob-nav-btn span{font-size:9px;font-weight:600;letter-spacing:.2px}
+
 
 /* ─── MOBILE TOPBAR ──────────────────────── */
-.mob-header{display:none;background:var(--navy);padding:0 16px;height:50px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.mob-header{display:none;background:var(--navy);padding:0 14px;height:var(--mob-topbar-h);align-items:center;justify-content:space-between;position:sticky;top:0;z-index:201;box-shadow:0 2px 12px rgba(0,0,0,.4)}
 .mob-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:#fff;display:flex;align-items:center;gap:6px}
 .mob-dot{width:7px;height:7px;background:var(--aqua-l);border-radius:50%}
 .mob-date{font-size:9px;color:rgba(255,255,255,.4)}
@@ -178,10 +174,11 @@ canvas{max-height:230px}
 .mob-weather-badge .wt{font-size:11px;font-weight:700;color:#fff}
 
 /* ─── MOBILE MES SELECTOR ────────────────── */
-.mob-mes-bar{display:none;position:fixed;bottom:var(--mob-nav-h);left:0;right:0;height:var(--mob-mes-h);background:var(--slate);padding:4px 16px;overflow-x:auto;white-space:nowrap;gap:6px;scrollbar-width:none;z-index:298;align-items:center}
-.mob-mes-bar::-webkit-scrollbar{display:none}
-.mob-mes-chip{display:inline-block;padding:5px 12px;border-radius:14px;font-size:10.5px;font-weight:600;border:1.5px solid rgba(255,255,255,.18);color:rgba(255,255,255,.5);cursor:pointer;transition:all .2s;white-space:nowrap}
-.mob-mes-chip.on{background:var(--aqua);border-color:var(--aqua-l);color:#fff}
+.mob-nav2{display:none;background:var(--navy);border-bottom:1px solid rgba(255,255,255,.1);height:var(--mob-nav2-h);position:sticky;top:var(--mob-topbar-h);z-index:200;align-items:center;padding:0 10px;gap:6px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.mob-nav2::-webkit-scrollbar{display:none}
+.mob-nav2-btn{padding:4px 10px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);background:transparent;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.mob-nav2-btn.on{background:var(--aqua);border-color:var(--aqua-l);color:#fff}
+.mob-nav2-sel{appearance:none;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);color:#fff;font-family:'Outfit',sans-serif;font-size:10px;font-weight:600;padding:4px 20px 4px 8px;border-radius:14px;margin-left:auto;flex-shrink:0;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,.5)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
 
 /* ─── MOBILE CARDS ───────────────────────── */
 .mob-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a3a5c 100%);border-radius:12px;padding:16px;margin-bottom:12px}
@@ -278,9 +275,8 @@ canvas{max-height:230px}
 @media(max-width:860px){
   .topbar{display:none}
   .mob-header{display:flex}
-  .mob-mes-bar{display:flex}
-  .mob-nav{display:flex}
-  .page{padding-bottom:calc(var(--mob-nav-h) + var(--mob-mes-h) + 16px);margin-top:0}
+  .mob-nav2{display:flex}
+  .page{padding-bottom:16px;margin-top:0}
   .row2,.row3,.row4{grid-template-columns:1fr}
   .irow{grid-template-columns:1fr}
   canvas{max-height:200px}
@@ -292,7 +288,7 @@ canvas{max-height:230px}
 }
 @media(min-width:861px){
   .mob-content{display:none!important}
-  .mob-header,.mob-mes-bar,.mob-nav{display:none!important}
+  .mob-header,.mob-nav2{display:none!important}
 }
 /* esconde mob-content por padrão */
 .mob-content{display:none}
@@ -308,16 +304,22 @@ canvas{max-height:230px}
     <div class="mob-dot"></div>
     <div>
       <div>TRADE DASHBOARD</div>
-      <div class="mob-date brand-small" id="mobDate">Grupo Cataratas</div>
+      <div class="mob-date brand-small" id="mobDate">Grupo Cataratas · <span id="mobDateVal"></span></div>
     </div>
   </div>
   <div class="mob-weather-badge" id="mobWeather">
     <span>☀️</span><div class="wt">28°C</div>
   </div>
 </div>
-
-<!-- MOBILE MES BAR -->
-<div class="mob-mes-bar" id="mobMesBar"></div>
+<!-- MOBILE NAV2: abas + select de meses -->
+<div class="mob-nav2" id="mobNav2">
+  <button class="mob-nav2-btn on" onclick="mobNav2(this,'mar')" data-page="mar">📅 <span id="mobMesLbl">Mês</span></button>
+  <button class="mob-nav2-btn" onclick="mobNav2(this,'acum')" data-page="acum">📊 Acum.</button>
+  <button class="mob-nav2-btn" onclick="mobNav2(this,'hist')" data-page="hist">📈 Histórico</button>
+  <button class="mob-nav2-btn" onclick="mobNav2(this,'share')" data-page="share">🔄 Share</button>
+  <button class="mob-nav2-btn" onclick="mobNav2(this,'cli')" data-page="cli">🏆 Top</button>
+  <select class="mob-nav2-sel" id="mobMesSel" onchange="trocarMes(this.value)"></select>
+</div>
 
 <!-- ════════════════════════════════════════
      TOPBAR DESKTOP
@@ -688,28 +690,6 @@ canvas{max-height:230px}
 <!-- ════════════════════════════════════════
      MOBILE BOTTOM NAV
      ════════════════════════════════════════ -->
-<nav class="mob-nav">
-  <button class="mob-nav-btn on" onclick="mobNav(this,'mar')" data-page="mar">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Mês</span>
-  </button>
-  <button class="mob-nav-btn" onclick="mobNav(this,'acum')" data-page="acum">
-    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    <span>Acumulado</span>
-  </button>
-  <button class="mob-nav-btn" onclick="mobNav(this,'hist')" data-page="hist">
-    <svg viewBox="0 0 24 24"><polyline points="3 3 3 21 21 21"/><polyline points="7 16 11 12 15 15 19 9"/></svg>
-    <span>Histórico</span>
-  </button>
-  <button class="mob-nav-btn" onclick="mobNav(this,'share')" data-page="share">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    <span>Share</span>
-  </button>
-  <button class="mob-nav-btn" onclick="mobNav(this,'cli')" data-page="cli">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Clientes</span>
-  </button>
-</nav>
 
 <script>
 // ══════════════════════════════════════════════════════════════════
@@ -770,8 +750,27 @@ function nav(btn, id) {
 // ════════════════════════════════════════
 // NAVEGAÇÃO MOBILE
 // ════════════════════════════════════════
+function mobNav2(btn, id) {
+  document.querySelectorAll('.mob-nav2-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // Reutiliza a lógica de navegação de páginas
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  // Sincroniza botões desktop
+  document.querySelectorAll('.np').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'+id+"'))b.classList.add('on');
+    else b.classList.remove('on');
+  });
+  curPage = id;
+  window.scrollTo(0,0);
+  var curMD=mesSelecionado||(D.meses&&D.meses[D.mesAtualIdx])||D.mesAtual;
+  if(!inited[id]){inited[id]=true;setTimeout(()=>{initCharts(id,curMD);buildMobContent(id,curMD);},80);}
+  // Atualiza label do botão Mês
+  if(id==='mar'){var lbl=document.getElementById('mobMesLbl');if(lbl&&curMD)lbl.textContent=curMD.label||curMD.nome||curMD;}
+}
+
 function mobNav(btn, id) {
-  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.mob-nav2-btn').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('pg-'+id).classList.add('on');
@@ -1069,23 +1068,19 @@ function shareRenderBarras(mesIdx){
 // ════════════════════════════════════════
 function populateSelectors(){
   var sel=document.getElementById('mesSeletor');
-  var bar=document.getElementById('mobMesBar');
+  var sel2=document.getElementById('mobMesSel');
+  var bar=null; // mob-mes-bar removida
   if(!D.meses||!D.meses.length){
     // sem histórico — só o mês atual
     if(sel){var o=document.createElement('option');o.value=0;o.textContent=D.mesAtual.label;o.selected=true;sel.appendChild(o);}
-    if(bar){var chip=document.createElement('span');chip.className='mob-mes-chip on';chip.textContent=D.mesAtual.label;chip.onclick=function(){trocarMesChip(this,0);};bar.appendChild(chip);}
+    if(sel2){var o2=document.createElement('option');o2.value=0;o2.textContent=D.mesAtual.label;o2.selected=true;sel2.appendChild(o2);}
     return;
   }
   // Opção Consolidado no seletor do topo
   if(sel){var oc=document.createElement('option');oc.value='consolidado';oc.textContent='📊 Consolidado';sel.appendChild(oc);}
   D.meses.forEach(function(m,i){
     if(sel){var o=document.createElement('option');o.value=i;o.textContent=m.label;if(i===D.mesAtualIdx)o.selected=true;sel.appendChild(o);}
-    if(bar){
-      var chip=document.createElement('span');chip.className='mob-mes-chip'+(i===D.mesAtualIdx?' on':'');
-      chip.textContent=m.label;chip.dataset.idx=i;
-      chip.onclick=function(){trocarMesChip(this,parseInt(this.dataset.idx));};
-      bar.appendChild(chip);
-    }
+    if(sel2){var o2=document.createElement('option');o2.value=i;o2.textContent=m.label;if(i===D.mesAtualIdx)o2.selected=true;sel2.appendChild(o2);}
   });
 }
 
@@ -1097,12 +1092,16 @@ function trocarMes(val){
   }
   var idx=parseInt(val);
   if(D.meses&&D.meses[idx]){mesSelecionado=D.meses[idx];renderMes(mesSelecionado);}
-  // sincroniza chips mobile
-  document.querySelectorAll('.mob-mes-chip').forEach((c,i)=>{c.classList.toggle('on',i===idx);});
+  // sincroniza selects (desktop + mobile)
+  var s1=document.getElementById('mesSeletor');if(s1)s1.value=idx;
+  var s2=document.getElementById('mobMesSel');if(s2)s2.value=idx;
+  // atualiza label botão Mês mobile
+  var lbl=document.getElementById('mobMesLbl');
+  if(lbl&&D.meses&&D.meses[idx])lbl.textContent=D.meses[idx].label||D.meses[idx].nome;
 }
 
 function trocarMesChip(chip,idx){
-  document.querySelectorAll('.mob-mes-chip').forEach(c=>c.classList.remove('on'));
+  // chips removed
   chip.classList.add('on');
   var sel=document.getElementById('mesSeletor');
   if(sel)sel.value=idx;
@@ -1492,6 +1491,12 @@ window.addEventListener('load', function(){
   var initMes = (D.meses&&D.meses.length>0) ? D.meses[D.mesAtualIdx||0] : D.mesAtual;
   mesSelecionado = initMes;
   renderMes(initMes);
+
+  // Atualiza label botão Mês mobile e data
+  var lbl=document.getElementById('mobMesLbl');
+  if(lbl)lbl.textContent=initMes.label||initMes.nome||initMes;
+  var dv=document.getElementById('mobDateVal');
+  if(dv){var hoje=new Date();dv.textContent=(hoje.getDate())+'.'+(hoje.getMonth()+1)+'.'+(hoje.getFullYear());}
 
   // Charts desktop
   setTimeout(function(){
