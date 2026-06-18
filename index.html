@@ -1100,6 +1100,10 @@ function trocarMes(val){
   // atualiza label botão Mês mobile
   var lbl=document.getElementById('mobMesLbl');
   if(lbl&&D.meses&&D.meses[idx])lbl.textContent=D.meses[idx].label||D.meses[idx].nome;
+  // Re-renderiza a aba ativa com o novo mês
+  if(curPage && curPage!=='mar' && mesSelecionado && typeof mesSelecionado==='object'){
+    setTimeout(function(){ initCharts(curPage, mesSelecionado); }, 60);
+  }
 }
 
 function trocarMesChip(chip,idx){
@@ -1655,9 +1659,11 @@ function cliGetPeriodo(){
   // YoY: mês equivalente do ano anterior
   if(cliPeriodo==='yoy'){
     var todosMeses2025 = (D.meses2025||[]).filter(function(m){return m.clientes&&m.clientes.length>0;});
-    // Mês atual = último mês com dados em 2026
+    // Mês atual = cliCurMes (mês selecionado) ou último com dados
     var meses26 = (D.meses||[]).filter(function(m){return m.clientes&&m.clientes.length>0;});
-    var curMes  = meses26.length ? [meses26[meses26.length-1]] : [];
+    var mesRef  = cliCurMes && cliCurMes.clientes ? cliCurMes
+                : (meses26.length ? meses26[meses26.length-1] : null);
+    var curMes  = mesRef ? [mesRef] : [];
     if(!curMes.length) return {cur:[], prev:[], curLabel:'—', prevLabel:'—', n:0, yoyIncompleto:false};
     // Encontrar o mesmo mês em 2025 pelo short name (JAN, FEV, MAR...)
     var curLabel = curMes[0].label; // ex: 'JUN/2026'
