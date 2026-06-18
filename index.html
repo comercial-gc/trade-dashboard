@@ -619,6 +619,7 @@ canvas{max-height:230px}
         <option value="3m" selected>vs Últimos 3 meses</option>
         <option value="6m">vs Últimos 6 meses</option>
         <option value="12m">vs Últimos 12 meses</option>
+        <option value="yoy">📆 Vs ano anterior</option>
         <option value="custom">📅 Personalizado</option>
       </select>
       <div id="cli-custom-panel" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1.5px solid var(--border);">
@@ -1651,6 +1652,31 @@ function cliGetPeriodo(){
     var cur = meses.slice(de, ate+1);
     return {cur:cur, prev:[], curLabel:lbl(cur), prevLabel:'—', n:cur.length};
   }
+  // YoY: mês equivalente do ano anterior
+  if(cliPeriodo==='yoy'){
+    var todosMeses2025 = (D.meses2025||[]).filter(function(m){return m.clientes&&m.clientes.length>0;});
+    // Mês atual = último mês com dados em 2026
+    var meses26 = (D.meses||[]).filter(function(m){return m.clientes&&m.clientes.length>0;});
+    var curMes  = meses26.length ? [meses26[meses26.length-1]] : [];
+    if(!curMes.length) return {cur:[], prev:[], curLabel:'—', prevLabel:'—', n:0, yoyIncompleto:false};
+    // Encontrar o mesmo mês em 2025 pelo short name (JAN, FEV, MAR...)
+    var curLabel = curMes[0].label; // ex: 'JUN/2026'
+    var mesShort = curLabel.split('/')[0]; // ex: 'JUN'
+    var prevMes  = todosMeses2025.filter(function(m){ return m.label && m.label.indexOf(mesShort) === 0; });
+    // Detectar se mês atual é parcial (diaAtual < diasMes)
+    var mesObj   = cliCurMes || D.mesAtual || {};
+    var isParcial = mesObj.diaAtual && mesObj.diasMes && mesObj.diaAtual < mesObj.diasMes;
+    return {
+      cur: curMes,
+      prev: prevMes,
+      curLabel: curLabel,
+      prevLabel: prevMes.length ? prevMes[0].label : '—',
+      n: 1,
+      yoy: true,
+      yoyIncompleto: isParcial && prevMes.length > 0
+    };
+  }
+
   // Âncora: sempre o último mês com dados
   var ancIdx = meses.length - 1;
   if(cliPeriodo==='none'){
@@ -1693,8 +1719,9 @@ function cliRenderRanking(){
   // Info de período
   var infoEl = document.getElementById('cli-period-info');
   infoEl.className = 'cli-period-info '+cliPeriodInfoCls();
+  var yoyAviso = per.yoyIncompleto ? '&nbsp;<em style="color:var(--warn);font-size:9px;">(⚠️ vs mês completo de 2025 — parcial vs total)</em>' : '';
   infoEl.innerHTML = '📅 <strong>Período atual:</strong> '+per.curLabel
-    +(per.prev.length?' &nbsp;|&nbsp; <strong>Comparando com:</strong> '+per.prevLabel
+    +(per.prev.length?' &nbsp;|&nbsp; <strong>Comparando com:</strong> '+per.prevLabel+yoyAviso
                      :' &nbsp;|&nbsp; <em>Sem período anterior disponível</em>');
 
   // Calcula ranking
