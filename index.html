@@ -1375,6 +1375,16 @@ function renderEscolarAppai(m){
 function renderMes(m){
   if(!m) return;
   var mesLabel = m.label || (D.mesAtual&&D.mesAtual.label) || 'Mar/2026';
+  var _lbl26 = mesLabel;
+  var _lbl25 = mesLabel.replace('2026','2025').replace('/26','/25');
+  var _setTxt = function(id,t){ var e=document.getElementById(id); if(e) e.textContent=t; };
+  _setTxt('chartObzSub', _lbl26+' · por parque');
+  _setTxt('chartYoYTitle', 'Comparativo '+_lbl25+' × '+_lbl26);
+  _setTxt('shareBadge', _lbl26);
+  _setTxt('h_ref25lbl', _lbl25+' ref.');
+  _setTxt('aqua_ref25lbl', _lbl25);
+  _setTxt('bio_ref25lbl', _lbl25);
+  _setTxt('pai_ref25lbl', _lbl25);
   var aqua=m.aqua||{}, bio=m.bio||{}, pai=m.pai||{}, total=m.total||{};
   // compatibilidade estrutura antiga/nova
   var aR=aqua.real26||aqua.real||0, aO=aqua.obz||0, aP=aqua.proj||0;
