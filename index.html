@@ -1059,7 +1059,10 @@ function initAcum(mesData){
   var m=D.mesAtual;
   var h26=D.hist26;
   var nMeses=h26.aqua.filter(v=>v!==null).length;
-  var metaAqua=(D.metasTrade&&D.metasTrade.aqua?D.metasTrade.aqua:[]).slice(0,nMeses);\n  var metaPai=(D.metasTrade&&D.metasTrade.pai?D.metasTrade.pai:[]).slice(0,nMeses);\n  var metaBio=(D.metasTrade&&D.metasTrade.bio?D.metasTrade.bio:[]).slice(0,nMeses);\n  var lsM=[]; var rA=[],rP=[],rB=[],mA=[],mP=[],mB=[];
+  var metaAqua=(D.metasTrade&&D.metasTrade.aqua?D.metasTrade.aqua:[]).slice(0,nMeses);
+  var metaPai=(D.metasTrade&&D.metasTrade.pai?D.metasTrade.pai:[]).slice(0,nMeses);
+  var metaBio=(D.metasTrade&&D.metasTrade.bio?D.metasTrade.bio:[]).slice(0,nMeses);
+  var lsM=[]; var rA=[],rP=[],rB=[],mA=[],mP=[],mB=[];
   for(var i=0;i<nMeses;i++){
     var lbl=meses[i]+(i===nMeses-1?'*':'');
     lsM.push('Aqua '+lbl); lsM.push('Pai '+lbl); lsM.push('Bio '+lbl);
@@ -2406,4 +2409,3 @@ function cliRenderInsights(){
 </script>
 </body>
 </html>
-
