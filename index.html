@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>Trade Dashboard · Grupo Cataratas</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>\n<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
   --aqua:#005F8E;--aqua-l:#00B4D8;--aqua-pale:#E0F7FF;
@@ -92,7 +92,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 /* Painel Escolar/APPAI */
 .ea-wrap{margin-top:14px}
 .ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.ea-park{background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.ea-park{background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
 .ea-park-h{padding:8px 14px;font-size:13px;font-weight:800;color:#fff;letter-spacing:.5px}
 .ea-aqua .ea-park-h{background:var(--aqua)}
 .ea-bio .ea-park-h{background:var(--bio)}
@@ -122,7 +122,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 /* Painel Top Clientes 3 colunas */
 .tc-wrap{margin-top:16px}
 .tc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.tc-col{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tc-col{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
 .tc-head{padding:9px 12px;font-size:12.5px;font-weight:800;color:#fff;letter-spacing:.4px;display:flex;align-items:center;gap:7px}
 .tc-pai .tc-head{background:var(--pai)}
 .tc-aqua .tc-head{background:var(--aqua)}
@@ -348,7 +348,7 @@ canvas{max-height:230px}
 }
 /* esconde mob-content por padrão */
 .mob-content{display:none}
-</style>
+.cap-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-size:10.5px;font-weight:600;cursor:pointer;transition:opacity .2s}.cap-btn:hover{opacity:.8}.cap-row{display:flex;justify-content:flex-end;gap:8px;margin:0 0 12px}\n</style>
 </head>
 <body>
 
@@ -675,7 +675,7 @@ canvas{max-height:230px}
   <div class="sec" style="margin-top:16px">
     <div><div class="sec-t">SHARE TRADE × PARQUE</div><div class="sec-s">% participação do canal trade no total de visitação</div></div>
     <span class="badge" id="shareBadge">Mar/2026</span>
-  </div>
+  </div>\n  <div class="cap-row"><button class="cap-btn" onclick="capPNG(this,0)">📥 Donuts</button><button class="cap-btn" onclick="capPNG(this,1)">📥 Barras</button><button class="cap-btn" onclick="capPNG(this,2)">📥 Evolução</button></div>
 
   <div class="row3">
     <div class="cc"><div class="cc-h"><div class="cc-t">🐠 AquaRio</div><div class="cc-s" id="shareSubAqua">Trade 12,41% · Parque 87,59%</div></div><canvas id="d_aqua" style="max-height:190px"></canvas><div class="donut-val" id="shareValAqua">12,41%</div><div class="donut-sub" id="shareSubAqua2">share trade Mar/26</div></div>
@@ -1136,7 +1136,7 @@ function initShare(mesData){
   // Atualiza valores e textos dos donuts
   var fS=function(v){return v.toFixed(2).replace('.',',')+'%';};
   var mesLbl=m?m.label:'';
-  ['shareValAqua','shareValBio','shareValPai'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.textContent=fS([sa,sb,sp][i]);});
+  ['shareValAqua','shareValBio','shareValPai'].forEach(function(id,i){var el=document.getElementById(id);if(el)el.textContent=fS([sa,sb,sp][i]);});\nvar _sp=function(v){return "Trade "+fS(v)+" · Parque "+(100-v).toFixed(2).replace(".",",")+"%";};\n["shareSubAqua","shareSubBio","shareSubPai"].forEach(function(id,i){var e=document.getElementById(id);if(e)e.textContent=_sp([sa,sb,sp][i]);});
   document.querySelectorAll('.donut-sub').forEach(function(el){el.textContent='share trade '+mesLbl;});
   var sbEl=document.getElementById('shareBadge');if(sbEl)sbEl.textContent=mesLbl;
 
