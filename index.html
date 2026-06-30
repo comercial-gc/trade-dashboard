@@ -90,6 +90,14 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 .appai-row{display:flex;align-items:center;gap:5px;margin-top:8px;padding:4px 8px;background:var(--bg);border-radius:7px;font-size:9px}
 .appai-lbl{color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
 .appai-val{font-weight:700;color:var(--text)}.appai-sep{color:var(--muted);margin:0 2px}
+.park-compare{margin-top:8px;padding:7px 9px;background:var(--bg);border-radius:7px;border:1px solid var(--border)}
+.pc-label{font-size:7.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.pc-row{display:flex;align-items:baseline;gap:5px}
+.pc-val{font-size:14px;font-weight:800;color:var(--navy)}
+.pc-delta{font-size:9px;font-weight:700}
+.pc-sub{font-size:8.5px;color:#94A8B5;margin-top:1px}
+.pc-vs{display:flex;align-items:center;gap:4px;margin-top:6px;padding-top:5px;border-top:1px solid var(--border);font-size:7.5px;color:var(--muted)}
+.pc-vs b{font-size:8.5px;font-weight:700}
 /* Painel Escolar/APPAI */
 .ea-wrap{margin-top:14px}
 .ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -450,6 +458,12 @@ canvas{max-height:230px}
         <div class="mini-box"><div class="mini-l">Projeção</div><div class="mini-v" id="aqua_proj">11.431</div><div class="mini-d up" id="aqua_projpct">▲ 153% OBZ</div></div>
       <div class="appai-row"><span class="appai-lbl">APPAI</span><span class="appai-val" id="aqua_appai">—</span><span class="appai-sep">·</span><span class="appai-lbl">Escolas</span><span class="appai-val" id="aqua_escolas">—</span></div>
       </div>
+      <div class="park-compare">
+        <div class="pc-label">Parque 2026 × 2025</div>
+        <div class="pc-row"><span class="pc-val" id="aqua_par_v26">—</span><span class="pc-delta" id="aqua_par_delta">—</span></div>
+        <div class="pc-sub" id="aqua_par_v25sub">—</div>
+        <div class="pc-vs">Trade <b id="aqua_vs_trade">—</b> vs parque <b id="aqua_vs_parque">—</b></div>
+      </div>
     </div>
     <div class="pk b">
       <div class="pk-name">🦁 BioParque</div>
@@ -464,6 +478,12 @@ canvas{max-height:230px}
         <div class="mini-box"><div class="mini-l">Projeção</div><div class="mini-v" id="bio_proj">1.473</div><div class="mini-d dn" id="bio_projpct">▼ 72% OBZ</div></div>
       <div class="appai-row"><span class="appai-lbl">APPAI</span><span class="appai-val" id="bio_appai">—</span><span class="appai-sep">·</span><span class="appai-lbl">Escolas</span><span class="appai-val" id="bio_escolas">—</span></div>
       </div>
+      <div class="park-compare">
+        <div class="pc-label">Parque 2026 × 2025</div>
+        <div class="pc-row"><span class="pc-val" id="bio_par_v26">—</span><span class="pc-delta" id="bio_par_delta">—</span></div>
+        <div class="pc-sub" id="bio_par_v25sub">—</div>
+        <div class="pc-vs">Trade <b id="bio_vs_trade">—</b> vs parque <b id="bio_vs_parque">—</b></div>
+      </div>
     </div>
     <div class="pk p">
       <div class="pk-name">🚞 Paineiras Corcovado</div>
@@ -476,6 +496,12 @@ canvas{max-height:230px}
       <div class="mini-grid">
         <div class="mini-box"><div class="mini-l" id="pai_ref25lbl">Mar/2025</div><div class="mini-v" id="pai_ref25">37.320</div><div class="mini-d up" id="pai_yoy">▲ 4%</div></div>
         <div class="mini-box"><div class="mini-l">Projeção</div><div class="mini-v" id="pai_proj">75.086</div><div class="mini-d up" id="pai_projpct">▲ 99% OBZ</div></div>
+      </div>
+      <div class="park-compare">
+        <div class="pc-label">Parque 2026 × 2025</div>
+        <div class="pc-row"><span class="pc-val" id="pai_par_v26">—</span><span class="pc-delta" id="pai_par_delta">—</span></div>
+        <div class="pc-sub" id="pai_par_v25sub">—</div>
+        <div class="pc-vs">Trade <b id="pai_vs_trade">—</b> vs parque <b id="pai_vs_parque">—</b></div>
       </div>
     </div>
   </div>
@@ -1510,6 +1536,21 @@ function renderMes(m){
   if(ft) ft.textContent='Trade Dashboard · Grupo Cataratas · Dados extraídos da planilha · '+(m.dataFmt||'');
   var nl=document.getElementById('navMesLabel');if(nl)nl.textContent=(m.label||'');
   var sb=document.getElementById('shareBadge');if(sb)sb.textContent=(m.label||'');
+
+  // Comparativo Parque 2026 x 2025
+  function setParkCompare(prefix, parkObj, tradeYoY) {
+    var v26 = (parkObj && parkObj.par26) || 0;
+    var v25 = (parkObj && parkObj.par25) || 0;
+    var delta = v25 > 0 ? Math.round((v26 - v25) / v25 * 100) : 0;
+    si(prefix+'_par_v26', fN(v26));
+    sc(prefix+'_par_delta', ps(delta), delta>=0);
+    si(prefix+'_par_v25sub', 'vs '+fN(v25)+' em 2025');
+    sc(prefix+'_vs_trade', ps(tradeYoY), tradeYoY>=0);
+    sc(prefix+'_vs_parque', ps(delta), delta>=0);
+  }
+  setParkCompare('aqua', aqua, aYoY);
+  setParkCompare('bio', bio, bYoY);
+  setParkCompare('pai', pai, pYoY);
 
   // Reconstrói conteúdo mobile
   buildMobContent(curPage, m);
