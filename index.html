@@ -347,7 +347,7 @@ canvas{max-height:230px}
   canvas{max-height:200px}
   /* Esconde elementos desktop dentro do page em mobile */
   .page .hero,.page .total-bar,.page .pk,.page .row2,.page .row3,.page .row4,
-  .page .irow,.page .alerta,.page .cc,.page .sec,.page .acum-card{display:none}
+  .page .irow,.page .alerta{display:none}
   /* Só mostra o conteúdo mobile */
   .mob-content{display:block!important}
 }
@@ -992,8 +992,8 @@ function animateBars(){
 function initCharts(id,md){
   if(id==='mar')   initMar(md);
   if(id==='acum')  initAcum(md);
-  if(id==='hist')  initHist();
-  if(id==='share') initShare(md);
+  var _mob=window.innerWidth<=860;\n  if(id==='hist'  && !_mob)   initHist();
+  if(id==='share' && !_mob)  initShare(md);
   if(id==='cli')   initCli(md);
 }
 
