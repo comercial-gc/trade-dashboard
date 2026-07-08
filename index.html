@@ -129,6 +129,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 .ea-share-ref{font-size:9.5px;color:var(--muted);font-weight:600;margin-left:82px;margin-bottom:6px}
 @media(max-width:860px){.ea-grid{grid-template-columns:1fr}}
 /* Painel Top Clientes 3 colunas */
+#cap-visitacao,#cap-acumulado{display:contents}
 .tc-wrap{margin-top:16px}
 .tc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .tc-col{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
@@ -412,7 +413,7 @@ canvas{max-height:230px}
 <div id="pg-mar" class="page on">
 
 
-  <!-- HERO DESKTOP -->
+<div id="cap-visitacao">  <!-- HERO DESKTOP -->
   <div class="hero">
     <div class="hero-mes-bg" id="heroBg">MAR</div>
     <div class="hero-l">
@@ -521,6 +522,7 @@ canvas{max-height:230px}
     <div class="tb-i"><div class="tb-l">A captar BioParque</div><div class="tb-v" id="bio_saldo">1.359</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="bio_pdia">76/dia</div></div>
   </div>
 
+</div><!-- /cap-visitacao -->
   <!-- CHARTS DESKTOP -->
   <div class="row2">
     <div class="cc">
@@ -646,7 +648,7 @@ canvas{max-height:230px}
     <span class="badge" id="acumBadge">até 16/03/2026</span>
   </div>
 
-  <div class="row4">
+<div id="cap-acumulado">  <div class="row4">
     <div class="acum-card"><div class="acum-label" style="color:var(--aqua)">🐠 AquaRio</div><div class="acum-v26" id="ac_aqua26">35.034</div><div class="acum-v25" id="ac_aqua25">vs 21.839 em 2025</div><div class="acum-delta up" id="ac_aquad">▲ 60%</div><div class="acum-appai" id="ac_aqua_appai"></div></div>
     <div class="acum-card"><div class="acum-label" style="color:var(--bio)">🦁 BioParque</div><div class="acum-v26" id="ac_bio26">4.718</div><div class="acum-v25" id="ac_bio25">vs 5.948 em 2025</div><div class="acum-delta dn" id="ac_biod">▼ 21%</div><div class="acum-appai" id="ac_bio_appai"></div></div>
     <div class="acum-card"><div class="acum-label" style="color:var(--pai)">🚞 Paineiras</div><div class="acum-v26" id="ac_pai26">197.818</div><div class="acum-v25" id="ac_pai25">vs 205.197 em 2025</div><div class="acum-delta dn" id="ac_paid">▼ 4%</div></div>
@@ -663,6 +665,7 @@ canvas{max-height:230px}
     <canvas id="c_meta" style="max-height:200px"></canvas>
   </div>
 
+</div><!-- /cap-acumulado -->
   <div class="irow">
     <div class="ins good"><div class="ins-icon">📈</div><div class="ins-text"><strong>AquaRio lidera o crescimento:</strong> +60% no acumulado (35.034 vs 21.839). Jan/26 com 18.475 foi excepcional — +65% vs Jan/25.</div></div>
     <div class="ins alert"><div class="ins-icon">🔴</div><div class="ins-text"><strong>BioParque preocupa no acumulado:</strong> -21% no período. Jan: 2.852 vs 4.375 (-35%); Fev: 1.165 vs 1.073 (+9%). Tendência de queda.</div></div>
@@ -992,8 +995,8 @@ function animateBars(){
 function initCharts(id,md){
   if(id==='mar')   initMar(md);
   if(id==='acum')  initAcum(md);
-  var _mob=window.innerWidth<=860;\n  if(id==='hist'  && !_mob)   initHist();
-  if(id==='share' && !_mob)  initShare(md);
+  if(id==='hist')  initHist();
+  if(id==='share') initShare(md);
   if(id==='cli')   initCli(md);
 }
 
