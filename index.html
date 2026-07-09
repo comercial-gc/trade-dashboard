@@ -14,7 +14,7 @@
   --pai:#2D6A2B;--pai-l:#56C354;--pai-pale:#E8F7E7;
   --gold:#E8A820;--navy:#0D1B2A;--slate:#1E3448;
   --white:#fff;--bg:#ffffff;--muted:#6B8A9E;--border:#D5E8F0;
-  --shadow:0 2px 12px rgba(13,27,42,.10),0 4px 28px rgba(13,27,42,.08);
+  --shadow:none;
   --up:#1B8A4C;--dn:#C0392B;--up-bg:#E6F7EE;--dn-bg:#FEECEC;
   --topbar-h:54px;
   --mob-topbar-h:48px;
@@ -65,7 +65,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 
 /* ─── CARDS PARQUE ───────────────────────── */
 .pk{background:var(--white);border-radius:13px;padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.pk:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,27,42,.14)}
+.pk:hover{transform:translateY(-2px)}
 .pk::after{content:'';position:absolute;top:0;left:0;width:5px;height:100%;border-radius:5px 0 0 5px}
 .pk.a::after{background:linear-gradient(180deg,var(--aqua-l),var(--aqua))}
 .pk.b::after{background:linear-gradient(180deg,var(--bio-l),var(--bio))}
