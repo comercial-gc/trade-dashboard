@@ -543,7 +543,7 @@ canvas{max-height:230px}
   </div>
 
   <!-- ═══ PAINEL ESCOLAR / APPAI ═══ -->
-  <div class="ea-wrap">
+  <div id="ea-wrap" class="ea-wrap">
     <div class="ea-grid">
       <div class="ea-park ea-aqua">
         <div class="ea-park-h">AquaRio</div>
@@ -613,7 +613,7 @@ canvas{max-height:230px}
   </div>
 
   <!-- ═══ PAINEL TOP CLIENTES ═══ -->
-  <div class="tc-wrap">
+  <div id="tc-wrap" class="tc-wrap">
     <div class="tc-grid">
       <div class="tc-col tc-pai">
         <div class="tc-head">🚡 PAINEIRAS CORCOVADO</div>
@@ -670,11 +670,12 @@ canvas{max-height:230px}
     <div class="sec-t">Trade vs Parque — Crescimento 2026 vs 2025</div>
     <div class="sec-s">Trade e Parque: crescimento acumulado no mesmo período</div>
   </div>
-  <div id="acumTV" class="row3" style="margin-bottom:14px"></div>
+<div id="cap-acum-tv">  <div id="acumTV" class="row3" style="margin-bottom:14px"></div>
   <div class="cc" style="margin-bottom:20px">
     <div class="cc-h"><div class="cc-t">Trade % vs Parque % vs 2025</div><div class="cc-s">Barras cheias = Trade | Claras = Parque</div></div>
     <canvas id="c_tvp" style="max-height:220px"></canvas>
   </div>
+</div><!-- /cap-acum-tv -->
   <div class="irow">
     <div class="ins good"><div class="ins-icon">📈</div><div class="ins-text"><strong>AquaRio lidera o crescimento:</strong> +60% no acumulado (35.034 vs 21.839). Jan/26 com 18.475 foi excepcional — +65% vs Jan/25.</div></div>
     <div class="ins alert"><div class="ins-icon">🔴</div><div class="ins-text"><strong>BioParque preocupa no acumulado:</strong> -21% no período. Jan: 2.852 vs 4.375 (-35%); Fev: 1.165 vs 1.073 (+9%). Tendência de queda.</div></div>
@@ -720,7 +721,7 @@ canvas{max-height:230px}
     <span class="badge" id="shareBadge">Mar/2026</span>
   </div>
 
-  <div class="row3">
+<div id="cap-share">  <div class="row3">
     <div class="cc"><div class="cc-h"><div class="cc-t">🐠 AquaRio</div><div class="cc-s" id="shareSubAqua">Trade 12,41% · Parque 87,59%</div></div><canvas id="d_aqua" style="max-height:190px"></canvas><div class="donut-val" id="shareValAqua">12,41%</div><div class="donut-sub" id="shareSubAqua2">share trade Mar/26</div></div>
     <div class="cc"><div class="cc-h"><div class="cc-t">🦁 BioParque</div><div class="cc-s" id="shareSubBio">Trade 3,81% · Parque 96,19%</div></div><canvas id="d_bio" style="max-height:190px"></canvas><div class="donut-val" id="shareValBio">3,81%</div><div class="donut-sub" id="shareSubBio2">share trade Mar/26</div></div>
     <div class="cc"><div class="cc-h"><div class="cc-t">🚞 Paineiras Corcovado</div><div class="cc-s" id="shareSubPai">Trade 50,43% · Parque 49,57%</div></div><canvas id="d_pai" style="max-height:190px"></canvas><div class="donut-val" id="shareValPai">50,43%</div><div class="donut-sub" id="shareSubPai2">share trade Mar/26</div></div>
@@ -731,6 +732,7 @@ canvas{max-height:230px}
     <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — BioParque</div></div><canvas id="c_share_bio"></canvas></div>
     <div class="cc"><div class="cc-h"><div class="cc-t">Share 2025 × 2026 — Paineiras</div></div><canvas id="c_share_pai"></canvas></div>
   </div>
+</div><!-- /cap-share -->
 
   <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade</div><div class="cc-s">% do canal trade no total · dados disponíveis a partir de Jul/25</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas></div>
 
