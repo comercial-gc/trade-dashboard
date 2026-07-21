@@ -88,9 +88,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 .mini-l{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
 .mini-v{font-size:13px;font-weight:700;color:var(--navy)}
 .mini-d{font-size:9.5px;font-weight:700;margin-top:2px}
-.appai-row{display:flex;align-items:center;gap:5px;margin-top:8px;padding:4px 8px;background:var(--bg);border-radius:7px;font-size:9px}
-.appai-lbl{color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.3px}
-.appai-val{font-weight:700;color:var(--text)}.appai-sep{color:var(--muted);margin:0 2px}
+.appai-row{display:flex;align-items:center;gap:4px;margin-top:8px;padding:4px 7px;background:var(--bg);border-radius:7px;font-size:8.5px;flex-wrap:nowrap;overflow:hidden}
+.appai-lbl{color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.appai-val{font-weight:700;color:var(--text);white-space:nowrap}.appai-sep{color:var(--muted);margin:0 2px;flex-shrink:0}
 .park-compare{margin-top:8px;padding:7px 9px;background:var(--bg);border-radius:7px;border:1px solid var(--border)}
 .pc-label{font-size:7.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .pc-row{display:flex;align-items:baseline;gap:5px}
@@ -183,7 +183,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 
 /* ─── TOTAL BAR ──────────────────────────── */
 .total-bar{background:linear-gradient(135deg,#0D1B2A,#1E3448);border-radius:13px;padding:16px 22px;margin-bottom:14px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow)}
-.tb-i{text-align:center;flex:1;min-width:90px}
+.tb-i{text-align:center;flex:1;min-width:90px;display:flex;flex-direction:column;justify-content:center}
 .tb-l{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px}
 .tb-v{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#fff;line-height:1}
 .tb-d{font-size:10.5px;font-weight:700;margin-top:4px}
@@ -1334,15 +1334,36 @@ function renderAppaiEscolarHist(){
     h += '<div class="ae-perf-metric-vals"><span>'+fmtP(g[spKey+'25'])+'</span><span>→</span><span>'+fmtP(g[spKey+'26'])+'</span></div>';
     h += '<div class="ae-perf-metric-yr">2025 → 2026</div>'+deltaHtml(g[spKey+'26']-g[spKey+'25'],false)+'</div>';
     h += '</div>';
+    h += '<canvas id="c_ae_'+classe+'_'+campoPrefixo+'" style="max-height:210px;margin-top:6px"></canvas>';
     h += '</div><div class="ae-perf-foot">Trade '+H.serie[0].label.split('/')[1]+': '+fmtN(g.trade25)+' · Trade 26: '+fmtN(g.trade26)+' · Parque 25: '+fmtN(g.parque25)+' · Parque 26: '+fmtN(g.parque26)+'</div>';
     h += '</div>';
     return h;
   }
+  function chartPark(classe, g, campoPrefixo, labelNum){
+    var num26 = g[campoPrefixo+'26'], num25 = g[campoPrefixo+'25'];
+    var corCheia = classe==='bio' ? 'rgba(194,90,0,.85)' : 'rgba(0,95,142,.85)';
+    var corClara = classe==='bio' ? 'rgba(194,90,0,.35)' : 'rgba(0,95,142,.35)';
+    mkChart('c_ae_'+classe+'_'+campoPrefixo, {type:'bar',data:{
+      labels:[labelNum,'Trade','Parque'],
+      datasets:[
+        {label:'Jan–'+H.serie[H.serie.length-1].label.split('/')[0]+'/25',data:[num25,g.trade25,g.parque25],backgroundColor:corClara,borderRadius:4,borderWidth:0},
+        {label:'Jan–'+H.serie[H.serie.length-1].label.split('/')[0]+'/26',data:[num26,g.trade26,g.parque26],backgroundColor:corCheia,borderRadius:4,borderWidth:0}
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:8,font:{size:9}}}},
+      scales:{x:{grid:gn,ticks:{font:{size:9}}},y:{grid:gc,ticks:{font:{size:9},callback:fK}}}}});
+  }
   var A = H.acumulado;
   var elAppaiPerf = document.getElementById('appaiPerfCards');
-  if(elAppaiPerf) elAppaiPerf.innerHTML = '<div class="ae-perf-grid">'+cardPark('BIOPARQUE','bio',A.bio,'app')+cardPark('AQUARIO','aqua',A.aqua,'app')+'</div>';
+  if(elAppaiPerf){
+    elAppaiPerf.innerHTML = '<div class="ae-perf-grid">'+cardPark('BIOPARQUE','bio',A.bio,'app')+cardPark('AQUARIO','aqua',A.aqua,'app')+'</div>';
+    chartPark('bio', A.bio, 'app', 'APPAI'); chartPark('aqua', A.aqua, 'app', 'APPAI');
+  }
   var elEscPerf = document.getElementById('escolarPerfCards');
-  if(elEscPerf) elEscPerf.innerHTML = '<div class="ae-perf-grid">'+cardPark('BIOPARQUE','bio',A.bio,'esc')+cardPark('AQUARIO','aqua',A.aqua,'esc')+'</div>';
+  if(elEscPerf){
+    elEscPerf.innerHTML = '<div class="ae-perf-grid">'+cardPark('BIOPARQUE','bio',A.bio,'esc')+cardPark('AQUARIO','aqua',A.aqua,'esc')+'</div>';
+    chartPark('bio', A.bio, 'esc', 'ESCOLAR'); chartPark('aqua', A.aqua, 'esc', 'ESCOLAR');
+  }
 }
 
 // ── HIST ─────────────────────────────────
