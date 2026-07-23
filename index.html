@@ -899,7 +899,6 @@ canvas{max-height:230px}
         <option value="3m" selected>vs Últimos 3 meses</option>
         <option value="6m">vs Últimos 6 meses</option>
         <option value="12m">vs Últimos 12 meses</option>
-        <option value="yoy">📆 Vs ano anterior</option>
         <option value="custom">📅 Personalizado</option>
       </select>
       <div id="cli-custom-panel" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;border:1.5px solid var(--border);">
@@ -2305,7 +2304,8 @@ function cliGetPeriodo(){
     var ate = Math.min(cliCustomAte, meses.length-1);
     if(de > ate) de = ate;
     var cur = meses.slice(de, ate+1);
-    return {cur:cur, prev:[], curLabel:lbl(cur), prevLabel:'—', n:cur.length};
+    var equiv2025 = cliGetEquiv2025(cur);
+    return {cur:cur, prev:[], curLabel:lbl(cur), prevLabel:'—', n:cur.length, equiv2025:equiv2025, equiv2025Label:cliEquiv2025Label(equiv2025)};
   }
   // YoY: mês equivalente do ano anterior
   if(cliPeriodo==='yoy'){
@@ -2338,16 +2338,37 @@ function cliGetPeriodo(){
   var ancIdx = meses.length - 1;
   if(cliPeriodo==='none'){
     var cur = [meses[ancIdx]];
-    return {cur:cur, prev:[], curLabel:cur[0].label, prevLabel:'—', n:1};
+    var equiv2025 = cliGetEquiv2025(cur);
+    return {cur:cur, prev:[], curLabel:cur[0].label, prevLabel:'—', n:1, equiv2025:equiv2025, equiv2025Label:cliEquiv2025Label(equiv2025)};
   }
   var n = cliPeriodo==='1m'?1:cliPeriodo==='3m'?3:cliPeriodo==='6m'?6:12;
   var cur  = meses.slice(Math.max(0, ancIdx-n+1), ancIdx+1);
   var prev = ancIdx >= n ? meses.slice(Math.max(0, ancIdx-n*2+1), ancIdx-n+1) : [];
-  return {cur:cur, prev:prev, curLabel:lbl(cur), prevLabel:prev.length?lbl(prev):'—', n:n};
+  var equiv2025 = cliGetEquiv2025(cur);
+  return {cur:cur, prev:prev, curLabel:lbl(cur), prevLabel:prev.length?lbl(prev):'—', n:n, equiv2025:equiv2025, equiv2025Label:cliEquiv2025Label(equiv2025)};
 }
 
 function cliTot(dados, ag, meses){
   return meses.reduce(function(s,m){ return s+(dados[ag]&&dados[ag][m.label]||0); }, 0);
+}
+
+// Acha, pra cada mês do período atual, o mês de mesmo nome em 2025
+// (ex: Mai/2026 -> Mai/2025). Ignora meses que já são de 2025.
+function cliGetEquiv2025(cur){
+  var meses2025 = (D.meses2025||[]).filter(function(m){return m.clientes&&m.clientes.length>0;});
+  var equiv = [];
+  (cur||[]).forEach(function(m){
+    var partes = (m.label||'').split('/');
+    var mesShort = partes[0], ano = partes[1];
+    if(ano==='2025') return;
+    var achado = meses2025.filter(function(m2){ return m2.label && m2.label.indexOf(mesShort)===0; });
+    if(achado.length) equiv.push(achado[0]);
+  });
+  return equiv;
+}
+function cliEquiv2025Label(equiv){
+  if(!equiv.length) return '—';
+  return equiv.length===1 ? equiv[0].label : equiv[0].label+' → '+equiv[equiv.length-1].label;
 }
 
 function cliColor(){
@@ -2370,7 +2391,8 @@ function cliUpdatePeriodInfo(per){
   if(!infoEl) return;
   infoEl.className = 'cli-period-info '+cliPeriodInfoCls();
   var yoyAviso = per.yoyIncompleto ? '&nbsp;<em style="color:var(--warn);font-size:9px;">(⚠️ vs mês completo de 2025 — parcial vs total)</em>' : '';
-  infoEl.innerHTML = '📅 <strong>Período atual:</strong> '+per.curLabel+(per.prev.length?' &nbsp;|&nbsp; <strong>Comparando com:</strong> '+per.prevLabel+yoyAviso:' &nbsp;|&nbsp; <em>Sem período anterior disponível</em>');
+  var comp2025 = (per.equiv2025&&per.equiv2025.length) ? ' &nbsp;|&nbsp; <strong>vs 2025:</strong> '+per.equiv2025Label : '';
+  infoEl.innerHTML = '📅 <strong>Período atual:</strong> '+per.curLabel+(per.prev.length?' &nbsp;|&nbsp; <strong>Comparando com:</strong> '+per.prevLabel+yoyAviso:' &nbsp;|&nbsp; <em>Sem período anterior disponível</em>')+comp2025;
 }
 
 // ── RANKING + DELTA ─────────────────────────────────────────────────
@@ -2389,7 +2411,10 @@ function cliRenderRanking(){
     var vP = per.prev.length ? cliTot(dados, ag, per.prev) : null;
     var d  = vP!==null ? vC-vP : null;
     var pct= vP>0 ? d/vP : (vC>0?Infinity:0);
-    return {ag:ag, vC:vC, vP:vP, d:d, pct:pct};
+    var v25 = (per.equiv2025&&per.equiv2025.length) ? cliTot(dados, ag, per.equiv2025) : null;
+    var d25 = v25!==null ? vC-v25 : null;
+    var pct25 = v25>0 ? d25/v25 : (v25!==null&&vC>0?Infinity:0);
+    return {ag:ag, vC:vC, vP:vP, d:d, pct:pct, v25:v25, d25:d25, pct25:pct25};
   }).filter(function(x){return x.vC>0||( x.vP&&x.vP>0);})
     .sort(function(a,b){return b.vC-a.vC;});
 
@@ -2404,6 +2429,7 @@ function cliRenderRanking(){
     +'<th style="text-align:right">'+per.curLabel+'</th>'
     +(per.prev.length?'<th style="text-align:right">'+per.prevLabel+'</th>':'')
     +'<th style="text-align:right">Variação</th>'
+    +(per.equiv2025&&per.equiv2025.length?'<th style="text-align:right;color:var(--muted)">2025 ('+per.equiv2025Label+')</th><th style="text-align:right">Δ vs 2025</th>':'')
     +'</tr></thead><tbody>';
 
   ranked.forEach(function(x,i){
@@ -2414,6 +2440,13 @@ function cliRenderRanking(){
     else if(x.d>0){pill='▲ +'+Math.round(x.pct*100)+'%';cls='up';}
     else if(x.d<0){pill='▼ '+Math.round(x.pct*100)+'%';cls='dn';}
     else{pill='0%';cls='zero';}
+    var pill25='', cls25='zero';
+    if(x.v25===null){pill25='—';cls25='zero';}
+    else if(x.pct25===Infinity){pill25='NOVO';cls25='novo';}
+    else if(x.vC===0&&x.v25>0){pill25='SAIU';cls25='dn';}
+    else if(x.d25>0){pill25='▲ +'+Math.round(x.pct25*100)+'%';cls25='up';}
+    else if(x.d25<0){pill25='▼ '+Math.round(x.pct25*100)+'%';cls25='dn';}
+    else{pill25='0%';cls25='zero';}
     html+='<tr>'
       +'<td class="cli-rk">'+(i+1)+'</td>'
       +'<td style="font-size:11px;max-width:200px">'+x.ag+'</td>'
@@ -2421,6 +2454,7 @@ function cliRenderRanking(){
       +'<td style="text-align:right;font-weight:700;color:'+cor+'">'+fN(x.vC)+'</td>'
       +(per.prev.length?'<td style="text-align:right;color:var(--muted)">'+(x.vP!==null?fN(x.vP):'—')+'</td>':'')
       +'<td style="text-align:right"><span class="cli-pill '+cls+'">'+pill+'</span></td>'
+      +(per.equiv2025&&per.equiv2025.length?'<td style="text-align:right;color:var(--muted)">'+(x.v25!==null?fN(x.v25):'—')+'</td><td style="text-align:right"><span class="cli-pill '+cls25+'">'+pill25+'</span></td>':'')
       +'</tr>';
   });
   html += '</tbody></table>';
