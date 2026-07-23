@@ -2428,18 +2428,10 @@ function cliRenderRanking(){
     +'<th>#</th><th>Agência</th><th></th>'
     +'<th style="text-align:right">'+per.curLabel+'</th>'
     +(per.prev.length?'<th style="text-align:right">'+per.prevLabel+'</th>':'')
-    +'<th style="text-align:right">Variação</th>'
     +(per.equiv2025&&per.equiv2025.length?'<th style="text-align:right;color:var(--muted)">2025 ('+per.equiv2025Label+')</th><th style="text-align:right">Δ vs 2025</th>':'')
     +'</tr></thead><tbody>';
 
   ranked.forEach(function(x,i){
-    var pill='', cls='zero';
-    if(x.d===null){pill='—';cls='zero';}
-    else if(x.pct===Infinity){pill='NOVO';cls='novo';}
-    else if(x.vC===0&&x.vP>0){pill='SAIU';cls='dn';}
-    else if(x.d>0){pill='▲ +'+Math.round(x.pct*100)+'%';cls='up';}
-    else if(x.d<0){pill='▼ '+Math.round(x.pct*100)+'%';cls='dn';}
-    else{pill='0%';cls='zero';}
     var pill25='', cls25='zero';
     if(x.v25===null){pill25='—';cls25='zero';}
     else if(x.pct25===Infinity){pill25='NOVO';cls25='novo';}
@@ -2453,7 +2445,6 @@ function cliRenderRanking(){
       +'<td><div class="cli-bar-wrap"><div class="cli-bar-fill" style="width:'+Math.round(x.vC/mx*100)+'%;background:'+cor+'"></div></div></td>'
       +'<td style="text-align:right;font-weight:700;color:'+cor+'">'+fN(x.vC)+'</td>'
       +(per.prev.length?'<td style="text-align:right;color:var(--muted)">'+(x.vP!==null?fN(x.vP):'—')+'</td>':'')
-      +'<td style="text-align:right"><span class="cli-pill '+cls+'">'+pill+'</span></td>'
       +(per.equiv2025&&per.equiv2025.length?'<td style="text-align:right;color:var(--muted)">'+(x.v25!==null?fN(x.v25):'—')+'</td><td style="text-align:right"><span class="cli-pill '+cls25+'">'+pill25+'</span></td>':'')
       +'</tr>';
   });
