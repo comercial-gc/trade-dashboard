@@ -167,18 +167,23 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--navy);over
 .tc-wrap{margin-top:16px}
 .tc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .tc-col{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.ae-hist-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:20px;align-items:stretch}
-@media (max-width:900px){.ae-hist-layout{grid-template-columns:1fr}}
-.ae-hist-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
-.ae-hist-table tr.ae-destaque td{font-weight:800;color:var(--ink)}
-.ae-hist-table tr.ae-destaque td.ae-mes{color:var(--navy)}
-.ae-hist-table th{padding:7px 10px;font-weight:700;color:#fff;text-align:center;white-space:nowrap}
-.ae-hist-table th.ae-th-mes{background:#fff;color:var(--ink)}
-.ae-hist-table th.ae-th-bio{background:#C1660B}
-.ae-hist-table th.ae-th-aqua{background:#1E6FA8}
-.ae-hist-table td{padding:6px 10px;text-align:center;border-bottom:1px solid var(--border)}
-.ae-hist-table td.ae-mes{text-align:left;font-weight:600}
+.ae-hist-layout{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.ae-hist-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.ae-hist-charts-row{grid-template-columns:1fr}}
+.ae-hist-table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+.ae-hist-table th{padding:6px 4px;font-weight:700;color:#fff;text-align:center;white-space:nowrap;background:var(--navy);font-size:9.5px}
+.ae-hist-table th.ae-th-metrica{background:#fff;color:var(--ink);text-align:left;width:120px}
+.ae-hist-table td{padding:5px 3px;text-align:center;border-bottom:1px solid var(--border)}
+.ae-hist-table td.ae-row-lbl{text-align:left;font-weight:700;font-size:10px;white-space:nowrap}
+.ae-hist-table td.ae-row-lbl.ae-lbl-bio{color:var(--bio)}
+.ae-hist-table td.ae-row-lbl.ae-lbl-aqua{color:var(--aqua)}
 .ae-hist-table tr:nth-child(even) td{background:#F7F9FB}
+.ae-c26{font-weight:800;color:var(--ink);font-size:11.5px;line-height:1.3}
+.ae-c26.ae-c-vazio{font-weight:400;color:var(--muted);font-size:10px}
+.ae-c25{font-weight:400;color:var(--muted);font-size:9px;line-height:1.3}
+.ae-cdelta{font-weight:700;font-size:8.5px}
+.ae-cdelta.up{color:var(--up)}
+.ae-cdelta.dn{color:var(--dn)}
 .ae-perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 .ae-perf-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .ae-perf-head{padding:9px 16px;font-weight:700;color:#fff;font-size:13px}
@@ -720,7 +725,7 @@ canvas{max-height:230px}
     <div class="cc" style="overflow-x:auto">
       <table class="ae-hist-table" id="appaiHistTable"></table>
     </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="ae-hist-charts-row">
       <div class="cc"><div class="cc-h"><div class="cc-t">Linha do Tempo — Bilhetes APPAI / mês</div></div><canvas id="c_appai_linha" style="max-height:200px"></canvas></div>
       <div class="cc"><div class="cc-h"><div class="cc-t">Share APPAI / Trade — mensal (%)</div></div><canvas id="c_appai_share" style="max-height:200px"></canvas></div>
     </div>
@@ -736,7 +741,7 @@ canvas{max-height:230px}
     <div class="cc" style="overflow-x:auto">
       <table class="ae-hist-table" id="escolarHistTable"></table>
     </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="ae-hist-charts-row">
       <div class="cc"><div class="cc-h"><div class="cc-t">Linha do Tempo — Bilhetes Escolar / mês</div></div><canvas id="c_escolar_linha" style="max-height:200px"></canvas></div>
       <div class="cc"><div class="cc-h"><div class="cc-t">Share Escolar / Trade — mensal (%)</div></div><canvas id="c_escolar_share" style="max-height:200px"></canvas></div>
     </div>
@@ -1224,6 +1229,21 @@ function initAcum(mesData){
   var lbls=meses.slice(0,Math.max(h26a.length,1));
   // adiciona * no último (parcial)
   var lblsFmt=lbls.map((l,i)=>i===lbls.length-1?l+'*':l);
+  var _lineValPlugin2={id:'lineValLabel2',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx;
+    chart.data.datasets.forEach(function(ds,di){
+      var meta=chart.getDatasetMeta(di); if(meta.hidden) return;
+      meta.data.forEach(function(pt,i){
+        var v=ds.data[i]; if(v===null||v===undefined) return;
+        ctx.save();
+        ctx.fillStyle=ds.borderColor;
+        ctx.font='bold 8.5px Outfit,Arial,sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText(fK(v), pt.x, pt.y-9-(di*11));
+        ctx.restore();
+      });
+    });
+  }};
   mkChart('c_mens26',{type:'line',data:{
     labels:lblsFmt,
     datasets:[
@@ -1231,7 +1251,7 @@ function initAcum(mesData){
     ].concat(_bioAcumOn?[{label:'BioParque',data:h26b,borderColor:'#C25A00',backgroundColor:'rgba(194,90,0,.08)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#C25A00',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true}]:[]).concat([
       {label:'Paineiras',data:h26p,borderColor:'#2D6A2B',backgroundColor:'rgba(45,106,43,.07)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#2D6A2B',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true}
     ])
-  },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  },plugins:[_lineValPlugin2],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:18}},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{grid:gc,ticks:{callback:fK}}}}});
 
@@ -1251,17 +1271,32 @@ function initAcum(mesData){
   }
   var lblsMeta=[],mDat=[],rDat=[],rColors=[];
   for(var i=0;i<nMeses;i++){
-    lblsMeta.push('AquaRio '+meses[i]+(i===nMeses-1?'*':'')); mDat.push(mA[i]); rDat.push(rA[i]); rColors.push(i===nMeses-1?'rgba(0,95,142,.5)':'rgba(0,95,142,.85)');
-    lblsMeta.push('Paineiras '+meses[i]+(i===nMeses-1?'*':'')); mDat.push(mP[i]); rDat.push(rP[i]); rColors.push(i===nMeses-1?'rgba(45,106,43,.5)':'rgba(45,106,43,.85)');
-    if(_bioAcumOn){ lblsMeta.push('BioParque '+meses[i]+(i===nMeses-1?'*':'')); mDat.push(mB[i]); rDat.push(rB[i]); rColors.push(i===nMeses-1?'rgba(194,90,0,.5)':'rgba(194,90,0,.85)'); }
+    var _mLbl=meses[i]+(i===nMeses-1?'*':'');
+    lblsMeta.push([_mLbl,'AquaRio']); mDat.push(mA[i]); rDat.push(rA[i]); rColors.push(i===nMeses-1?'rgba(0,95,142,.5)':'rgba(0,95,142,.85)');
+    lblsMeta.push([_mLbl,'Paineiras']); mDat.push(mP[i]); rDat.push(rP[i]); rColors.push(i===nMeses-1?'rgba(45,106,43,.5)':'rgba(45,106,43,.85)');
+    if(_bioAcumOn){ lblsMeta.push([_mLbl,'BioParque']); mDat.push(mB[i]); rDat.push(rB[i]); rColors.push(i===nMeses-1?'rgba(194,90,0,.5)':'rgba(194,90,0,.85)'); }
   }
+  var _pctMetaPlugin={id:'pctMetaLabel',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx; var metaArr=chart.data.datasets[0].data; var meta=chart.getDatasetMeta(1);
+    meta.data.forEach(function(bar,i){
+      var m=metaArr[i], r=chart.data.datasets[1].data[i];
+      if(!m||m<=0) return;
+      var pct=Math.round(r/m*100);
+      ctx.save();
+      ctx.fillStyle=pct>=100?'#1E7B34':'#C0392B';
+      ctx.font='bold 9.5px Outfit,Arial,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(pct+'%', bar.x, bar.y-6);
+      ctx.restore();
+    });
+  }};
   mkChart('c_meta',{type:'bar',data:{
     labels:lblsMeta,
     datasets:[
       {label:'Meta OBZ 2026',data:mDat,backgroundColor:'rgba(0,0,0,.08)',borderRadius:4,borderWidth:0},
       {label:'Realizado',data:rDat,backgroundColor:rColors,borderRadius:4,borderWidth:0}
     ]
-  },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  },plugins:[_pctMetaPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:16}},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn,ticks:{font:{size:9}}},y:{grid:gc,ticks:{callback:fK}}}}});
 
@@ -1351,38 +1386,81 @@ function renderAppaiEscolarHist(nMesesAtual, bioOn){
     var campoShT = tipo==='appai' ? 'appShareTrade' : 'escShareTrade';
     var campoShP = tipo==='appai' ? 'appShareParque' : 'escShareParque';
     var mesesOrdem = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    var ultimo = serie[serie.length-1];
-    var up = (ultimo.label||'').split('/');
-    var curMesIdx = mesesOrdem.indexOf(up[0]);
-    var curAno = up[1];
-    var anoAnterior = curAno ? String(parseInt(curAno,10)-1).padStart(2,'0') : null;
-    var h = '<thead><tr>';
-    h += '<th class="ae-th-mes" rowspan="2">Mês</th>';
-    if(bioOn){ h += '<th class="ae-th-bio" colspan="3">BIOPARQUE</th>'; }
-    h += '<th class="ae-th-aqua" colspan="3">AQUARIO</th></tr>';
-    if(bioOn){ h += '<tr><th class="ae-th-bio">Bilhetes</th><th class="ae-th-bio">Sh/Trade</th><th class="ae-th-bio">Sh/Parque</th>'; }
-    else { h += '<tr>'; }
-    h += '<th class="ae-th-aqua">Bilhetes</th><th class="ae-th-aqua">Sh/Trade</th><th class="ae-th-aqua">Sh/Parque</th></tr></thead><tbody>';
+    var by25={}, by26={};
     serie.forEach(function(m){
-      var mp = (m.label||'').split('/');
-      var mIdx = mesesOrdem.indexOf(mp[0]), mAno = mp[1];
-      var destaque = curMesIdx>=0 && (mAno===curAno || mAno===anoAnterior) && mIdx<=curMesIdx;
-      h += '<tr'+(destaque?' class="ae-destaque"':'')+'><td class="ae-mes">'+m.label+'</td>';
-      if(bioOn){ h += '<td>'+fmtN(m.bio[campoNum])+'</td><td>'+fmtP(m.bio[campoShT])+'</td><td>'+fmtP(m.bio[campoShP])+'</td>'; }
-      h += '<td>'+fmtN(m.aqua[campoNum])+'</td><td>'+fmtP(m.aqua[campoShT])+'</td><td>'+fmtP(m.aqua[campoShP])+'</td></tr>';
+      var mp=(m.label||'').split('/'); var mc=mp[0], ano=mp[1];
+      if(ano==='25') by25[mc]=m; else if(ano==='26') by26[mc]=m;
     });
-    h += '</tbody>';
+    function celula(parkKey, campo, isPct){
+      return function(mc){
+        var m25=by25[mc], m26=by26[mc];
+        var v25 = m25 ? m25[parkKey][campo] : null;
+        var v26 = m26 ? m26[parkKey][campo] : null;
+        var fmt = isPct ? fmtP : fmtN;
+        var top = (v26!==null&&v26!==undefined) ? '<div class="ae-c26">'+fmt(v26)+'</div>' : '<div class="ae-c26 ae-c-vazio">—</div>';
+        var bottom='';
+        if(v25!==null && v25!==undefined){
+          var deltaTxt='';
+          if(v26!==null && v26!==undefined){
+            if(isPct){
+              var dpp=Math.round((v26-v25)*10)/10;
+              deltaTxt=' <span class="ae-cdelta '+(dpp>=0?'up':'dn')+'">'+(dpp>=0?'▲':'▼')+Math.abs(dpp).toFixed(1).replace('.',',')+'pp</span>';
+            } else if(v25>0){
+              var d=Math.round((v26-v25)/v25*1000)/10;
+              deltaTxt=' <span class="ae-cdelta '+(d>=0?'up':'dn')+'">'+(d>=0?'▲':'▼')+Math.abs(d).toFixed(1).replace('.',',')+'%</span>';
+            }
+          }
+          bottom='<div class="ae-c25">'+fmt(v25)+deltaTxt+'</div>';
+        }
+        return '<td class="ae-hcell">'+top+bottom+'</td>';
+      };
+    }
+    function linha(parkLabel, parkKey, metricLabel, campo, isPct, corClass){
+      var cf=celula(parkKey,campo,isPct);
+      var row='<tr><td class="ae-row-lbl '+corClass+'">'+parkLabel+' · '+metricLabel+'</td>';
+      mesesOrdem.forEach(function(mc){ row+=cf(mc); });
+      row+='</tr>';
+      return row;
+    }
+    var h='<thead><tr><th class="ae-th-metrica">Métrica</th>';
+    mesesOrdem.forEach(function(mc){ h+='<th class="ae-th-mes-h">'+mc+'</th>'; });
+    h+='</tr></thead><tbody>';
+    if(bioOn){
+      h+=linha('BioParque','bio','Bilhetes',campoNum,false,'ae-lbl-bio');
+      h+=linha('BioParque','bio','Sh/Trade',campoShT,true,'ae-lbl-bio');
+      h+=linha('BioParque','bio','Sh/Parque',campoShP,true,'ae-lbl-bio');
+    }
+    h+=linha('AquaRio','aqua','Bilhetes',campoNum,false,'ae-lbl-aqua');
+    h+=linha('AquaRio','aqua','Sh/Trade',campoShT,true,'ae-lbl-aqua');
+    h+=linha('AquaRio','aqua','Sh/Parque',campoShP,true,'ae-lbl-aqua');
+    h+='</tbody>';
     return h;
   }
   var elAppaiT = document.getElementById('appaiHistTable'); if(elAppaiT) elAppaiT.innerHTML = montaTabela('appai');
   var elEscT = document.getElementById('escolarHistTable'); if(elEscT) elEscT.innerHTML = montaTabela('escolar');
 
   var lblsSerie = serie.map(function(m){return m.label;});
+  var _lineValPlugin={id:'lineValLabel',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx;
+    chart.data.datasets.forEach(function(ds,di){
+      var meta=chart.getDatasetMeta(di); if(meta.hidden) return;
+      meta.data.forEach(function(pt,i){
+        var v=ds.data[i]; if(v===null||v===undefined) return;
+        var txt = ds._sufixo==='%' ? v.toFixed(1).replace('.',',')+'%' : fN(v);
+        ctx.save();
+        ctx.fillStyle=ds.borderColor;
+        ctx.font='bold 8.5px Outfit,Arial,sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText(txt, pt.x, pt.y-9-(di*11));
+        ctx.restore();
+      });
+    });
+  }};
   function lineCfg(labels, bioData, aquaData, sufixo){
     var dsets=[];
-    if(bioOn) dsets.push({label:'BioParque',data:bioData,borderColor:'#C25A00',backgroundColor:'rgba(194,90,0,.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C25A00',tension:.25});
-    dsets.push({label:'AquaRio',data:aquaData,borderColor:'#005F8E',backgroundColor:'rgba(0,95,142,.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#005F8E',tension:.25});
-    return {type:'line',data:{labels:labels,datasets:dsets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    if(bioOn) dsets.push({label:'BioParque',data:bioData,borderColor:'#C25A00',backgroundColor:'rgba(194,90,0,.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#C25A00',tension:.25,_sufixo:sufixo});
+    dsets.push({label:'AquaRio',data:aquaData,borderColor:'#005F8E',backgroundColor:'rgba(0,95,142,.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#005F8E',tension:.25,_sufixo:sufixo});
+    return {type:'line',data:{labels:labels,datasets:dsets},plugins:[_lineValPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:18}},
       plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:10,font:{size:10}}}},
       scales:{x:{grid:gn,ticks:{font:{size:9}}},y:{grid:gc,ticks:{font:{size:9},callback:function(v){return sufixo==='%'?v+'%':v;}}}}}};
   }
@@ -1569,6 +1647,21 @@ function initShare(mesData){
   document.querySelectorAll('.donut-sub').forEach(function(el){el.textContent='share trade '+mesLbl;});
   var sbEl=document.getElementById('shareBadge');if(sbEl)sbEl.textContent=mesLbl;
 
+  var _lineValPlugin3={id:'lineValLabel3',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx;
+    chart.data.datasets.forEach(function(ds,di){
+      var meta=chart.getDatasetMeta(di); if(meta.hidden) return;
+      meta.data.forEach(function(pt,i){
+        var v=ds.data[i]; if(v===null||v===undefined) return;
+        ctx.save();
+        ctx.fillStyle=ds.borderColor;
+        ctx.font='bold 7.5px Outfit,Arial,sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText(v.toFixed(1).replace('.',',')+'%', pt.x, pt.y-7-(di*10));
+        ctx.restore();
+      });
+    });
+  }};
   mkChart('c_share_evo',{type:'line',data:{
     labels:mesesShDyn,
     datasets:[
@@ -1576,7 +1669,7 @@ function initShare(mesData){
       {label:'BioParque %',data:D.share.bio,borderColor:'rgba(194,90,0,1)',backgroundColor:'transparent',borderWidth:2,borderDash:[4,3],pointRadius:4,pointBackgroundColor:'rgba(194,90,0,1)',tension:.3},
       {label:'Paineiras %',data:D.share.pai,borderColor:'rgba(45,106,43,1)',backgroundColor:'rgba(45,106,43,.05)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'rgba(45,106,43,1)',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true}
     ]
-  },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+  },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:16}},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{grid:gc,ticks:{callback:function(v){return v+"%";},font:{size:9}},title:{display:false}}}}});
 
