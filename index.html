@@ -688,6 +688,11 @@ canvas{max-height:230px}
     <canvas id="c_meta" style="max-height:200px"></canvas>
   </div>
 
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-h"><div class="cc-t">Meta 2026 vs Realizado — Consolidado (Total dos Parques)</div><div class="cc-s" id="acumMetaTotSub">Soma de todos os parques ativos em cada mês</div></div>
+    <canvas id="c_meta_tot" style="max-height:200px"></canvas>
+  </div>
+
 </div><!-- /cap-acumulado -->
   <div class="sec" style="margin-top:20px">
     <div class="sec-t">Trade vs Parque — Crescimento 2026 vs 2025</div>
@@ -1150,13 +1155,14 @@ function initMar(mesData){
   var aR=aqua.real26||aqua.real||0, aO=aqua.obz||0, aP=aqua.proj||0;
   var bR=bio.real26||bio.real||0,   bO=bio.obz||0,   bP=bio.proj||0;
   var pR=pai.real26||pai.real||0,   pO=pai.obz||0,   pP=pai.proj||0;
+  var _bioAtivoMar = !_bioSaiuDoGrupo(m.label||'');
 
   mkChart('c_obz',{type:'bar',data:{
-    labels:['AquaRio','BioParque','Paineiras'],
+    labels:_bioAtivoMar?['AquaRio','BioParque','Paineiras']:['AquaRio','Paineiras'],
     datasets:[
-      {label:'OBZ',data:[aO,bO,pO],backgroundColor:'rgba(0,0,0,.07)',borderRadius:5,borderWidth:0},
-      {label:'Realizado',data:[aR,bR,pR],backgroundColor:['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)'],borderRadius:5,borderWidth:0},
-      {label:'Projeção',data:[aP,bP,pP],type:'line',borderColor:'#E8A820',backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#E8A820',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3}
+      {label:'OBZ',data:_bioAtivoMar?[aO,bO,pO]:[aO,pO],backgroundColor:'rgba(0,0,0,.07)',borderRadius:5,borderWidth:0},
+      {label:'Realizado',data:_bioAtivoMar?[aR,bR,pR]:[aR,pR],backgroundColor:_bioAtivoMar?['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)']:['rgba(0,95,142,.85)','rgba(45,106,43,.85)'],borderRadius:5,borderWidth:0},
+      {label:'Projeção',data:_bioAtivoMar?[aP,bP,pP]:[aP,pP],type:'line',borderColor:'#E8A820',backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#E8A820',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3}
     ]
   },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
@@ -1165,10 +1171,10 @@ function initMar(mesData){
   var ref25lbl = (m.label||'Mar/2026').replace('2026','2025').replace('/26','/25');
   var r25a=aqua.real25||0, r25b=bio.real25||0, r25p=pai.real25||0;
   mkChart('c_yoy',{type:'bar',data:{
-    labels:['AquaRio','BioParque','Paineiras'],
+    labels:_bioAtivoMar?['AquaRio','BioParque','Paineiras']:['AquaRio','Paineiras'],
     datasets:[
-      {label:ref25lbl,data:[r25a,r25b,r25p],backgroundColor:['rgba(0,180,216,.45)','rgba(255,140,42,.45)','rgba(86,195,84,.45)'],borderRadius:5,borderWidth:0},
-      {label:m.label||'Mar/2026',data:[aR,bR,pR],backgroundColor:['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)'],borderRadius:5,borderWidth:0}
+      {label:ref25lbl,data:_bioAtivoMar?[r25a,r25b,r25p]:[r25a,r25p],backgroundColor:_bioAtivoMar?['rgba(0,180,216,.45)','rgba(255,140,42,.45)','rgba(86,195,84,.45)']:['rgba(0,180,216,.45)','rgba(86,195,84,.45)'],borderRadius:5,borderWidth:0},
+      {label:m.label||'Mar/2026',data:_bioAtivoMar?[aR,bR,pR]:[aR,pR],backgroundColor:_bioAtivoMar?['rgba(0,95,142,.85)','rgba(194,90,0,.85)','rgba(45,106,43,.85)']:['rgba(0,95,142,.85)','rgba(45,106,43,.85)'],borderRadius:5,borderWidth:0}
     ]
   },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
@@ -1295,6 +1301,26 @@ function initAcum(mesData){
     datasets:[
       {label:'Meta OBZ 2026',data:mDat,backgroundColor:'rgba(0,0,0,.08)',borderRadius:4,borderWidth:0},
       {label:'Realizado',data:rDat,backgroundColor:rColors,borderRadius:4,borderWidth:0}
+    ]
+  },plugins:[_pctMetaPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:16}},
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
+    scales:{x:{grid:gn,ticks:{font:{size:9}}},y:{grid:gc,ticks:{callback:fK}}}}});
+
+  // Meta vs Realizado — consolidado (total dos parques ativos em cada mes)
+  var lblsMetaTot=[],mDatTot=[],rDatTot=[],rColorsTot=[];
+  for(var _it=0;_it<nMeses;_it++){
+    var _mLblTot=meses[_it]+(_it===nMeses-1?'*':'');
+    var _incluiBioMes = _bioAcumOn && !_bioSaiuDoGrupo(meses[_it]+'/2026');
+    lblsMetaTot.push(_mLblTot);
+    mDatTot.push(mA[_it]+mP[_it]+(_incluiBioMes?mB[_it]:0));
+    rDatTot.push(rA[_it]+rP[_it]+(_incluiBioMes?rB[_it]:0));
+    rColorsTot.push(_it===nMeses-1?'rgba(13,27,42,.5)':'rgba(13,27,42,.85)');
+  }
+  mkChart('c_meta_tot',{type:'bar',data:{
+    labels:lblsMetaTot,
+    datasets:[
+      {label:'Meta OBZ 2026',data:mDatTot,backgroundColor:'rgba(0,0,0,.08)',borderRadius:4,borderWidth:0},
+      {label:'Realizado',data:rDatTot,backgroundColor:rColorsTot,borderRadius:4,borderWidth:0}
     ]
   },plugins:[_pctMetaPlugin],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:16}},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
@@ -1797,8 +1823,6 @@ function populateSelectors(){
     if(sel2){var o2=document.createElement('option');o2.value=0;o2.textContent=D.mesAtual.label;o2.selected=true;sel2.appendChild(o2);}
     return;
   }
-  // Opção Consolidado no seletor do topo
-  if(sel){var oc=document.createElement('option');oc.value='consolidado';oc.textContent='📊 Consolidado';sel.appendChild(oc);}
   D.meses.forEach(function(m,i){
     if(sel){var o=document.createElement('option');o.value=i;o.textContent=m.label;if(i===D.mesAtualIdx)o.selected=true;sel.appendChild(o);}
     if(sel2){var o2=document.createElement('option');o2.value=i;o2.textContent=m.label;if(i===D.mesAtualIdx)o2.selected=true;sel2.appendChild(o2);}
@@ -2728,6 +2752,12 @@ function cliUpdatePeriodInfo(per){
 }
 
 // ── RANKING + DELTA ─────────────────────────────────────────────────
+function cliNomeParques(){
+  if(cliParque.length===3) return 'Todos os Parques';
+  var nomes={a:'AquaRio',b:'BioParque',p:'Paineiras'};
+  return cliParque.map(function(k){return nomes[k];}).join(' + ');
+}
+
 function cliRenderRanking(){
   var fN = function(n){return Number(Math.round(n)).toLocaleString('pt-BR');};
   var per = cliGetPeriodo();
@@ -2749,12 +2779,6 @@ function cliRenderRanking(){
     return {ag:ag, vC:vC, vP:vP, d:d, pct:pct, v25:v25, d25:d25, pct25:pct25};
   }).filter(function(x){return x.vC>0||( x.vP&&x.vP>0);})
     .sort(function(a,b){return b.vC-a.vC;});
-
-function cliNomeParques(){
-  if(cliParque.length===3) return 'Todos os Parques';
-  var nomes={a:'AquaRio',b:'BioParque',p:'Paineiras'};
-  return cliParque.map(function(k){return nomes[k];}).join(' + ');
-}
 
   var mx = ranked.length ? ranked[0].vC : 1;
   var pName = cliNomeParques();
