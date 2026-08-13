@@ -412,13 +412,14 @@ canvas{max-height:230px}
   .topbar{display:none}
   .mob-header{display:flex}
   .mob-nav2{display:flex}
-  .page{padding-bottom:16px;margin-top:0}
+  .page{padding:0 14px 16px;margin-top:0}
   .row2,.row3,.row4{grid-template-columns:1fr}
   .irow{grid-template-columns:1fr}
   canvas{max-height:200px}
-  /* Esconde elementos desktop dentro do page em mobile */
-  .page .hero,.page .total-bar,.page .pk,.page .row2,.page .row3,.page .row4,
-  .page .irow,.page .alerta{display:none}
+  /* Esconde TUDO que for filho direto de .page, exceto o bloco mobile.
+     Isso evita qualquer painel desktop (gráfico avulso, tabela, ea-wrap,
+     tc-wrap, cli-*) vazar e aparecer fora de ordem acima do resumo mobile. */
+  .page > *:not(.mob-content){display:none!important}
   /* Só mostra o conteúdo mobile */
   .mob-content{display:block!important}
 }
