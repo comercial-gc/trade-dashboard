@@ -416,6 +416,10 @@ canvas{max-height:230px}
   .row2,.row3,.row4{grid-template-columns:1fr}
   .irow{grid-template-columns:1fr}
   canvas{max-height:200px}
+  /* Evita o zoom automático do Safari/iOS ao tocar num select/input
+     (o iOS dá zoom sozinho em qualquer campo com font-size < 16px) */
+  select,input[type="text"]{font-size:16px!important}
+  .mob-nav2-sel{font-size:16px!important;padding:6px 22px 6px 10px}
   /* Esconde TUDO que for filho direto de .page, exceto o bloco mobile.
      Isso evita qualquer painel desktop (gráfico avulso, tabela, ea-wrap,
      tc-wrap, cli-*) vazar e aparecer fora de ordem acima do resumo mobile. */
@@ -427,6 +431,11 @@ canvas{max-height:230px}
   .mob-content{display:none!important}
   .mob-header,.mob-nav2{display:none!important}
 }
+/* Rede de segurança: nunca deixa a PÁGINA inteira ganhar scroll horizontal,
+   mesmo que algum componente novo escape do controle (doc "Melhorias
+   Visuais", item 4.4). Não substitui overflow-x:auto nos componentes
+   largos (tabelas, réguas) — é só a última rede de proteção. */
+  html{overflow-x:hidden;max-width:100%}
 /* esconde mob-content por padrão */
 .mob-content{display:none}
 </style>
