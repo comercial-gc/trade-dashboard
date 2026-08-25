@@ -2830,6 +2830,16 @@ function cliRenderShareMensal(){
   var idxUlt = labels.length-1;
   var deltaShare = (share26[idxUlt]!==null && share25[idxUlt]!==null) ? Math.round((share26[idxUlt]-share25[idxUlt])*10)/10 : null;
 
+  // Acumulado do período: soma de todos os meses do gráfico, não média dos %
+  var somaTrade26=0, somaPark26=0, somaTrade25=0, somaPark25=0;
+  meses.forEach(function(m){
+    somaTrade26 += totalTrade(m,26); somaPark26 += totalParque(m,26);
+    somaTrade25 += totalTrade(m,25); somaPark25 += totalParque(m,25);
+  });
+  var shareAcum26 = somaPark26>0 ? Math.round(somaTrade26/somaPark26*10000)/100 : null;
+  var shareAcum25 = somaPark25>0 ? Math.round(somaTrade25/somaPark25*10000)/100 : null;
+  var deltaAcum = (shareAcum26!==null && shareAcum25!==null) ? Math.round((shareAcum26-shareAcum25)*10)/10 : null;
+
   var kpisEl = document.getElementById('cli-share-kpis');
   if(kpisEl){
     kpisEl.innerHTML =
@@ -2844,7 +2854,10 @@ function cliRenderShareMensal(){
       +'<div class="cli-kpi-sub">de '+fN(park26arr[idxUlt])+' visitantes do parque</div></div>'
       +'<div class="cli-kpi-card"><div class="cli-kpi-label">Meses no gráfico</div>'
       +'<div class="cli-kpi-val" style="color:var(--navy)">'+labels.length+'</div>'
-      +'<div class="cli-kpi-sub">'+labels[0]+' → '+labels[idxUlt]+'</div></div>';
+      +'<div class="cli-kpi-sub">'+labels[0]+' → '+labels[idxUlt]+'</div></div>'
+      +'<div class="cli-kpi-card" style="border-color:var(--gold)"><div class="cli-kpi-label">Share Acumulado do período</div>'
+      +'<div class="cli-kpi-val" style="color:var(--gold)">'+fP(shareAcum26)+'</div>'
+      +'<div class="cli-kpi-sub">'+(deltaAcum!==null?((deltaAcum>=0?'▲ +':'▼ ')+Math.abs(deltaAcum)+'pp vs acum. 2025 ('+fP(shareAcum25)+')'):'sem comparação')+'</div></div>';
   }
 
   cliDestroyChart('cli-share-chart');
@@ -2879,6 +2892,14 @@ function cliRenderShareMensal(){
         +'<td style="text-align:right;color:var(--muted)">'+fP(share25[i])+'</td>'
         +'<td style="text-align:right"><span class="cli-pill '+dCls+'">'+dTxt+'</span></td></tr>';
     });
+    var dAcumCls = deltaAcum===null ? 'zero' : (deltaAcum>=0?'up':'dn');
+    var dAcumTxt = deltaAcum===null ? '—' : (deltaAcum>=0?'▲ +':'▼ ')+Math.abs(deltaAcum)+'pp';
+    html += '<tr style="background:var(--bio-pale);font-weight:800;border-top:2px solid var(--navy)">'
+      +'<td>ACUMULADO ('+labels[0]+' → '+labels[idxUlt]+')</td><td style="text-align:right">'+fN(somaTrade26)+'</td>'
+      +'<td style="text-align:right">'+fN(somaPark26)+'</td>'
+      +'<td style="text-align:right;color:var(--gold)">'+fP(shareAcum26)+'</td>'
+      +'<td style="text-align:right;color:var(--muted)">'+fP(shareAcum25)+'</td>'
+      +'<td style="text-align:right"><span class="cli-pill '+dAcumCls+'">'+dAcumTxt+'</span></td></tr>';
     html += '</tbody></table>';
     tblEl.innerHTML = html;
   }
