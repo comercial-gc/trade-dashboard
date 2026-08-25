@@ -122,7 +122,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 
 /* ─── CARDS PARQUE ───────────────────────── */
 .pk{background:var(--white);border-radius:13px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.pk:hover{transform:translateY(-2px)}
 .pk::after{content:'';position:absolute;top:0;left:0;width:5px;height:100%;border-radius:5px 0 0 5px}
 .pk.a::after{background:linear-gradient(180deg,var(--aqua-l),var(--aqua))}
 .pk.b::after{background:linear-gradient(180deg,var(--bio-l),var(--bio))}
@@ -172,15 +171,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 .ea-num-sub{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px}
 .ea-delta{padding:5px 10px;border-radius:7px;font-size:13px;font-weight:800;text-align:center;line-height:1.3}
 .ea-delta-sub{font-size:9.5px;font-weight:600;opacity:.85;margin-top:1px}
-.ea-delta.up{background:#E7F6EC;color:#1B873F}
-.ea-delta.down{background:#FDECEC;color:#D92D20}
+.ea-delta.up{background:var(--up-bg);color:var(--up)}
+.ea-delta.down{background:var(--dn-bg);color:var(--dn)}
 .ea-obz{padding:5px 10px;border-radius:7px;font-size:13px;font-weight:800;text-align:center;background:#FFF6E5;color:#B8860B;line-height:1.3}
 .ea-obz-lbl{font-size:8px;font-weight:700;opacity:.7;letter-spacing:.5px}
 .ea-obz-sub{font-size:9.5px;font-weight:600;opacity:.8;margin-top:1px}
 .ea-share{margin-top:7px}
 .ea-share-row{display:flex;align-items:center;gap:8px;margin-bottom:2px}
 .ea-share-lbl{font-size:9.5px;font-weight:700;color:var(--text);width:74px;flex-shrink:0}
-.ea-share-bar{flex:1;height:7px;background:#EAEEF3;border-radius:4px;overflow:hidden}
+.ea-share-bar{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
 .ea-share-fill{height:100%;border-radius:4px}
 .ea-aqua .ea-share-fill{background:var(--aqua)}
 .ea-bio .ea-share-fill{background:var(--bio)}
@@ -202,7 +201,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 .ae-hist-table td.ae-row-lbl{text-align:left;font-weight:700;font-size:10px;white-space:nowrap}
 .ae-hist-table td.ae-row-lbl.ae-lbl-bio{color:var(--bio)}
 .ae-hist-table td.ae-row-lbl.ae-lbl-aqua{color:var(--aqua)}
-.ae-hist-table tr:nth-child(even) td{background:#F7F9FB}
+.ae-hist-table tr:nth-child(even) td{background:var(--bg)}
 .ae-c26{font-weight:800;color:var(--text);font-size:11.5px;line-height:1.3}
 .ae-c26.ae-c-vazio{font-weight:400;color:var(--muted);font-size:10px}
 .ae-c25{font-weight:400;color:var(--muted);font-size:9px;line-height:1.3}
@@ -216,13 +215,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 .ae-perf-head.aqua{background:#1E6FA8}
 .ae-perf-body{padding:14px 16px}
 .ae-perf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.ae-perf-metric{background:#F7F9FB;border-radius:8px;padding:8px 10px;text-align:center}
+.ae-perf-metric{background:var(--bg);border-radius:8px;padding:8px 10px;text-align:center}
 .ae-perf-metric-t{font-size:10px;color:#667;text-transform:uppercase;font-weight:700;margin-bottom:4px}
 .ae-perf-metric-vals{display:flex;justify-content:center;gap:10px;font-size:15px;font-weight:800;color:var(--text)}
 .ae-perf-metric-yr{font-size:9px;color:#889;font-weight:600}
 .ae-perf-delta{margin-top:5px;font-size:11px;font-weight:700;padding:3px 6px;border-radius:5px;display:inline-block}
-.ae-perf-delta.up{background:#E6F4EA;color:#1E7B34}
-.ae-perf-delta.down{background:#FCE8E6;color:#C0392B}
+.ae-perf-delta.up{background:var(--up-bg);color:var(--up)}
+.ae-perf-delta.down{background:var(--dn-bg);color:var(--dn)}
 .ae-perf-foot{font-size:10.5px;color:#778;padding:8px 16px 12px;border-top:1px solid var(--border)}
 .tc-head{padding:9px 12px;font-size:12.5px;font-weight:800;color:#fff;letter-spacing:.4px;display:flex;align-items:center;gap:7px}
 .tc-pai .tc-head{background:var(--pai)}
@@ -230,9 +229,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);over
 .tc-bio .tc-head{background:var(--bio)}
 .tc-colhdr{display:grid;grid-template-columns:22px 1fr 52px 48px 56px;gap:4px;padding:5px 10px;font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);align-items:center}
 .tc-colhdr .tc-r{text-align:right}
-.tc-row{display:grid;grid-template-columns:22px 1fr 52px 48px 56px;gap:4px;padding:6px 10px;font-size:11px;align-items:center;border-bottom:1px solid #F2F5F8}
+.tc-row{display:grid;grid-template-columns:22px 1fr 52px 48px 56px;gap:4px;padding:6px 10px;font-size:11px;align-items:center;border-bottom:1px solid var(--border)}
 .tc-row:last-child{border-bottom:none}
-.tc-row:nth-child(even){background:#FAFBFC}
+.tc-row:nth-child(even){background:var(--bg)}
 .tc-rank{width:18px;height:18px;border-radius:50%;background:var(--slate);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .tc-pai .tc-rank{background:var(--pai)}
 .tc-aqua .tc-rank{background:var(--aqua)}
@@ -442,6 +441,67 @@ canvas{max-height:230px}
   .brand,.np,.weather,.mes-select,.theme-toggle-btn{flex-shrink:0}
   .page{padding:0 14px 40px}
 }
+/* ─── INTERAÇÕES (hover lift, ícones, tooltip, nav slider) ─── */
+.pk,.cc,.acum-card,.ins,.tc-col,.mob-pk,.mob-ins,.mob-acum-card,
+.mob-chart-card,.mob-cli-item,.mob-share-card,.ea-card,.ae-perf-card,
+.hist-kpi-card,.acum-tv-card,.cli-kpi-card{
+  transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease;
+}
+.pk:hover,.cc:hover,.acum-card:hover,.ins:hover,.tc-col:hover,.mob-pk:hover,
+.mob-ins:hover,.mob-acum-card:hover,.mob-chart-card:hover,.mob-cli-item:hover,
+.mob-share-card:hover,.ea-card:hover,.ae-perf-card:hover,.hist-kpi-card:hover,
+.acum-tv-card:hover,.cli-kpi-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 14px 28px rgba(13,27,42,.16);
+}
+html[data-theme="dark"] .pk:hover,html[data-theme="dark"] .cc:hover,
+html[data-theme="dark"] .acum-card:hover,html[data-theme="dark"] .ins:hover,
+html[data-theme="dark"] .tc-col:hover,html[data-theme="dark"] .mob-pk:hover,
+html[data-theme="dark"] .mob-ins:hover,html[data-theme="dark"] .mob-acum-card:hover,
+html[data-theme="dark"] .mob-chart-card:hover,html[data-theme="dark"] .mob-cli-item:hover,
+html[data-theme="dark"] .mob-share-card:hover,html[data-theme="dark"] .ea-card:hover,
+html[data-theme="dark"] .ae-perf-card:hover,html[data-theme="dark"] .hist-kpi-card:hover,
+html[data-theme="dark"] .acum-tv-card:hover,html[data-theme="dark"] .cli-kpi-card:hover{
+  box-shadow:0 14px 32px rgba(0,0,0,.6);
+}
+/* Ícones e logos reagindo ao mouse */
+.plogo,.pktbl-logo,.mob-share-chart-wrap{transition:transform .2s ease}
+.plogo:hover{transform:scale(1.25) rotate(-4deg)}
+.pktbl-logo:hover{transform:scale(1.1) rotate(-3deg)}
+.tc-rank,.mob-cli-rank{transition:transform .2s ease}
+.tc-row:hover .tc-rank{transform:scale(1.15)}
+.mob-cli-item:hover .mob-cli-rank{transform:scale(1.15)}
+.brand-dot,.mob-dot{transition:transform .3s ease}
+.brand:hover .brand-dot,.mob-title:hover .mob-dot{transform:scale(1.4)}
+/* Tooltips leves (CSS puro, via atributo data-tip) */
+[data-tip]{position:relative;cursor:help}
+[data-tip]:hover::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;
+  transform:translateX(-50%);background:var(--navy);color:#fff;font-size:10px;
+  font-weight:600;padding:6px 10px;border-radius:7px;white-space:nowrap;z-index:60;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);pointer-events:none;
+}
+[data-tip]:hover::before{
+  content:'';position:absolute;bottom:calc(100% + 2px);left:50%;
+  transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--navy);
+  z-index:60;pointer-events:none;
+}
+/* Indicador deslizante sob a aba ativa (desktop + mobile) */
+.topbar{position:relative}
+.nav-slider{position:absolute;bottom:2px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--aqua-l),var(--gold));
+  transition:left .32s cubic-bezier(.4,0,.2,1),width .32s cubic-bezier(.4,0,.2,1);
+  z-index:5;opacity:0;pointer-events:none;
+}
+.mob-nav2{position:relative}
+.mob-nav2-slider{position:absolute;bottom:1px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--aqua-l),var(--gold));
+  transition:left .32s cubic-bezier(.4,0,.2,1),width .32s cubic-bezier(.4,0,.2,1);
+  z-index:5;opacity:0;pointer-events:none;
+}
+/* Tilt 3D — só no cabeçalho principal (.hero) */
+.hero{transition:transform .12s ease-out}
+
 /* ─── RESPONSIVE BREAKPOINTS ─────────────── */
 @media(max-width:860px){
   .topbar{display:none}
@@ -495,6 +555,7 @@ canvas{max-height:230px}
 </div>
 <!-- MOBILE NAV2: abas + select de meses -->
 <div class="mob-nav2" id="mobNav2">
+  <div class="mob-nav2-slider" id="mobNav2Slider"></div>
   <button class="mob-nav2-btn on" onclick="mobNav2(this,'mar')" data-page="mar">📅 <span id="mobMesLbl">Mês</span></button>
   <button class="mob-nav2-btn" onclick="mobNav2(this,'acum')" data-page="acum">📊 Acum.</button>
   <button class="mob-nav2-btn" onclick="mobNav2(this,'hist')" data-page="hist">📈 Histórico</button>
@@ -507,6 +568,7 @@ canvas{max-height:230px}
      TOPBAR DESKTOP
      ════════════════════════════════════════ -->
 <div class="topbar">
+  <div class="nav-slider" id="navSlider"></div>
   <div class="brand">
     <div class="brand-dot"></div>
     <div>
@@ -538,22 +600,22 @@ canvas{max-height:230px}
       <p id="heroParcial">Trade · Parcial até 16/03 · 17 dias restantes</p>
     </div>
     <div class="hs">
-      <div class="hs-i">
+      <div class="hs-i" data-tip="Total de bilhetes Trade vendidos no mês, até o último dia com dado registrado">
         <div class="hs-v" id="h_real">45.355</div>
         <div class="hs-l">Realizado</div>
         <div class="hs-d up" id="h_yoy">▲ 12% vs 2025</div>
       </div>
-      <div class="hs-i">
+      <div class="hs-i" data-tip="% do Realizado sobre a meta (OBZ) do mês para o Trade">
         <div class="hs-v" id="h_pct">53%</div>
         <div class="hs-l" id="h_obzlbl">% OBZ (85.690)</div>
         <div class="hs-d" style="color:rgba(255,255,255,.4)" id="h_dias">14 dias úteis restantes</div>
       </div>
-      <div class="hs-i">
+      <div class="hs-i" data-tip="Estimativa de fechamento do mês, baseada no ritmo de vendas até agora">
         <div class="hs-v" id="h_proj">87.875</div>
         <div class="hs-l" id="h_projlbl">Projeção Mar.</div>
         <div class="hs-d up" id="h_projpct">▲ 103% do OBZ</div>
       </div>
-      <div class="hs-i">
+      <div class="hs-i" data-tip="Total Trade do mesmo mês em 2025, pra comparação">
         <div class="hs-v" id="h_ref25">40.644</div>
         <div class="hs-l" id="h_ref25lbl">Mar/2025 ref.</div>
         <div class="hs-d" style="color:rgba(255,255,255,.35)" id="h_refdiff">+4.711 bilhetes</div>
@@ -573,19 +635,19 @@ canvas{max-height:230px}
 
   <!-- TOTAIS DESKTOP -->
   <div class="total-bar">
-    <div class="tb-i"><div class="tb-l">Total Realizado</div><div class="tb-v" id="tot_real">45.355</div><div class="tb-d up" id="tot_yoy">▲ 12% vs 2025</div></div>
+    <div class="tb-i" data-tip="Soma dos 3 parques no mês"><div class="tb-l">Total Realizado</div><div class="tb-v" id="tot_real">45.355</div><div class="tb-d up" id="tot_yoy">▲ 12% vs 2025</div></div>
     <div class="tb-div"></div>
-    <div class="tb-i"><div class="tb-l">Receita Total</div><div class="tb-v" id="tot_rec" style="font-size:20px">—</div><div class="tb-d" id="tot_rec_d"></div></div>
+    <div class="tb-i" data-tip="Receita gerada pelo canal Trade nos 3 parques"><div class="tb-l">Receita Total</div><div class="tb-v" id="tot_rec" style="font-size:20px">—</div><div class="tb-d" id="tot_rec_d"></div></div>
     <div class="tb-div"></div>
-    <div class="tb-i"><div class="tb-l">OBZ Total</div><div class="tb-v" id="tot_obz">85.690</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="tot_pct">53% atingido</div></div>
+    <div class="tb-i" data-tip="Meta somada dos 3 parques pra este mês"><div class="tb-l">OBZ Total</div><div class="tb-v" id="tot_obz">85.690</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="tot_pct">53% atingido</div></div>
     <div class="tb-div"></div>
-    <div class="tb-i"><div class="tb-l">Projeção Mês</div><div class="tb-v" id="tot_proj">87.875</div><div class="tb-d up" id="tot_projpct">▲ 103% OBZ</div></div>
+    <div class="tb-i" data-tip="Estimativa de fechamento somando os 3 parques"><div class="tb-l">Projeção Mês</div><div class="tb-v" id="tot_proj">87.875</div><div class="tb-d up" id="tot_projpct">▲ 103% OBZ</div></div>
     <div class="tb-div"></div>
-    <div class="tb-i"><div class="tb-l">A captar AquaRio</div><div class="tb-v" id="aqua_saldo">1.580</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="aqua_pdia">132/dia</div></div>
+    <div class="tb-i" data-tip="Bilhetes que faltam pro AquaRio bater a meta do mês"><div class="tb-l">A captar AquaRio</div><div class="tb-v" id="aqua_saldo">1.580</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="aqua_pdia">132/dia</div></div>
     <div class="tb-div"></div>
-    <div class="tb-i"><div class="tb-l">A captar Paineiras</div><div class="tb-v" id="pai_saldo">37.396</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="pai_pdia">3.117/dia</div></div>
+    <div class="tb-i" data-tip="Bilhetes que faltam pro Paineiras bater a meta do mês"><div class="tb-l">A captar Paineiras</div><div class="tb-v" id="pai_saldo">37.396</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="pai_pdia">3.117/dia</div></div>
     <div class="tb-div"></div>
-    <div class="tb-i" id="tbBioSaldo"><div class="tb-l">A captar BioParque</div><div class="tb-v" id="bio_saldo">1.359</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="bio_pdia">76/dia</div></div>
+    <div class="tb-i" id="tbBioSaldo" data-tip="Bilhetes que faltam pro BioParque bater a meta do mês"><div class="tb-l">A captar BioParque</div><div class="tb-v" id="bio_saldo">1.359</div><div class="tb-d" style="color:rgba(255,255,255,.35)" id="bio_pdia">76/dia</div></div>
   </div>
 
 </div><!-- /cap-visitacao -->
@@ -884,7 +946,7 @@ canvas{max-height:230px}
 .cli-period-info{background:var(--aqua-pale);border:1px solid rgba(0,95,142,.2);border-radius:8px;padding:9px 14px;font-size:11px;color:var(--aqua);font-weight:600;margin-bottom:14px;}
 .cli-period-info.pai{background:var(--pai-pale);border-color:rgba(45,106,43,.2);color:var(--pai);}
 .cli-period-info.bio{background:var(--bio-pale);border-color:rgba(194,90,0,.2);color:var(--bio);}
-.cli-period-info.tot{background:#EEF3F7;border-color:rgba(13,27,42,.15);color:var(--text);}
+.cli-period-info.tot{background:var(--bg);border-color:var(--border);color:var(--text);}
 .cli-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;}
 .cli-tbl th{font-size:9.5px;font-weight:700;color:#fff;text-align:left;padding:10px 10px;background:var(--navy);text-transform:uppercase;letter-spacing:.5px;}
 .cli-tbl th:first-child{border-top-left-radius:10px;}
@@ -1129,12 +1191,25 @@ function mkChart(id,cfg){
 }
 
 // ════════════════════════════════════════
+// INDICADOR DESLIZANTE DE ABA ATIVA
+// ════════════════════════════════════════
+function _slideIndicator(sliderEl, activeBtn){
+  if(!sliderEl||!activeBtn) return;
+  var left = activeBtn.offsetLeft;
+  var width = activeBtn.offsetWidth;
+  sliderEl.style.left = left+'px';
+  sliderEl.style.width = width+'px';
+  sliderEl.style.opacity = 1;
+}
+
+// ════════════════════════════════════════
 // NAVEGAÇÃO DESKTOP
 // ════════════════════════════════════════
 function nav(btn, id) {
   document.querySelectorAll('.np').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on');
+  _slideIndicator(document.getElementById('navSlider'), btn);
   document.getElementById('pg-'+id).classList.add('on');
   curPage = id;
   // Sempre re-renderiza com mês atual ao navegar
@@ -1149,12 +1224,13 @@ function nav(btn, id) {
 function mobNav2(btn, id) {
   document.querySelectorAll('.mob-nav2-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
+  _slideIndicator(document.getElementById('mobNav2Slider'), btn);
   // Reutiliza a lógica de navegação de páginas
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   // Sincroniza botões desktop
   document.querySelectorAll('.np').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"))b.classList.add('on');
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'")){b.classList.add('on');_slideIndicator(document.getElementById('navSlider'),b);}
     else b.classList.remove('on');
   });
   curPage = id;
@@ -2566,6 +2642,30 @@ window.addEventListener('load', function(){
   }, 100);
 
   animateBars();
+
+  // Posiciona os indicadores deslizantes na aba "Mês" (ativa por padrão)
+  _slideIndicator(document.getElementById('navSlider'), document.querySelector('.np.on'));
+  _slideIndicator(document.getElementById('mobNav2Slider'), document.querySelector('.mob-nav2-btn.on'));
+  window.addEventListener('resize', function(){
+    _slideIndicator(document.getElementById('navSlider'), document.querySelector('.np.on'));
+    _slideIndicator(document.getElementById('mobNav2Slider'), document.querySelector('.mob-nav2-btn.on'));
+  });
+
+  // Tilt 3D — só no cabeçalho principal (.hero)
+  var heroEl = document.querySelector('.hero');
+  if(heroEl){
+    heroEl.addEventListener('mousemove', function(e){
+      var r = heroEl.getBoundingClientRect();
+      var px = (e.clientX - r.left)/r.width - 0.5;
+      var py = (e.clientY - r.top)/r.height - 0.5;
+      var rotY = px * 7;
+      var rotX = -py * 5;
+      heroEl.style.transform = 'perspective(800px) rotateX('+rotX+'deg) rotateY('+rotY+'deg)';
+    });
+    heroEl.addEventListener('mouseleave', function(){
+      heroEl.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
+    });
+  }
 });
 
 // ── Top Clientes JS ────────────────────────
