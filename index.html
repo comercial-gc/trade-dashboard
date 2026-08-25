@@ -1045,6 +1045,7 @@ html[data-theme="dark"] .acum-tv-card:hover,html[data-theme="dark"] .cli-kpi-car
 <div class="cli-tab-bar">
   <button class="cli-tab on" onclick="cliSetTab('ranking',this)">📊 Ranking + Delta</button>
   <button class="cli-tab"    onclick="cliSetTab('agencia',this)">📈 Por Agência</button>
+  <button class="cli-tab"    onclick="cliSetTab('share',this)">🥧 Share Mensal</button>
   <button class="cli-tab"    onclick="cliSetTab('insights',this)">💡 Insights</button>
 </div>
 
@@ -1086,6 +1087,25 @@ html[data-theme="dark"] .acum-tv-card:hover,html[data-theme="dark"] .cli-kpi-car
     <canvas id="cli-ag-delta" style="max-height:180px;"></canvas>
   </div>
   <div id="cli-ag-insights"></div>
+</div>
+
+<!-- PAINEL SHARE MENSAL -->
+<div id="cli-panel-share" style="display:none;">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+    <span style="font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Agência</span>
+    <select class="cli-select" id="cli-share-ag-sel" onchange="cliRenderShareMensal()" style="min-width:280px;"></select>
+  </div>
+  <div class="cli-kpis-ag" id="cli-share-kpis"></div>
+  <div class="cc" style="margin-bottom:12px;">
+    <div class="cc-h"><div class="cc-t">Share da agência no parque — mês a mês</div>
+      <div class="cc-s" id="cli-share-sub">% que a agência representa do total de visitantes do(s) parque(s) selecionado(s) no topo da página</div></div>
+    <canvas id="cli-share-chart" style="max-height:260px;"></canvas>
+  </div>
+  <div class="cc" style="margin-bottom:12px;overflow-x:auto;">
+    <div class="cc-h"><div class="cc-t">Detalhamento mensal</div></div>
+    <div id="cli-share-tbl"></div>
+  </div>
+  <div class="nota">ℹ️ <strong>Nota:</strong> o total do parque (denominador do share) só está disponível a partir de Jan/2026 — por isso o gráfico começa aí. Pra 2025 mostramos só o "mesmo mês do ano anterior" como comparação, não a série completa.</div>
 </div>
 
 <!-- PAINEL INSIGHTS -->
@@ -2710,6 +2730,7 @@ function cliSetTab(tab, btn){
   btn.classList.add('on');
   document.getElementById('cli-panel-ranking').style.display = tab==='ranking' ? '' : 'none';
   document.getElementById('cli-panel-agencia').style.display = tab==='agencia'  ? '' : 'none';
+  document.getElementById('cli-panel-share').style.display = tab==='share' ? '' : 'none';
   document.getElementById('cli-panel-insights').style.display = tab==='insights' ? '' : 'none';
   cliRenderAtivo();
 }
@@ -2776,7 +2797,114 @@ function cliRenderAtivo(){
   var tab = activeTab ? (activeTab.getAttribute('onclick').match(/'(\w+)'/)||[])[1]||'ranking' : 'ranking';
   if(tab==='ranking') cliRenderRanking();
   else if(tab==='insights') cliRenderInsights();
+  else if(tab==='share') { cliPopulateShareAgSel(); cliRenderShareMensal(); }
   else { cliPopulateAgSel(); cliRenderAgencia(); }
+}
+
+// ── Share Mensal: quanto a agência representa do total do parque ──────
+function cliPopulateShareAgSel(){
+  var nomes = {};
+  (D.meses||[]).forEach(function(m){
+    (m.clientes||[]).forEach(function(c){ nomes[cliNormAlias(c.n)] = true; });
+  });
+  var sorted = Object.keys(nomes).sort(function(a,b){ return a.localeCompare(b,"pt-BR",{sensitivity:"base"}); });
+  var sel = document.getElementById('cli-share-ag-sel');
+  if(!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = sorted.map(function(ag){
+    return '<option value="'+ag+'"'+(ag===cur?' selected':'')+'>'+ag+'</option>';
+  }).join('');
+  if(sorted.indexOf(cur)<0 && sorted.length) sel.value = sorted[0];
+}
+
+function cliRenderShareMensal(){
+  var fN = function(n){return Number(Math.round(n)).toLocaleString('pt-BR');};
+  var fP = function(n){return (n===null||n===undefined)?'—':n.toFixed(1).replace('.',',')+'%';};
+  var sel = document.getElementById('cli-share-ag-sel');
+  if(!sel || !sel.value) return;
+  var ag = sel.value;
+  var meses = (D.meses||[]).filter(function(m){ return m.clientes && m.clientes.length>0; });
+  if(!meses.length) return;
+
+  function valorAgencia(clientesArr){
+    var cli = (clientesArr||[]).filter(function(c){ return cliNormAlias(c.n)===ag; })[0];
+    if(!cli) return 0;
+    return (cliParque.indexOf('a')>=0?(cli.a||0):0)+(cliParque.indexOf('b')>=0?(cli.b||0):0)+(cliParque.indexOf('p')>=0?(cli.p||0):0);
+  }
+  function totalParque(m, ano){
+    var suf = ano===25 ? 'par25' : 'par26';
+    return (cliParque.indexOf('a')>=0?(m.aqua[suf]||0):0)+(cliParque.indexOf('b')>=0?(m.bio[suf]||0):0)+(cliParque.indexOf('p')>=0?(m.pai[suf]||0):0);
+  }
+
+  var labels=[], share26=[], share25=[], val26arr=[], park26arr=[];
+  meses.forEach(function(m){
+    labels.push(m.label);
+    var v26 = valorAgencia(m.clientes);
+    var pk26 = totalParque(m, 26);
+    var pk25 = totalParque(m, 25);
+    var mesShort = (m.label||'').split('/')[0];
+    var m25 = (D.meses2025||[]).filter(function(mm){ return mm.label && mm.label.indexOf(mesShort)===0; })[0];
+    var v25 = m25 ? valorAgencia(m25.clientes) : 0;
+    val26arr.push(v26); park26arr.push(pk26);
+    share26.push(pk26>0 ? Math.round(v26/pk26*10000)/100 : null);
+    share25.push(pk25>0 ? Math.round(v25/pk25*10000)/100 : null);
+  });
+
+  var idxUlt = labels.length-1;
+  var deltaShare = (share26[idxUlt]!==null && share25[idxUlt]!==null) ? Math.round((share26[idxUlt]-share25[idxUlt])*10)/10 : null;
+
+  var kpisEl = document.getElementById('cli-share-kpis');
+  if(kpisEl){
+    kpisEl.innerHTML =
+      '<div class="cli-kpi-card"><div class="cli-kpi-label">Share atual ('+labels[idxUlt]+')</div>'
+      +'<div class="cli-kpi-val" style="color:var(--aqua)">'+fP(share26[idxUlt])+'</div>'
+      +'<div class="cli-kpi-sub">do total do(s) parque(s) selecionado(s)</div></div>'
+      +'<div class="cli-kpi-card"><div class="cli-kpi-label">Mesmo mês 2025</div>'
+      +'<div class="cli-kpi-val" style="color:var(--muted)">'+fP(share25[idxUlt])+'</div>'
+      +'<div class="cli-kpi-sub">'+(deltaShare!==null?((deltaShare>=0?'▲ +':'▼ ')+Math.abs(deltaShare)+'pp vs 2025'):'sem comparação')+'</div></div>'
+      +'<div class="cli-kpi-card"><div class="cli-kpi-label">Bilhetes ('+labels[idxUlt]+')</div>'
+      +'<div class="cli-kpi-val" style="color:var(--navy)">'+fN(val26arr[idxUlt])+'</div>'
+      +'<div class="cli-kpi-sub">de '+fN(park26arr[idxUlt])+' visitantes do parque</div></div>'
+      +'<div class="cli-kpi-card"><div class="cli-kpi-label">Meses no gráfico</div>'
+      +'<div class="cli-kpi-val" style="color:var(--navy)">'+labels.length+'</div>'
+      +'<div class="cli-kpi-sub">'+labels[0]+' → '+labels[idxUlt]+'</div></div>';
+  }
+
+  cliDestroyChart('cli-share-chart');
+  var chartEl = document.getElementById('cli-share-chart');
+  if(chartEl){
+    cliCharts['cli-share-chart'] = new Chart(chartEl, {
+      type:'line',
+      data:{ labels: labels, datasets:[
+        {label:'Share 2026', data:share26, borderColor:'rgba(0,95,142,1)', backgroundColor:'rgba(0,95,142,.1)', borderWidth:2.5, pointRadius:4, pointBackgroundColor:'rgba(0,95,142,1)', spanGaps:true, tension:.3, fill:true},
+        {label:'Mesmo mês 2025', data:share25, borderColor:'rgba(150,150,150,.8)', backgroundColor:'transparent', borderWidth:1.5, borderDash:[5,3], pointRadius:3, spanGaps:true, tension:.3}
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+        plugins:{ legend:{position:'top',labels:{usePointStyle:true,padding:10,font:{size:10}}},
+          tooltip:{callbacks:{label:function(ctx){ return ctx.dataset.label+': '+(ctx.parsed.y!==null?ctx.parsed.y+'%':'sem dado'); }}} },
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:function(v){return v+'%';}}} }
+      }
+    });
+  }
+
+  var tblEl = document.getElementById('cli-share-tbl');
+  if(tblEl){
+    var html = '<table class="cli-tbl"><thead><tr><th>Mês</th><th style="text-align:right">Bilhetes 26</th>'
+      +'<th style="text-align:right">Parque 26</th><th style="text-align:right">Share 26</th>'
+      +'<th style="text-align:right">Share 25</th><th style="text-align:right">Δ pp</th></tr></thead><tbody>';
+    labels.forEach(function(lbl,i){
+      var d = (share26[i]!==null && share25[i]!==null) ? Math.round((share26[i]-share25[i])*10)/10 : null;
+      var dCls = d===null ? 'zero' : (d>=0?'up':'dn');
+      var dTxt = d===null ? '—' : (d>=0?'▲ +':'▼ ')+Math.abs(d)+'pp';
+      html += '<tr><td>'+lbl+'</td><td style="text-align:right">'+fN(val26arr[i])+'</td>'
+        +'<td style="text-align:right">'+fN(park26arr[i])+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+fP(share26[i])+'</td>'
+        +'<td style="text-align:right;color:var(--muted)">'+fP(share25[i])+'</td>'
+        +'<td style="text-align:right"><span class="cli-pill '+dCls+'">'+dTxt+'</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    tblEl.innerHTML = html;
+  }
 }
 
 // ── Helpers de dados ─────────────────────────────────────────────────
