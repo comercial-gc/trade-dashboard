@@ -1012,7 +1012,10 @@ html[data-theme="dark"] .acum-tv-card:hover,html[data-theme="dark"] .cli-kpi-car
   <div class="cli-controls">
     <div style="display:flex;flex-direction:column;gap:3px;">
       <span style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Exportar</span>
-      <button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);white-space:nowrap;" onclick="exportarTopClientesXLSX()">⬇️ Todas as agências (Excel)</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);white-space:nowrap;" onclick="exportarTopClientesXLSX(false)">⬇️ Todas as agências (Excel)</button>
+        <button class="cli-seg-btn" style="background:var(--up);color:#fff;border-color:var(--up);white-space:nowrap;" onclick="exportarTopClientesXLSX(true)" title="Agências com pelo menos 1 venda nos últimos 12 meses com dado">⬇️ Agências ativas (Excel)</button>
+      </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:3px;">
       <span style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Parque (clique pra ligar/desligar)</span>
@@ -2936,13 +2939,15 @@ function cliGetDados(){
   return {dados:dados, mesLabels:mesLabels, todosMeses:todosMeses};
 }
 
-// ── Exportar XLSX: todas as agências, mês a mês, Jan/2025 até o período atual ──
+// ── Exportar XLSX: agências mês a mês, Jan/2025 até o período atual ──
 // 3 linhas por agência (2025 / 2026 / Variação%), nome da agência mesclado
 // nas 3 linhas via ws["!merges"] — CSV não suporta célula mesclada, por isso
 // esse export gera um .xlsx de verdade (biblioteca SheetJS, roda no navegador).
 // Sempre soma os 3 parques juntos (independe do filtro ligado/desligado na tela),
 // porque é uma exportação de "tudo que temos", não do recorte atual da tela.
-function exportarTopClientesXLSX(){
+// apenasAtivas=true: só agências com pelo menos 1 venda (qualquer parque) nos
+// últimos 12 meses com dado disponível.
+function exportarTopClientesXLSX(apenasAtivas){
   if(!window.XLSX){ alert('Biblioteca de exportação ainda não carregou — tenta de novo em alguns segundos.'); return; }
   var MESES_ORDEM = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   var todosMeses = (D.meses2025||[]).concat(D.meses||[]);
@@ -2963,7 +2968,21 @@ function exportarTopClientesXLSX(){
   });
 
   var agencias = Object.keys(dados).sort(function(a,b){ return (totalGeral[b]||0)-(totalGeral[a]||0); });
-  if(!agencias.length){ alert('Sem dados de agências carregados pra exportar ainda.'); return; }
+
+  if(apenasAtivas){
+    // Últimos 12 meses com dado disponível (janela móvel, não ano-calendário fixo)
+    var ultimos12 = todosMeses.filter(function(m){ return m.clientes && m.clientes.length>0; }).slice(-12);
+    var ativosSet = {};
+    ultimos12.forEach(function(m){
+      (m.clientes||[]).forEach(function(c){
+        var val = (c.a||0)+(c.b||0)+(c.p||0);
+        if(val>0) ativosSet[cliNormAlias(c.n)] = true;
+      });
+    });
+    agencias = agencias.filter(function(nome){ return ativosSet[nome]; });
+  }
+
+  if(!agencias.length){ alert('Sem dados de agências pra exportar'+(apenasAtivas?' (nenhuma agência ativa nos últimos 12 meses)':'')+'.'); return; }
 
   var mesesLabel = MESES_ORDEM.map(function(mc){ return mc.charAt(0)+mc.slice(1).toLowerCase(); });
   var aoa = [['Agência','Ano'].concat(mesesLabel)];
@@ -2996,12 +3015,13 @@ function exportarTopClientesXLSX(){
   ws['!cols'] = [{wch:36},{wch:11}].concat(MESES_ORDEM.map(function(){ return {wch:9}; }));
 
   var wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Top Clientes');
+  XLSX.utils.book_append_sheet(wb, ws, apenasAtivas ? 'Agências Ativas' : 'Top Clientes');
 
   var hoje = new Date();
   var pad = function(n){ return (n<10?'0':'')+n; };
   var dataStr = hoje.getFullYear()+'-'+pad(hoje.getMonth()+1)+'-'+pad(hoje.getDate());
-  XLSX.writeFile(wb, 'top_clientes_trade_'+dataStr+'.xlsx');
+  var nomeArq = apenasAtivas ? 'agencias_ativas_trade_' : 'top_clientes_trade_';
+  XLSX.writeFile(wb, nomeArq+dataStr+'.xlsx');
 }
 
 function cliGetPeriodo(){
