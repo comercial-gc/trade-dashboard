@@ -2501,9 +2501,9 @@ function buildMobContent(pageId, mesData){
           }).join('');
           return '<div style="margin-bottom:14px"><div class="mob-chart-title" style="color:'+cor+'">'+nome+'</div>'+itens+'</div>';
         }
-        var out = bloco(LOGO_AQUA+' AquaRio', 'var(--aqua)', tc.aqua)
-                + (_bioAtivoMob ? bloco(LOGO_BIO+' BioParque', 'var(--bio)', tc.bio) : '')
-                + bloco(LOGO_PAI+' Paineiras', 'var(--pai)', tc.pai);
+        var out = bloco(_LOGO_AQUA+' AquaRio', 'var(--aqua)', tc.aqua)
+                + (_bioAtivoMob ? bloco(_LOGO_BIO+' BioParque', 'var(--bio)', tc.bio) : '')
+                + bloco(_LOGO_PAI+' Paineiras', 'var(--pai)', tc.pai);
         if(!out) return '';
         return '<div class="mob-chart-title" style="margin-top:18px;font-size:16px">🏆 Top Clientes do mês</div>'+out;
       })()}
