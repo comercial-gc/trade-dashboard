@@ -277,6 +277,7 @@ canvas{max-height:230px}
 .se-th-label,.se-td-label{text-align:left;position:sticky;left:0;background:var(--white);min-width:120px;font-weight:700}
 .se-regua thead .se-th-label{background:var(--bg)}
 .se-row-park td{border-top:2px solid var(--border);font-weight:700;padding-top:8px}
+.se-row-2025 td{font-weight:400;color:var(--text)}
 .se-row-delta td{color:var(--muted);font-size:10px;font-style:italic}
 .se-row-delta .up{color:var(--up)}
 .se-row-delta .down{color:var(--dn)}
@@ -2016,13 +2017,13 @@ function renderShareEvoRegua(bioAtivo){
   var headerCells = '<th class="se-th-label">Parque \u00b7 Share Trade (%) \u00b7 Ano</th>' + MESES_ABREV_PT_SHARE.map(function(m){return '<th>'+m+'</th>';}).join('');
   var bodyRows = parques.map(function(p){
     var map = _buildShareMesMap(D.share[p.key]);
-    var row25 = '<tr class="se-row-park"><td class="se-td-label" style="color:'+p.cor+'">'+p.nome+' \u00b7 Share Trade \u00b7 2025</td>'
-      + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtV(map[m].y25)+'</td>';}).join('') + '</tr>';
-    var row26 = '<tr><td class="se-td-label">Share Trade \u00b7 2026</td>'
+    var row26 = '<tr class="se-row-park"><td class="se-td-label" style="color:'+p.cor+'">'+p.nome+' \u00b7 Share Trade \u00b7 2026</td>'
       + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtV(map[m].y26)+'</td>';}).join('') + '</tr>';
+    var row25 = '<tr class="se-row-2025"><td class="se-td-label">Share Trade \u00b7 2025</td>'
+      + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtV(map[m].y25)+'</td>';}).join('') + '</tr>';
     var rowD = '<tr class="se-row-delta"><td class="se-td-label">Delta (p.p.)</td>'
       + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtDelta(map[m].y25,map[m].y26)+'</td>';}).join('') + '</tr>';
-    return row25+row26+rowD;
+    return row26+row25+rowD;
   }).join('');
   wrap.innerHTML = '<table class="se-regua"><thead><tr>'+headerCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
 }
@@ -2301,7 +2302,7 @@ function initShare(mesData){
     labels:_mesesShCut,
     datasets:_shareEvoDatasets
   },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:34}},
-    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:20,font:{size:40},boxWidth:18,boxHeight:18}}},
     scales:{x:{grid:gn},y:{suggestedMax:_shareEvoMax(),grid:gc,ticks:{callback:function(v){return v+"%";},font:{size:9}},title:{display:false}}}}});
 
   renderShareEvoRegua(_bioAtivoShare);
