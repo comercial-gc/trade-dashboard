@@ -2276,11 +2276,13 @@ function initShare(mesData){
   var sbEl=document.getElementById('shareBadge');if(sbEl)sbEl.textContent=mesLbl;
 
   // Rótulos dos pontos ("spots") do gráfico -- não é a legenda de topo, é o número que
-  // aparece do lado de cada ponto da linha. Fonte bem maior (24/09/2026, pedido do Paulo,
-  // ~3.5x o tamanho anterior de 7.5px) e reposicionado: 2026 sempre acima do próprio ponto,
-  // 2025 sempre abaixo do próprio ponto, com uma folga extra quando os dois pontos do mês
-  // ficam muito perto um do outro pra não sobrepor.
-  var LBL_FONT_SHARE = 26;
+  // aparece do lado de cada ponto da linha. Reposicionado (24/09/2026, pedido do Paulo):
+  // 2026 sempre acima do próprio ponto, 2025 sempre abaixo do próprio ponto, com uma folga
+  // extra quando os dois pontos do mês ficam muito perto um do outro pra não sobrepor.
+  // Fonte ajustada pra 10px (25/09/2026 -- 26px lotava o gráfico com 4-6 séries × 12 meses,
+  // texto cortando na borda e sobrepondo as próprias linhas; 10px é o maior tamanho que
+  // ainda cabe sem colidir nesse espaço).
+  var LBL_FONT_SHARE = 10;
   var _lineValPlugin3={id:'lineValLabel3',afterDatasetsDraw:function(chart){
     var ctx=chart.ctx;
     var porX={};
@@ -2295,7 +2297,7 @@ function initShare(mesData){
       var grupo=porX[key];
       var ys=grupo.map(function(it){return it.pt.y;});
       var span=ys.length>1?Math.max.apply(null,ys)-Math.min.apply(null,ys):999;
-      var folga=Math.max(10,(LBL_FONT_SHARE+8-span)/2+10);
+      var folga=Math.max(6,(LBL_FONT_SHARE+6-span)/2+6);
       grupo.forEach(function(item){
         var acima = item.ds.anoShare!==2025;
         ctx.save();
@@ -2326,7 +2328,7 @@ function initShare(mesData){
   mkChart('c_share_evo',{type:'line',data:{
     labels:MESES_ABREV_PT_SHARE,
     datasets:_shareEvoDatasets
-  },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:40,bottom:40,left:20,right:20}},
+  },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:24,bottom:24,left:16,right:16}},
     plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
     scales:{x:{grid:gn},y:{suggestedMax:Math.ceil((_shareMax*1.3)/10)*10,grid:gc,ticks:{display:false},title:{display:false}}}}});
 
