@@ -1001,7 +1001,7 @@ html[data-theme="dark"] .acum-tv-card:hover,html[data-theme="dark"] .cli-kpi-car
   </div>
 </div><!-- /cap-share -->
 
-  <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade</div><div class="cc-s">% do canal trade no total · dados disponíveis a partir de Jul/25</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas>
+  <div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução do Share Trade</div><div class="cc-s">% do canal trade no total · 2025 (tom claro) vs 2026 (cor cheia), Jan a Dez</div></div><canvas id="c_share_evo" style="max-height:230px"></canvas>
     <div class="se-regua-wrap" id="seReguaWrap"></div>
   </div>
 
@@ -1262,6 +1262,29 @@ function _shareNormLabel(lbl){
 function _shareCutIndex(mesLabel){
   var idx = mesesShDyn.indexOf(_shareNormLabel(mesLabel));
   return idx>=0 ? idx : (mesesShDyn.length-1);
+}
+// Config compartilhada de cor/nome por parque do Share Trade (24/09/2026, pedido do
+// Paulo): usada tanto na régua quanto no gráfico "Evolução do Share Trade".
+var SHARE_PARK_CFG = {
+  aqua:{nome:'AquaRio',   cor:'rgba(0,95,142,1)',  corClara:'rgba(0,95,142,.45)'},
+  pai: {nome:'Paineiras', cor:'rgba(45,106,43,1)', corClara:'rgba(45,106,43,.45)'},
+  bio: {nome:'BioParque', cor:'rgba(194,90,0,1)',  corClara:'rgba(194,90,0,.45)'}
+};
+// D.share.<parque> hoje guarda [Jul25..Dez25 fixos, depois 2026 mês a mês vindo do hist];
+// D.share.<parque>25 já guarda Jan25..mês-atual/25 dinâmico (vem do próprio hist, mas
+// nunca tinha sido usado na tela). Junta os dois pra ter o ano cheio (Jan-Dez) de 2025 e
+// de 2026 por mês calendário (24/09/2026, pedido do Paulo -- antes Jan-Jun/25 nunca
+// aparecia em lugar nenhum, nem no gráfico nem na régua).
+var SHARE_MESES_FIXOS_25 = ['Jul','Ago','Set','Out','Nov','Dez'];
+function _shareFullAno(parkKey){
+  var serieCompleta = D.share[parkKey] || [];
+  var din25 = D.share[parkKey+'25'] || [];
+  var y25 = [null,null,null,null,null,null,null,null,null,null,null,null];
+  var y26 = [null,null,null,null,null,null,null,null,null,null,null,null];
+  SHARE_MESES_FIXOS_25.forEach(function(mes,i){ y25[6+i] = serieCompleta[i]; });
+  din25.forEach(function(v,i){ if(i<12) y25[i] = v; });
+  serieCompleta.slice(6).forEach(function(v,i){ if(i<12) y26[i] = v; });
+  return {y25:y25, y26:y26};
 }
 var gc = {display:true,color:'rgba(0,0,0,.04)'};
 var gn = {display:false};
@@ -1980,32 +2003,16 @@ function donut(id,val,cor){
   chartReg[id]=ch;
 }
 
-// Régua "Evolução do Share Trade" (17/09/2026, pedido do Paulo): meses em coluna, 2025/2026
-// em linhas separadas + delta em p.p., logo abaixo do gráfico de linha. Reaproveita D.share
-// (mesmo dado do gráfico) e mesesShDyn (rótulos "Mmm/aa") pra montar um mapa mês->{y25,y26}.
+// Régua "Evolução do Share Trade" (17/09/2026, pedido do Paulo; 24/09/2026: passou a usar
+// _shareFullAno() em vez do mesesShDyn/D.share cru, pra mostrar Jan-Dez inteiro em vez de
+// só Jul-Dez/25 -- ver comentário de _shareFullAno acima): meses em coluna, 2025/2026 em
+// linhas separadas + delta em p.p., logo abaixo do gráfico de linha.
 var MESES_ABREV_PT_SHARE = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-function _buildShareMesMap(arr){
-  var map = {};
-  MESES_ABREV_PT_SHARE.forEach(function(mes){ map[mes] = {y25:null, y26:null}; });
-  (mesesShDyn||[]).forEach(function(lbl, i){
-    var partes = lbl.split('/');
-    var mes = partes[0], ano = partes[1];
-    if(!map[mes]) return;
-    var v = arr ? arr[i] : null;
-    if(v===null || v===undefined) return;
-    if(ano==='25') map[mes].y25 = v;
-    else if(ano==='26') map[mes].y26 = v;
-  });
-  return map;
-}
 function renderShareEvoRegua(bioAtivo){
   var wrap = document.getElementById('seReguaWrap');
   if(!wrap) return;
-  var parques = [
-    {key:'aqua', nome:'AquaRio', cor:'rgba(0,95,142,1)'},
-    {key:'pai', nome:'Paineiras', cor:'rgba(45,106,43,1)'}
-  ];
-  if(bioAtivo) parques.push({key:'bio', nome:'BioParque', cor:'rgba(194,90,0,1)'});
+  var chaves = ['aqua', 'pai'];
+  if(bioAtivo) chaves.push('bio');
   var fmtV = function(v){ return (v===null||v===undefined) ? '\u2014' : v.toFixed(1).replace('.',',')+'%'; };
   var fmtDelta = function(v25,v26){
     if(v25===null||v25===undefined||v26===null||v26===undefined) return '<span>\u2014</span>';
@@ -2015,14 +2022,15 @@ function renderShareEvoRegua(bioAtivo){
     return '<span class="'+cls+'">'+seta+' '+Math.abs(d).toFixed(1).replace('.',',')+'p.p.</span>';
   };
   var headerCells = '<th class="se-th-label">Parque \u00b7 Share Trade (%) \u00b7 Ano</th>' + MESES_ABREV_PT_SHARE.map(function(m){return '<th>'+m+'</th>';}).join('');
-  var bodyRows = parques.map(function(p){
-    var map = _buildShareMesMap(D.share[p.key]);
-    var row26 = '<tr class="se-row-park"><td class="se-td-label" style="color:'+p.cor+'">'+p.nome+' \u00b7 Share Trade \u00b7 2026</td>'
-      + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtV(map[m].y26)+'</td>';}).join('') + '</tr>';
+  var bodyRows = chaves.map(function(key){
+    var cfg = SHARE_PARK_CFG[key];
+    var ano = _shareFullAno(key);
+    var row26 = '<tr class="se-row-park"><td class="se-td-label" style="color:'+cfg.cor+'">'+cfg.nome+' \u00b7 Share Trade \u00b7 2026</td>'
+      + ano.y26.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '</tr>';
     var row25 = '<tr class="se-row-2025"><td class="se-td-label">Share Trade \u00b7 2025</td>'
-      + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtV(map[m].y25)+'</td>';}).join('') + '</tr>';
+      + ano.y25.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '</tr>';
     var rowD = '<tr class="se-row-delta"><td class="se-td-label">Delta (p.p.)</td>'
-      + MESES_ABREV_PT_SHARE.map(function(m){return '<td>'+fmtDelta(map[m].y25,map[m].y26)+'</td>';}).join('') + '</tr>';
+      + ano.y26.map(function(v,i){return '<td>'+fmtDelta(ano.y25[i],v)+'</td>';}).join('') + '</tr>';
     return row26+row25+rowD;
   }).join('');
   wrap.innerHTML = '<table class="se-regua"><thead><tr>'+headerCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
@@ -2267,43 +2275,60 @@ function initShare(mesData){
   document.querySelectorAll('.donut-sub').forEach(function(el){el.textContent='share trade '+mesLbl;});
   var sbEl=document.getElementById('shareBadge');if(sbEl)sbEl.textContent=mesLbl;
 
+  // Rótulos dos pontos ("spots") do gráfico -- não é a legenda de topo, é o número que
+  // aparece do lado de cada ponto da linha. Fonte bem maior (24/09/2026, pedido do Paulo,
+  // ~3.5x o tamanho anterior de 7.5px) e reposicionado: 2026 sempre acima do próprio ponto,
+  // 2025 sempre abaixo do próprio ponto, com uma folga extra quando os dois pontos do mês
+  // ficam muito perto um do outro pra não sobrepor.
+  var LBL_FONT_SHARE = 26;
   var _lineValPlugin3={id:'lineValLabel3',afterDatasetsDraw:function(chart){
     var ctx=chart.ctx;
+    var porX={};
     chart.data.datasets.forEach(function(ds,di){
       var meta=chart.getDatasetMeta(di); if(meta.hidden) return;
       meta.data.forEach(function(pt,i){
         var v=ds.data[i]; if(v===null||v===undefined) return;
+        (porX[pt.x]=porX[pt.x]||[]).push({ds:ds,pt:pt,v:v});
+      });
+    });
+    Object.keys(porX).forEach(function(key){
+      var grupo=porX[key];
+      var ys=grupo.map(function(it){return it.pt.y;});
+      var span=ys.length>1?Math.max.apply(null,ys)-Math.min.apply(null,ys):999;
+      var folga=Math.max(10,(LBL_FONT_SHARE+8-span)/2+10);
+      grupo.forEach(function(item){
+        var acima = item.ds.anoShare!==2025;
         ctx.save();
-        ctx.fillStyle=ds.borderColor;
-        ctx.font='bold 7.5px Outfit,Arial,sans-serif';
+        ctx.fillStyle=item.ds.borderColor;
+        ctx.font='bold '+LBL_FONT_SHARE+'px Outfit,Arial,sans-serif';
         ctx.textAlign='center';
-        ctx.fillText(v.toFixed(1).replace('.',',')+'%', pt.x, pt.y-7-(di*10));
+        ctx.textBaseline=acima?'bottom':'top';
+        ctx.fillText(item.v.toFixed(1).replace('.',',')+'%', item.pt.x, acima?item.pt.y-folga:item.pt.y+folga);
         ctx.restore();
       });
     });
   }};
-  // Corta o gráfico/régua no mês selecionado no cabeçalho (17/09/2026, pedido do Paulo --
-  // antes o gráfico sempre ia até o último mês com dado, ignorando o mês escolhido no
-  // seletor; selecionar Ago/2026 agora faz Ago/2026 ser o ponto mais recente do gráfico).
+  // Corta a linha de 2026 no mês selecionado no cabeçalho (17/09/2026, pedido do Paulo --
+  // 2025 é histórico fechado, sempre mostra o ano inteiro; adaptado em 24/09/2026 pro eixo
+  // virar Jan-Dez fixo com 2 linhas por parque em vez de uma linha crescendo mês a mês).
   var _shareCutIdx = _shareCutIndex(_mesLabelShare);
-  var _mesesShCut = mesesShDyn.slice(0, _shareCutIdx+1);
-  var _cutArr = function(arr){ return (arr||[]).slice(0, _shareCutIdx+1); };
-  var _shareEvoMax=function(){
-    var todos=_cutArr(D.share.aqua).concat(_cutArr(D.share.bio)).concat(_cutArr(D.share.pai)).filter(function(v){return v!==null&&v!==undefined;});
-    var mx=todos.length?Math.max.apply(null,todos):60;
-    return Math.ceil((mx*1.3)/10)*10;
-  };
-  var _shareEvoDatasets=[
-    {label:'AquaRio %',data:_cutArr(D.share.aqua),borderColor:'rgba(0,95,142,1)',backgroundColor:'rgba(0,95,142,.07)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'rgba(0,95,142,1)',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true},
-    {label:'Paineiras %',data:_cutArr(D.share.pai),borderColor:'rgba(45,106,43,1)',backgroundColor:'rgba(45,106,43,.05)',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'rgba(45,106,43,1)',pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,fill:true}
-  ];
-  if(_bioAtivoShare) _shareEvoDatasets.splice(1,0,{label:'BioParque %',data:_cutArr(D.share.bio),borderColor:'rgba(194,90,0,1)',backgroundColor:'transparent',borderWidth:2,borderDash:[4,3],pointRadius:4,pointBackgroundColor:'rgba(194,90,0,1)',tension:.3});
+  var _shareCutCalIdx = Math.max(0, _shareCutIdx-6);
+  var _shareEvoDatasets=[];
+  var _shareMax=0;
+  ['aqua','pai'].concat(_bioAtivoShare?['bio']:[]).forEach(function(key){
+    var cfg=SHARE_PARK_CFG[key];
+    var ano=_shareFullAno(key);
+    var y26=ano.y26.map(function(v,i){return i<=_shareCutCalIdx?v:null;});
+    ano.y25.concat(y26).forEach(function(v){ if(typeof v==='number' && v>_shareMax) _shareMax=v; });
+    _shareEvoDatasets.push({label:cfg.nome+' 2025',data:ano.y25,anoShare:2025,borderColor:cfg.corClara,backgroundColor:'transparent',borderWidth:2,borderDash:[5,3],pointRadius:4,pointBackgroundColor:cfg.corClara,tension:.3,spanGaps:true});
+    _shareEvoDatasets.push({label:cfg.nome+' 2026',data:y26,anoShare:2026,borderColor:cfg.cor,backgroundColor:'transparent',borderWidth:2.5,pointRadius:5,pointBackgroundColor:cfg.cor,pointBorderColor:'#fff',pointBorderWidth:2,tension:.3,spanGaps:true});
+  });
   mkChart('c_share_evo',{type:'line',data:{
-    labels:_mesesShCut,
+    labels:MESES_ABREV_PT_SHARE,
     datasets:_shareEvoDatasets
-  },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:34}},
-    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:20,font:{size:40},boxWidth:18,boxHeight:18}}},
-    scales:{x:{grid:gn},y:{suggestedMax:_shareEvoMax(),grid:gc,ticks:{callback:function(v){return v+"%";},font:{size:9}},title:{display:false}}}}});
+  },plugins:[_lineValPlugin3],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},layout:{padding:{top:40,bottom:40,left:20,right:20}},
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}}},
+    scales:{x:{grid:gn},y:{suggestedMax:Math.ceil((_shareMax*1.3)/10)*10,grid:gc,ticks:{display:false},title:{display:false}}}}});
 
   renderShareEvoRegua(_bioAtivoShare);
 
