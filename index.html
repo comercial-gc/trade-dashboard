@@ -281,6 +281,10 @@ canvas{max-height:230px}
 .se-row-delta td{color:var(--muted);font-size:10px;font-style:italic}
 .se-row-delta .up{color:var(--up)}
 .se-row-delta .down{color:var(--dn)}
+/* Coluna Acumulado (30/09/2026, pedido do Paulo) */
+.se-regua .se-acum{border-left:2px solid var(--border);font-weight:700;background:var(--bg)}
+.se-row-2025 .se-acum{font-weight:600}
+.se-regua-nota{font-size:10px;color:var(--muted);font-style:italic;margin-top:6px}
 
 /* ─── PREVISÃO ESTENDIDA (17/09/2026) ──────── */
 .pv-weather-body{margin-top:10px}
@@ -2008,6 +2012,14 @@ function donut(id,val,cor){
 // só Jul-Dez/25 -- ver comentário de _shareFullAno acima): meses em coluna, 2025/2026 em
 // linhas separadas + delta em p.p., logo abaixo do gráfico de linha.
 var MESES_ABREV_PT_SHARE = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// Acumulado do ano (30/09/2026, pedido do Paulo): soma do trade / soma da visitação dos
+// meses de D.meses (linha Parcial de cada aba). No mês aberto o 2025 já vem cortado no
+// mesmo dia do 2026 preenchido, então o acumulado compara período igual.
+function _shareAcum(parkKey){
+  var t26=0,p26=0,t25=0,p25=0;
+  (D.meses||[]).forEach(function(m){ var x=m[parkKey]; if(!x) return; t26+=x.real26||0; p26+=x.par26||0; t25+=x.real25||0; p25+=x.par25||0; });
+  return {v26: p26>0 ? t26/p26*100 : null, v25: p25>0 ? t25/p25*100 : null};
+}
 function renderShareEvoRegua(bioAtivo){
   var wrap = document.getElementById('seReguaWrap');
   if(!wrap) return;
@@ -2021,19 +2033,22 @@ function renderShareEvoRegua(bioAtivo){
     var seta = d>=0?'\u25B2':'\u25BC';
     return '<span class="'+cls+'">'+seta+' '+Math.abs(d).toFixed(1).replace('.',',')+'p.p.</span>';
   };
-  var headerCells = '<th class="se-th-label">Parque \u00b7 Share Trade (%) \u00b7 Ano</th>' + MESES_ABREV_PT_SHARE.map(function(m){return '<th>'+m+'</th>';}).join('');
+  var headerCells = '<th class="se-th-label">Parque \u00b7 Share Trade (%) \u00b7 Ano</th>' + MESES_ABREV_PT_SHARE.map(function(m){return '<th>'+m+'</th>';}).join('') + '<th class="se-acum">Acumulado</th>';
   var bodyRows = chaves.map(function(key){
     var cfg = SHARE_PARK_CFG[key];
     var ano = _shareFullAno(key);
+    var ac = _shareAcum(key);
     var row26 = '<tr class="se-row-park"><td class="se-td-label" style="color:'+cfg.cor+'">'+cfg.nome+' \u00b7 Share Trade \u00b7 2026</td>'
-      + ano.y26.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '</tr>';
+      + ano.y26.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '<td class="se-acum">'+fmtV(ac.v26)+'</td></tr>';
     var row25 = '<tr class="se-row-2025"><td class="se-td-label">Share Trade \u00b7 2025</td>'
-      + ano.y25.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '</tr>';
+      + ano.y25.map(function(v){return '<td>'+fmtV(v)+'</td>';}).join('') + '<td class="se-acum">'+fmtV(ac.v25)+'</td></tr>';
     var rowD = '<tr class="se-row-delta"><td class="se-td-label">Delta (p.p.)</td>'
-      + ano.y26.map(function(v,i){return '<td>'+fmtDelta(ano.y25[i],v)+'</td>';}).join('') + '</tr>';
+      + ano.y26.map(function(v,i){return '<td>'+fmtDelta(ano.y25[i],v)+'</td>';}).join('') + '<td class="se-acum">'+fmtDelta(ac.v25,ac.v26)+'</td></tr>';
     return row26+row25+rowD;
   }).join('');
-  wrap.innerHTML = '<table class="se-regua"><thead><tr>'+headerCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table>';
+  var ult = (D.mesAtual && D.mesAtual.diaAtual) ? ('0'+D.mesAtual.diaAtual).slice(-2)+'/'+('0'+((D.mesAtualIdx||0)+1)).slice(-2) : '';
+  var nota = '<div class="se-regua-nota">Acumulado = soma do trade \u00f7 soma da visita\u00e7\u00e3o de 01/01 at\u00e9 '+ult+', com 2025 no mesmo per\u00edodo (01/01 a '+ult+'/2025).</div>';
+  wrap.innerHTML = '<table class="se-regua"><thead><tr>'+headerCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table>'+nota;
 }
 
 // ── PREVISÃO ESTENDIDA (17/09/2026, pedido do Paulo) ──────────────
