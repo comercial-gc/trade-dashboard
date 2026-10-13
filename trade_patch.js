@@ -33,7 +33,16 @@
     'RIO ALTERNATIVE TOUR': 'RIO ALTERNATIVE TOUR VIAGENS E TURISMO',
     'RIO BY BUZIOS': 'RIO BY BUZIOS TURISMO',
     'M G DE LIMA TURISMO': 'M G DE LIMA TURISMO E LOCADORA',
-    'GRAMADO PROMOCAO DE VENDAS EM RECUPERACAO J': 'GRAMADO PROMOCAO DE VENDAS'
+    'GRAMADO PROMOCAO DE VENDAS EM RECUPERACAO J': 'GRAMADO PROMOCAO DE VENDAS',
+    // 13/10/2026, aprovados pelo Paulo no mapa agencias_similares.xlsx
+    'MARINHO': 'MARINHO TURISMO BUZIOS',
+    'INTERTOURING AG DE VIAG E TUR': 'INTERTOURING AGENCIA DE VIAGEM E TURISMO',
+    '3B TOUR AND TRAVEL': '3B TOUR',
+    'HEADOUT': 'HEADOUT EXPERIENCES',
+    'VOYAGEZRIO': 'AGENCIA DE TURISMO VOYAGEZ RIO',
+    'RIO RADICAL TURISMO DE AVENTURA': 'RIO RADICAL ECOTURISMO'
+    // NÃO juntar (Paulo, 13/10): RIO CARIOCA TOUR x CARIOCA TOUR; TOUR RJ x RJ TOUR; DISCOVERY RIO
+    // TOUR / Rio Tour / GUANABARA RIO TOUR / RIO TOUR VIP / BY RIO TOUR TURISMO (todas separadas)
   };
   var aliasOriginal = cliNormAlias;
   function grupo(n) {
@@ -44,6 +53,28 @@
     if (k.replace(/[^A-Z]/g, '').length < 2) return '#' + String(orig).trim();
     return TRADE_UNIFICAR[k] || k;
   }
+  // Acento quebrado na origem ("ANT?NIO CARLOS GOMES"): o caractere perdido vira qualquer letra
+  // e o nome junta com a grafia correta, se existir UMA só que case (ex.: "ANTONIO CARLOS GOMES").
+  var todosNomes = {};
+  (D.meses2025 || []).concat(D.meses || []).forEach(function (m) {
+    (m.clientes || []).forEach(function (c) { todosNomes[aliasOriginal(c.n)] = true; });
+  });
+  var QUEBRADO = '�';
+  var chavesLimpas = {};
+  Object.keys(todosNomes).forEach(function (n) { if (n.indexOf(QUEBRADO) < 0) chavesLimpas[chave(n)] = true; });
+  Object.keys(todosNomes).forEach(function (n) {
+    if (n.indexOf(QUEBRADO) < 0) return;
+    // chave com '#' no lugar de cada letra perdida; casa com chave limpa do mesmo tamanho que só
+    // difere nessas posições
+    var m = chave(n.split(QUEBRADO).join('QQQ')).split('QQQ').join('#');
+    var achou = Object.keys(chavesLimpas).filter(function (k) {
+      if (k.length !== m.length) return false;
+      for (var i = 0; i < k.length; i++) if (m[i] !== '#' && m[i] !== k[i]) return false;
+      return true;
+    });
+    if (achou.length === 1) TRADE_UNIFICAR[chave(n)] = TRADE_UNIFICAR[achou[0]] || achou[0];
+  });
+
   // nome exibido de cada grupo = grafia com mais bilhetes (todos os meses, todos os parques)
   var volume = {}, exibir = {};
   (D.meses2025 || []).concat(D.meses || []).forEach(function (m) {
@@ -56,7 +87,11 @@
   });
   Object.keys(volume).forEach(function (g) {
     var nomes = Object.keys(volume[g]);
-    nomes.sort(function (a, b) { return volume[g][b] - volume[g][a]; });
+    // grafia sem caractere quebrado na frente; entre elas, a com mais bilhetes
+    nomes.sort(function (a, b) {
+      var qa = a.indexOf(QUEBRADO) >= 0 ? 1 : 0, qb = b.indexOf(QUEBRADO) >= 0 ? 1 : 0;
+      return qa - qb || volume[g][b] - volume[g][a];
+    });
     exibir[g] = nomes[0];
   });
   cliNormAlias = function (n) {
