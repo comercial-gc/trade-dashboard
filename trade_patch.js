@@ -92,7 +92,9 @@
       var qa = a.indexOf(QUEBRADO) >= 0 ? 1 : 0, qb = b.indexOf(QUEBRADO) >= 0 ? 1 : 0;
       return qa - qb || volume[g][b] - volume[g][a];
     });
-    exibir[g] = nomes[0];
+    // acento quebrado que sobrou sem outra grafia: "JO?O" e "SEBASTI?O" viram JOÃO / SEBASTIÃO
+    // (Paulo, 13/10/2026). Só a final "?O" de palavra, que nesses nomes é sempre "ÃO".
+    exibir[g] = nomes[0].split(QUEBRADO + 'O ').join('ÃO ').replace(new RegExp(QUEBRADO + 'O$'), 'ÃO');
   });
   cliNormAlias = function (n) {
     var g = grupo(n);
