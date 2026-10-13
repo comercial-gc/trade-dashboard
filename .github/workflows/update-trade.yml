@@ -1,0 +1,62 @@
+name: Números diários do Trade (trade_diario.json)
+
+# 13/10/2026, pedido do Paulo: calcula os números das abas "Diário <Mês><aa>" e "Top Clientes-<Mês>"
+# da planilha TRADE a partir da pasta do Drive onde ele sobe os relatórios do Flux (normalmente
+# entre 09:30 e 11:00) e da visitação do parque (Visitação Parques 2026, pronta às 09:30).
+# Gera trade_diario.json na raiz; o Apps Script da planilha (Trade_Auto.gs, gatilho de hora em
+# hora, rodando com a conta do Paulo) grava nas abas e republica o Dashboard. A conta de serviço
+# só LÊ o Drive: ela não tem acesso à planilha do Trade.
+
+on:
+  schedule:
+    # UTC = Brasília + 3h: 09:45, 10:45, 11:45, 13:00 e 15:00
+    - cron: "45 12 * * *"
+    - cron: "45 13 * * *"
+    - cron: "45 14 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+    inputs:
+      mes:
+        description: "Mês AAAA-MM (vazio = mês de ontem)"
+        required: false
+        default: ""
+
+concurrency:
+  group: numeros-trade
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install google-api-python-client==2.140.0 google-auth==2.34.0 openpyxl==3.1.5
+
+      - name: Calcular números do Trade
+        env:
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "${{ github.event.inputs.mes }}" ]; then
+            python scripts/trade_diario.py --mes "${{ github.event.inputs.mes }}"
+          else
+            python scripts/trade_diario.py
+          fi
+
+      - name: Commitar se mudou
+        run: |
+          git config user.name "cataratas-dashboard-bot"
+          git config user.email "actions@github.com"
+          git add trade_diario.json scripts/trade_grafias.json
+          if git diff --cached --quiet; then echo "nada mudou"; exit 0; fi
+          git commit -m "chore: números diários do Trade"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push && break; sleep 5; done

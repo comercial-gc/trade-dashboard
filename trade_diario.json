@@ -1,0 +1,1474 @@
+{
+ "versao": 1,
+ "gerado_em": "2026-10-13T18:58:54Z",
+ "mes": "2026-10",
+ "ate": 12,
+ "limite": 12,
+ "dias_faltando": [],
+ "dias_sem_visitacao": [],
+ "protegidos": [
+  1,
+  2
+ ],
+ "aba_diario": "Diário Out26",
+ "aba_top": "Top Clientes-Out",
+ "cabecalhos": {
+  "C": "trade 26",
+  "E": "parque 26",
+  "I": "appai",
+  "J": "escolas",
+  "K": "receita 26",
+  "M": "trade 26",
+  "O": "parque 26",
+  "S": "receita 26"
+ },
+ "diario": [
+  {
+   "dia": 3,
+   "C": 1118.0,
+   "E": 6591.0,
+   "I": 102.0,
+   "J": 50.0,
+   "K": 94012.7,
+   "M": 675.0,
+   "O": 910.0,
+   "S": 52023.0
+  },
+  {
+   "dia": 4,
+   "C": 216.0,
+   "E": 1367.0,
+   "I": 32.0,
+   "J": 0.0,
+   "K": 16719.0,
+   "M": 1212.0,
+   "O": 1959.0,
+   "S": 97413.0
+  },
+  {
+   "dia": 5,
+   "C": 267.0,
+   "E": 2020.0,
+   "I": 20.0,
+   "J": 0.0,
+   "K": 21688.1,
+   "M": 1389.0,
+   "O": 3048.0,
+   "S": 104514.0
+  },
+  {
+   "dia": 6,
+   "C": 538.0,
+   "E": 2136.0,
+   "I": 8.0,
+   "J": 93.0,
+   "K": 44250.3,
+   "M": 1045.0,
+   "O": 2066.0,
+   "S": 78528.0
+  },
+  {
+   "dia": 7,
+   "C": 746.0,
+   "E": 3035.0,
+   "I": 5.0,
+   "J": 265.0,
+   "K": 54232.4,
+   "M": 729.0,
+   "O": 1285.0,
+   "S": 55008.0
+  },
+  {
+   "dia": 8,
+   "C": 696.0,
+   "E": 2116.0,
+   "I": 4.0,
+   "J": 311.0,
+   "K": 49449.3,
+   "M": 1980.0,
+   "O": 4109.0,
+   "S": 152151.0
+  },
+  {
+   "dia": 9,
+   "C": 710.0,
+   "E": 2682.0,
+   "I": 19.0,
+   "J": 197.0,
+   "K": 50415.6,
+   "M": 2453.0,
+   "O": 4930.0,
+   "S": 189690.0
+  },
+  {
+   "dia": 10,
+   "C": 1538.0,
+   "E": 8073.0,
+   "I": 164.0,
+   "J": 1.0,
+   "K": 104937.8,
+   "M": 2747.0,
+   "O": 5188.0,
+   "S": 216174.0
+  },
+  {
+   "dia": 11,
+   "C": 2228.0,
+   "E": 9536.0,
+   "I": 260.0,
+   "J": 0.0,
+   "K": 146264.5,
+   "M": 2137.0,
+   "O": 4797.0,
+   "S": 166869.0
+  },
+  {
+   "dia": 12,
+   "C": 2254.0,
+   "E": 9751.0,
+   "I": 308.0,
+   "J": 0.0,
+   "K": 134887.3,
+   "M": 1883.0,
+   "O": 4008.0,
+   "S": 148299.0
+  }
+ ],
+ "top": {
+  "subtitulo": "AquaRio · Paineiras Corcovado | Out/2026 (01 a 12/10)",
+  "linhas": [
+   [
+    "ONERIO PASS INGRESSOS E ACESSOS",
+    1470,
+    0
+   ],
+   [
+    "C2 RIO VIAGENS E TURISMO S.A.",
+    180,
+    1103
+   ],
+   [
+    "RIO CARIOCA TOUR TURISMO LIMITADA",
+    40,
+    1211
+   ],
+   [
+    "MIGUEL LEONARDO PEPE QUERALES",
+    0,
+    1027
+   ],
+   [
+    "APPAI",
+    942,
+    0
+   ],
+   [
+    "RLBM TRANSPORTES E TURISMO LTDA",
+    0,
+    695
+   ],
+   [
+    "FERIAS RIO VIAGENS E TURISMO LTDA",
+    0,
+    617
+   ],
+   [
+    "HYD BRAZILIAN TOURS / IN BUZIOS",
+    10,
+    569
+   ],
+   [
+    "BRAZIL OFFICIAL DMC TOURS AND EVENTS LTDA-ME",
+    0,
+    510
+   ],
+   [
+    "GIULIA VALENTINI",
+    5,
+    440
+   ],
+   [
+    "JS AGENCIAS DE VIAGENS E TURISMO LTDA",
+    0,
+    378
+   ],
+   [
+    "WTT",
+    0,
+    364
+   ],
+   [
+    "BRASIL SHOW TURISMO LTDA",
+    7,
+    332
+   ],
+   [
+    "HIGH CLASS TAXI AEREO LTDA",
+    52,
+    267
+   ],
+   [
+    "SMART RIO",
+    0,
+    294
+   ],
+   [
+    "CLUB WEB SERVIÇOS DIGITAIS LTDA",
+    281,
+    0
+   ],
+   [
+    "FERNANDO R FERNANDES TRANSPORTE LTDA",
+    0,
+    264
+   ],
+   [
+    "THIAGO GOMES BARBOSA",
+    0,
+    258
+   ],
+   [
+    "GUSTAVO ELIAS ANDOLPHI LIZCANO",
+    0,
+    253
+   ],
+   [
+    "MARKTOUR",
+    0,
+    251
+   ],
+   [
+    "TOURIST CLUB",
+    0,
+    251
+   ],
+   [
+    "RUHM TURISMO",
+    0,
+    244
+   ],
+   [
+    "EL SHERPA TURISMO LTDA",
+    0,
+    231
+   ],
+   [
+    "ERIKA SOUSA DE SA",
+    0,
+    206
+   ],
+   [
+    "KRIOK TURISMO LTDA",
+    0,
+    170
+   ],
+   [
+    "MARINHO TURISMO BUZIOS LTDA",
+    0,
+    167
+   ],
+   [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    153
+   ],
+   [
+    "GALLERY VIAGENS E TURISMO LTDA",
+    0,
+    151
+   ],
+   [
+    "VICTOR HUGO VALERIANO",
+    0,
+    149
+   ],
+   [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    146
+   ],
+   [
+    "DOUGLAS PRENTZNAUER DE MORAES",
+    0,
+    136
+   ],
+   [
+    "RAFAEL NEVES DE ARAUJO",
+    0,
+    135
+   ],
+   [
+    "BE A LOCAL TOURS",
+    0,
+    124
+   ],
+   [
+    "YURI EZEQUIEL SANTOS",
+    0,
+    122
+   ],
+   [
+    "ICD - INGRESSO COM DESCONTO",
+    119,
+    0
+   ],
+   [
+    "LUCAS ALEXANDER MORAES DA COSTA",
+    0,
+    115
+   ],
+   [
+    "M A N BRITTO PASSEIOS TURISTICOS - ME",
+    0,
+    115
+   ],
+   [
+    "QUEL TOUR LTDA",
+    0,
+    112
+   ],
+   [
+    "KINGS / KING TURISMO",
+    0,
+    104
+   ],
+   [
+    "LEANDRO AUGUSTO REGIS NEVES",
+    0,
+    100
+   ],
+   [
+    "O ARENCIBIA VALDES AGENCIA DE VIAGENS E TURISMO",
+    0,
+    95
+   ],
+   [
+    "ANTONIO CARLOS GOMES",
+    0,
+    86
+   ],
+   [
+    "ANDREWS MARQUES DE SOUZA",
+    0,
+    82
+   ],
+   [
+    "CRV TRANSPORTE E TURISMO LTDA",
+    0,
+    81
+   ],
+   [
+    "VIA CAPI VIAGENS E TURISMO LTDA",
+    22,
+    58
+   ],
+   [
+    "YASMIM OLIVIA SANTANA FARIA DA SILVEIRA",
+    0,
+    79
+   ],
+   [
+    "GABRIEL GOULART LTDA",
+    0,
+    78
+   ],
+   [
+    "LEONARDO SOLIDADE DOS SANTOS PEREIRA",
+    0,
+    77
+   ],
+   [
+    "BEATRIZ TIMOTEO BRAZ",
+    0,
+    74
+   ],
+   [
+    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
+    0,
+    73
+   ],
+   [
+    "ALEXANDRE ALVES ROBERTO",
+    0,
+    72
+   ],
+   [
+    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
+    0,
+    72
+   ],
+   [
+    "XODO TOUR VIAGENS E TURISMO LTDA",
+    0,
+    72
+   ],
+   [
+    "RODRIGO DA SILVA MOURAO",
+    0,
+    71
+   ],
+   [
+    "COLEGIO ELEVA EDUCACAO LTDA",
+    66,
+    0
+   ],
+   [
+    "LEANDRO DOS SANTOS GALDINO",
+    0,
+    62
+   ],
+   [
+    "JEEP TUOR / SOBRE TERRA",
+    0,
+    54
+   ],
+   [
+    "CONDUTOR: MARCOS VINICIUS FERREIRA",
+    0,
+    53
+   ],
+   [
+    "CHI SIU JING",
+    0,
+    52
+   ],
+   [
+    "THAIAN NASCIMENTO DA SILVA",
+    0,
+    52
+   ],
+   [
+    "3B TOUR AND TRAVEL LTDA",
+    0,
+    50
+   ],
+   [
+    "FELIPE DE MELO CRUZ PEREIRA",
+    0,
+    50
+   ],
+   [
+    "J. G. JORGE TURISMO",
+    0,
+    50
+   ],
+   [
+    "GO NOW TOURS",
+    49,
+    0
+   ],
+   [
+    "SILVANA DEL CARMEN AVACA",
+    0,
+    49
+   ],
+   [
+    "LUCAS DA SILVA BARRETO",
+    0,
+    47
+   ],
+   [
+    "RIO MAXIMO",
+    0,
+    47
+   ],
+   [
+    "CARLOS ALBERTO FIRMO ALVES",
+    0,
+    45
+   ],
+   [
+    "FABIANO ASSIS MARTINS",
+    0,
+    45
+   ],
+   [
+    "INTERTOURING AG. DE VIAG. E TUR. LTDA.",
+    15,
+    30
+   ],
+   [
+    "LUIZ CLAUDIO SILVA DOS SANTOS",
+    0,
+    45
+   ],
+   [
+    "MARCOS JOSE MONTEIRO",
+    0,
+    45
+   ],
+   [
+    "WELLINGTON LUIS DE FARIAS ARAUJO",
+    0,
+    44
+   ],
+   [
+    "PROMOTIONAL TRAVEL VIAGENS E TURISMO LTDA",
+    43,
+    0
+   ],
+   [
+    "JOSE GUILHERME ALVES DE MORAES",
+    0,
+    42
+   ],
+   [
+    "MARCIO SALLES SERRA LIMA",
+    0,
+    42
+   ],
+   [
+    "CREW ONLY LTDA",
+    0,
+    40
+   ],
+   [
+    "JORGE DOS SANTOS PEREIRA",
+    0,
+    38
+   ],
+   [
+    "M. G. DE LIMA TURISMO",
+    36,
+    2
+   ],
+   [
+    "TATIANA LEMOS DE CARVALHO",
+    0,
+    38
+   ],
+   [
+    "MARCELLO MONGE TURISMO E EVENTOS",
+    0,
+    37
+   ],
+   [
+    "R.P.T. RIO PARADISE TOUR AGENCIA DE VIAGEM E TURIS",
+    0,
+    37
+   ],
+   [
+    "RHUANN RODRIGUES",
+    0,
+    37
+   ],
+   [
+    "YAN CANDIDO BARBOSA SANTOS",
+    0,
+    37
+   ],
+   [
+    "JOAO CARLOS BRANDAO",
+    0,
+    36
+   ],
+   [
+    "VINICIUS ROCHA DE SOUSA",
+    0,
+    36
+   ],
+   [
+    "IGOR REIS BARROS",
+    0,
+    35
+   ],
+   [
+    "YGOR DA SILVA BRAGA DE LACERDA",
+    0,
+    35
+   ],
+   [
+    "MARCOS SEQUEIRA",
+    0,
+    34
+   ],
+   [
+    "RIO CIDADE SERVICE TUR TRANSPORTES TURISTICOS LTDA",
+    0,
+    34
+   ],
+   [
+    "WESLEY EMANUEL S. ALVES DA SILVA",
+    0,
+    34
+   ],
+   [
+    "AM&G TRANSP TUR LTDA",
+    0,
+    33
+   ],
+   [
+    "CUNHA TUR EIRELI",
+    33,
+    0
+   ],
+   [
+    "RAQUEL DOS SANTOS",
+    0,
+    33
+   ],
+   [
+    "DIEGO ALMEIDA BARBOSA DA SILVA",
+    0,
+    32
+   ],
+   [
+    "MARIA JESUS DE ARAUJO GUZMAN",
+    0,
+    32
+   ],
+   [
+    "SURF INN TURISMO LTDA",
+    0,
+    32
+   ],
+   [
+    "ALMIR DOS SANTOS FERREIRA",
+    0,
+    31
+   ],
+   [
+    "MURILO SANTOS",
+    0,
+    30
+   ],
+   [
+    "THIAGO AMARAL SOARES",
+    0,
+    30
+   ],
+   [
+    "DANIEL GOMES DAS CHAGAS",
+    0,
+    29
+   ],
+   [
+    "EMILIANO EMMANUEL GALLEGOS",
+    0,
+    29
+   ],
+   [
+    "JUAN SALVADOR ECHEVERRIA MARZAN",
+    7,
+    22
+   ],
+   [
+    "LUIZ FERNANDO BARRETO DE SOUZA",
+    0,
+    29
+   ],
+   [
+    "ANYE FRANCHINI",
+    9,
+    19
+   ],
+   [
+    "HEADOUT EXPERIENCES",
+    0,
+    28
+   ],
+   [
+    "PAZ MAGDALENA QUEZADA FISSORE",
+    0,
+    28
+   ],
+   [
+    "VITOR HUGO PAIVA DA SILVA",
+    0,
+    28
+   ],
+   [
+    "MARCELO CORREIA DE SOUZA",
+    0,
+    27
+   ],
+   [
+    "MARCOS ALVES DE SOUZA MARQUES",
+    0,
+    27
+   ],
+   [
+    "THIAGO GODOI DE CASTRO",
+    0,
+    27
+   ],
+   [
+    "ULISSES ARAUJO MATIAS",
+    0,
+    27
+   ],
+   [
+    "ILSON BARRETO",
+    0,
+    25
+   ],
+   [
+    "L DE C HIPOLITO AGENCIA DE VIAGENS EIRELI",
+    0,
+    25
+   ],
+   [
+    "FABRICIO PLACIDES ARTULANO",
+    0,
+    24
+   ],
+   [
+    "JONATHAN NOGUEIRA ABRAO",
+    0,
+    24
+   ],
+   [
+    "MARCUS VINICIUS SANTOS SANTIAGO",
+    0,
+    24
+   ],
+   [
+    "NEWTON VICTOR",
+    0,
+    24
+   ],
+   [
+    "RAMON VIANA BARBOSA MOURA",
+    0,
+    24
+   ],
+   [
+    "NORMANDY AGENCIA DE VIAGEM E TURISMO LTDA",
+    23,
+    0
+   ],
+   [
+    "PEGADA TOUR EXPERIENCE LTDA",
+    0,
+    23
+   ],
+   [
+    "AGENCIA DE TURISMO VOYAGEZ RIO LTDA",
+    0,
+    22
+   ],
+   [
+    "MLJ TRANSPORTE LTDA",
+    0,
+    22
+   ],
+   [
+    "RENE GEORGE",
+    22,
+    0
+   ],
+   [
+    "RONALDO ARMANDO",
+    0,
+    22
+   ],
+   [
+    "YURI MARTINS DE CARVALHO",
+    0,
+    22
+   ],
+   [
+    "DIOGO SANTANNA DE SOUZA",
+    0,
+    21
+   ],
+   [
+    "FABIANO BERNARDO DA SILVA",
+    0,
+    21
+   ],
+   [
+    "PAULO WAGNER",
+    0,
+    21
+   ],
+   [
+    "RIO NAMORAL TOUR LTDA",
+    0,
+    21
+   ],
+   [
+    "ADRIANO GOMES ALONSO",
+    0,
+    20
+   ],
+   [
+    "CLEBER SANTOS",
+    0,
+    20
+   ],
+   [
+    "GILMAR DA SILVA",
+    0,
+    20
+   ],
+   [
+    "PAULO EDUARDO BERNARDES DE OLIVEIRA",
+    0,
+    20
+   ],
+   [
+    "THIAGO MEDEIROS VERLINGUE",
+    0,
+    20
+   ],
+   [
+    "DIEGO MUNIZ DOS SANTOS",
+    0,
+    19
+   ],
+   [
+    "PABLO FIGUEIREDO DA SILVA",
+    0,
+    19
+   ],
+   [
+    "VINICIUS GOMES PANTALIAO",
+    0,
+    19
+   ],
+   [
+    "VLADIMIR DA SILVA VIEIRA",
+    0,
+    19
+   ],
+   [
+    "FRANCISCO EDUARDO JOSE DA SILVA",
+    0,
+    18
+   ],
+   [
+    "JOSE ROBERTO CAMPOS CAVALCANTE",
+    0,
+    18
+   ],
+   [
+    "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
+    18,
+    0
+   ],
+   [
+    "AGENCIA FALCAO TOUR LTDA",
+    0,
+    17
+   ],
+   [
+    "AMAURI BELFIORI R. MENDONCA",
+    0,
+    17
+   ],
+   [
+    "JUAN CARLOS BADARO DA SILVA",
+    0,
+    17
+   ],
+   [
+    "MATHEUS WAGNER DOS SANTOS",
+    0,
+    17
+   ],
+   [
+    "RIO INSIDER ADVENTURES LTDA",
+    0,
+    17
+   ],
+   [
+    "VALDECIR PAES DA SILVA",
+    0,
+    17
+   ],
+   [
+    "ALEXANDRE DE MORAES SERPA",
+    0,
+    16
+   ],
+   [
+    "ANDRESSA PIRES AMARAL",
+    0,
+    16
+   ],
+   [
+    "C R B AGENCIAS DE VIAGENS E TRANSPORTES TURISTICOS",
+    0,
+    16
+   ],
+   [
+    "MILENA PAULA BARBOSA DA SILVA",
+    0,
+    16
+   ],
+   [
+    "NILSON ROSA JUNIOR",
+    0,
+    16
+   ],
+   [
+    "ROBERTO WILLIAM PEREIRA SIQUEIRA",
+    16,
+    0
+   ],
+   [
+    "THEOPHILO DE SOUZA ALVES",
+    0,
+    16
+   ],
+   [
+    "LUIZ CLAUDIO MONTEIRO COSTA",
+    8,
+    7
+   ],
+   [
+    "MARCELO DA SILVA MACEDO",
+    0,
+    15
+   ],
+   [
+    "MARCUS PAULO JOAQUIM COELHO",
+    0,
+    15
+   ],
+   [
+    "ANDERSON CHAVES DA COSTA",
+    0,
+    14
+   ],
+   [
+    "FABIO SILVA RIBEIRO",
+    5,
+    9
+   ],
+   [
+    "MARCELO CAETANO VIEIRA DA SILVA",
+    0,
+    14
+   ],
+   [
+    "TRAVEL E EXPERIENCES RJ LTDA",
+    0,
+    14
+   ],
+   [
+    "CONDUTORES MAURICIO DE AZEVEDO DUTRA",
+    0,
+    13
+   ],
+   [
+    "THIAGO PIEPER DOS SANTOS",
+    13,
+    0
+   ],
+   [
+    "ANDERSON DE OLIVEIRA SEVERIANO",
+    0,
+    12
+   ],
+   [
+    "CLEITON VIEIRA MONTEIRO",
+    12,
+    0
+   ],
+   [
+    "FRANCISCO COSTA DE PAULA",
+    0,
+    12
+   ],
+   [
+    "LEONARDO MOURA DE OLIVEIRA DE JESUS",
+    0,
+    12
+   ],
+   [
+    "LUIZ AUGUSTO ANDRADE",
+    0,
+    12
+   ],
+   [
+    "PE NO MUNDO TOUR TURISMO E EXPERIENCIAS LTDA",
+    0,
+    12
+   ],
+   [
+    "RONALDO DE MORAES COUTO",
+    0,
+    12
+   ],
+   [
+    "ROSIVALDO VICENTE DOS SANTOS",
+    0,
+    12
+   ],
+   [
+    "THIAGO ALVES DA SILVA",
+    0,
+    12
+   ],
+   [
+    "WELYSON SERPA FERREIRA",
+    0,
+    12
+   ],
+   [
+    "CLEUBER DA SILVA SANTOS",
+    0,
+    11
+   ],
+   [
+    "LUIZ FLAVIO AGENCIA",
+    0,
+    11
+   ],
+   [
+    "SIDNEY DENNER BEZERRA MASCARENHAS",
+    0,
+    11
+   ],
+   [
+    "ALESSANDRA ARMANDO NUNES",
+    0,
+    10
+   ],
+   [
+    "CLAUDIO EDUARDO MORAES",
+    0,
+    10
+   ],
+   [
+    "CLEBER ANTONIO DOS SANTOS",
+    0,
+    10
+   ],
+   [
+    "DAGMAR SANTOS",
+    0,
+    10
+   ],
+   [
+    "DAVID MOREIRA FIGUEIREDO",
+    0,
+    10
+   ],
+   [
+    "FABIO SEBASTIAO FIGUEIREDO DE MELO",
+    0,
+    10
+   ],
+   [
+    "FLAVIA PELICIONI",
+    0,
+    10
+   ],
+   [
+    "JOAO VICTOR BASILIO DE MORAES SOBRINHO",
+    0,
+    10
+   ],
+   [
+    "BRUNO LUIZ DIAS",
+    0,
+    9
+   ],
+   [
+    "CARLOS EDUARDO MONTESINOS DE NAVARRO GIACOMOCARLOS",
+    0,
+    9
+   ],
+   [
+    "VIRGILIO OLIVEIRA PAPA",
+    0,
+    9
+   ],
+   [
+    "ALEJANDRO JOSE NUNEZ MONDUERI",
+    0,
+    8
+   ],
+   [
+    "EDERSON ALMEIDA DE OLIVEIRA",
+    0,
+    8
+   ],
+   [
+    "EVASION RIO",
+    0,
+    8
+   ],
+   [
+    "LUCIANA ALVES DO NASCIMENTO",
+    0,
+    8
+   ],
+   [
+    "RAPHAEL SOUSA CORREA",
+    0,
+    8
+   ],
+   [
+    "WESLEY RIBEIRO AGENCIA DE TURISMOS LTDA",
+    0,
+    8
+   ],
+   [
+    "ANDERSON BARBOSA PEREIRA",
+    0,
+    7
+   ],
+   [
+    "CARLOS FREDERICO MAGALHAES PINI",
+    7,
+    0
+   ],
+   [
+    "CELSO TEIXEIRA PANTALIAO",
+    0,
+    7
+   ],
+   [
+    "EMERSON ALVES DA SILVA",
+    2,
+    5
+   ],
+   [
+    "GREAT TOUR",
+    7,
+    0
+   ],
+   [
+    "GRETA IMELDA LAMBERTINI ORTEGA",
+    7,
+    0
+   ],
+   [
+    "JULIA DE OLIVEIRA BARBOSA",
+    0,
+    7
+   ],
+   [
+    "ROCIO PELLEGRINI",
+    7,
+    0
+   ],
+   [
+    "ADILSON JOHN DA SILVA LIMA",
+    0,
+    6
+   ],
+   [
+    "ANDRE ZAVA FERNANDES",
+    0,
+    6
+   ],
+   [
+    "DOUGLAS FERNANDES DE CARVALHO",
+    0,
+    6
+   ],
+   [
+    "FELIX ACRUX TURISMO LTDA",
+    0,
+    6
+   ],
+   [
+    "FRANCINALDO SILVA",
+    6,
+    0
+   ],
+   [
+    "GGIR TURISMO RECEPTIVO LTDA",
+    0,
+    6
+   ],
+   [
+    "JOSE LELIS DOS SANTOS",
+    0,
+    6
+   ],
+   [
+    "MARCIO TORRES CORREIA",
+    0,
+    6
+   ],
+   [
+    "PEDRO LEO TOUR SERVICOS LTDA",
+    0,
+    6
+   ],
+   [
+    "VANS DO CORCOVADO",
+    6,
+    0
+   ],
+   [
+    "ALAN ALVES DE MELO",
+    5,
+    0
+   ],
+   [
+    "BRUNO AMARAL GUEDES DE SOUZA",
+    5,
+    0
+   ],
+   [
+    "BRUNO OLIVEIRA DOS SANTOS",
+    5,
+    0
+   ],
+   [
+    "DEMERVAL FERNANDES JUNIOR",
+    5,
+    0
+   ],
+   [
+    "DIO BERKANA VIAGENS E TURISMO LTDA",
+    5,
+    0
+   ],
+   [
+    "GUIA RIO DE JANEIRO 021 LTDA",
+    0,
+    5
+   ],
+   [
+    "JOAO FERREIRA PIMENTEL FILHO",
+    5,
+    0
+   ],
+   [
+    "NILTON GONCALVES VIANA",
+    0,
+    5
+   ],
+   [
+    "ROGERIO CARLOS ALMEIDA DE FARIAS",
+    0,
+    5
+   ],
+   [
+    "ROMUALDO DA SILVA COSTA",
+    0,
+    5
+   ],
+   [
+    "WENDEL BASTOS DE OLIVEIRA",
+    5,
+    0
+   ],
+   [
+    "ANDERSON BORBA DA FONSECA",
+    0,
+    4
+   ],
+   [
+    "CHRISTOPHER DE ARAGAO SANTANA ZARATE",
+    0,
+    4
+   ],
+   [
+    "FERNANDA COELHO DA SILVA",
+    0,
+    4
+   ],
+   [
+    "FERNANDO SANTANA MARTINS",
+    0,
+    4
+   ],
+   [
+    "GLAUBER UBIRATAN ALVES DE MORAES",
+    0,
+    4
+   ],
+   [
+    "MARCELO VIEIRA MENDES",
+    0,
+    4
+   ],
+   [
+    "MARIANA PILLER CARVALHO DE OLIVEIRA",
+    0,
+    4
+   ],
+   [
+    "PEDRO LIBER ECHEVERRIA MARZAN",
+    0,
+    4
+   ],
+   [
+    "RAFAEL MENDES DE PADUA",
+    0,
+    4
+   ],
+   [
+    "RAFAEL SATHLER GIGANTE",
+    4,
+    0
+   ],
+   [
+    "WILLIAM DE PAULA LUCAS",
+    4,
+    0
+   ],
+   [
+    "YANN NASCIMENTO DOS SANTOS",
+    0,
+    4
+   ],
+   [
+    "CARLOS ALBERTO SOARES DA SILVA",
+    0,
+    3
+   ],
+   [
+    "DIEGO MAIA LOPES DA SILVA",
+    0,
+    3
+   ],
+   [
+    "GLP TOUR LTDA",
+    0,
+    3
+   ],
+   [
+    "RODOLFO FRANCISCO VIEIRA DA SILVA",
+    3,
+    0
+   ],
+   [
+    "ROMULO SMITH",
+    3,
+    0
+   ],
+   [
+    "WILLIAM LIMA ZAPAROLLI",
+    0,
+    3
+   ],
+   [
+    "CLEBER NEVES DA SILVA FERREIRA",
+    0,
+    2
+   ],
+   [
+    "FRANK HOPFE",
+    0,
+    2
+   ],
+   [
+    "LORRAN DO AMPARO PAES",
+    0,
+    2
+   ],
+   [
+    "PAULO JOSE",
+    0,
+    2
+   ],
+   [
+    "RAFAEL OLIVEIRA DA SILVA",
+    0,
+    2
+   ],
+   [
+    "RENAN MORAIS DOS SANTOS",
+    0,
+    2
+   ],
+   [
+    "RIO ALTERNATIVE TOUR",
+    0,
+    2
+   ],
+   [
+    "RODRIGO PAIVA FREIRE",
+    0,
+    2
+   ],
+   [
+    "ROGINALDO PEREIRA DA SILVA",
+    2,
+    0
+   ],
+   [
+    "ALESSANDRA RIBEIRO VIAGENS E TURISMO",
+    0,
+    1
+   ],
+   [
+    "DANIEL BANDEIRA GONCALVES",
+    1,
+    0
+   ],
+   [
+    "GUILHERME GOMES BORGES",
+    1,
+    0
+   ],
+   [
+    "JEAN CARLOS PEREIRA ANTUNES",
+    0,
+    1
+   ],
+   [
+    "KELLY NOGUEIRA",
+    1,
+    0
+   ],
+   [
+    "LEANDER SALAZAR",
+    1,
+    0
+   ],
+   [
+    "MARCELO SALOMAO MIGUEL",
+    0,
+    1
+   ],
+   [
+    "MARLON BARBOSA DE SOUZA COSTA",
+    1,
+    0
+   ],
+   [
+    "MOISES GONCALVES DE ARAUJO",
+    1,
+    0
+   ],
+   [
+    "THAYZA DA SILVA VITORIO",
+    0,
+    1
+   ],
+   [
+    "THIAGO TRAVASSOS FORTUNA",
+    0,
+    1
+   ]
+  ]
+ },
+ "arquivos": {
+  "A01": "Aqua 01.10.xlsx",
+  "A02": "AquaRio 02 a 05.10.csv",
+  "A03": "AquaRio 02 a 05.10.csv",
+  "A04": "AquaRio 02 a 05.10.csv",
+  "A05": "AquaRio 02 a 05.10.csv",
+  "A06": "Aqua 06.10.csv",
+  "A07": "aquario_2026-10-08_131243.csv",
+  "A08": "aquario_2026-10-09_135914.csv",
+  "A09": "AquaRio 09 a 12.10.csv",
+  "A10": "AquaRio 09 a 12.10.csv",
+  "A11": "AquaRio 09 a 12.10.csv",
+  "A12": "AquaRio 09 a 12.10.csv",
+  "P01": "Paineiras 01.10.csv",
+  "P02": "Paineiras 02 a 04.10",
+  "P03": "Paineiras 02 a 04.10",
+  "P04": "Paineiras 02 a 04.10",
+  "P05": "Paineiras 05.10.csv",
+  "P06": "Paineiras 06.10",
+  "P07": "paineiras_2026-10-08_131316.csv",
+  "P08": "paineiras_2026-10-09_140227.csv",
+  "P09": "Paineiras 09 a 12.10.csv",
+  "P10": "Paineiras 09 a 12.10.csv",
+  "P11": "Paineiras 09 a 12.10.csv",
+  "P12": "Paineiras 09 a 12.10.csv"
+ },
+ "avisos": []
+}
