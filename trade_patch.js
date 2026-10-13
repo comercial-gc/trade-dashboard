@@ -37,7 +37,11 @@
   };
   var aliasOriginal = cliNormAlias;
   function grupo(n) {
-    var k = chave(aliasOriginal(n));
+    var orig = aliasOriginal(n);
+    var k = chave(orig);
+    // nome que é só CNPJ/número ou só pontuação ("60701521006481", "-") não tem o que unificar:
+    // cada um é uma agência diferente e fica com o próprio nome
+    if (k.replace(/[^A-Z]/g, '').length < 2) return '#' + String(orig).trim();
     return TRADE_UNIFICAR[k] || k;
   }
   // nome exibido de cada grupo = grafia com mais bilhetes (todos os meses, todos os parques)
