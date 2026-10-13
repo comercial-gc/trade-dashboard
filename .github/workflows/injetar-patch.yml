@@ -3,6 +3,7 @@ name: Religar trade_patch.js no index.html
 # 13/10/2026: o Apps Script regera o index.html (18h e atualizações manuais) sem o carregador do
 # trade_patch.js, e as correções da aba Top Clientes sumiam. A cada push que mexe no index.html,
 # este workflow recoloca o carregador se ele não estiver lá (se já estiver, não faz nada).
+# 13/10/2026: também gera trade_mensal.json (Trade oficial por mês) para o Dash de Performance.
 
 on:
   push:
@@ -23,11 +24,13 @@ jobs:
       - uses: actions/checkout@v4
       - name: Recolocar carregador
         run: python scripts/injetar_patch.py
+      - name: Resumo mensal do Trade para o Dash de Performance (trade_mensal.json)
+        run: node scripts/extrair_mensal.js
       - name: Commitar se mudou
         run: |
-          if git diff --quiet; then echo "nada a fazer"; exit 0; fi
+          git add index.html trade_mensal.json
+          if git diff --cached --quiet; then echo "nada a fazer"; exit 0; fi
           git config user.name "cataratas-dashboard-bot"
           git config user.email "actions@github.com"
-          git add index.html
-          git commit -m "chore: religar trade_patch.js no index.html"
+          git commit -m "chore: religar trade_patch.js e atualizar trade_mensal.json"
           for i in 1 2 3; do git pull --rebase -q origin main && git push && break; sleep 5; done

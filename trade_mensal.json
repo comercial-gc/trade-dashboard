@@ -1,0 +1,492 @@
+{
+ "versao": 1,
+ "fonte": "Dash do Trade (planilha TRADE, validada com Bia/Nikolas)",
+ "dataRef": "13/10/2026",
+ "meses": {
+  "2025-01": {
+   "AquaRio": {
+    "trade": 11225,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 92846,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 4375,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-02": {
+   "AquaRio": {
+    "trade": 7509,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 77950,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 1073,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-03": {
+   "AquaRio": {
+    "trade": 6293,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 72593,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 1631,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-04": {
+   "AquaRio": {
+    "trade": 8749,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 56737,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 2203,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-05": {
+   "AquaRio": {
+    "trade": 8730,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 48282,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 4504,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-06": {
+   "AquaRio": {
+    "trade": 7449,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 45197,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 5031,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-07": {
+   "AquaRio": {
+    "trade": 15982,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 57465,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 8142,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-08": {
+   "AquaRio": {
+    "trade": 10494,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 53655,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 737,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-09": {
+   "AquaRio": {
+    "trade": 11913,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 53401,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 2347,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-10": {
+   "AquaRio": {
+    "trade": 14862,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 60655,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 6781,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-11": {
+   "AquaRio": {
+    "trade": 11037,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 58022,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 4122,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2025-12": {
+   "AquaRio": {
+    "trade": 9636,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 57920,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 2014,
+    "parque": null,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2026-01": {
+   "AquaRio": {
+    "trade": 18673,
+    "parque": 140500,
+    "appai": 3798,
+    "escolas": 0,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 98043,
+    "parque": 180282,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 2789,
+    "parque": 51776,
+    "appai": 1965,
+    "escolas": 58,
+    "parcial": false
+   }
+  },
+  "2026-02": {
+   "AquaRio": {
+    "trade": 10659,
+    "parque": 80525,
+    "appai": 989,
+    "escolas": 12,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 74467,
+    "parque": 146223,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 1165,
+    "parque": 23852,
+    "appai": 742,
+    "escolas": 81,
+    "parcial": false
+   }
+  },
+  "2026-03": {
+   "AquaRio": {
+    "trade": 11124,
+    "parque": 86768,
+    "appai": 1134,
+    "escolas": 172,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 73854,
+    "parque": 148916,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 1830,
+    "parque": 38488,
+    "appai": 837,
+    "escolas": 494,
+    "parcial": false
+   }
+  },
+  "2026-04": {
+   "AquaRio": {
+    "trade": 10550,
+    "parque": 76670,
+    "appai": 1494,
+    "escolas": 1230,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 57031,
+    "parque": 134840,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 4171,
+    "parque": 52229,
+    "appai": 1595,
+    "escolas": 1536,
+    "parcial": false
+   }
+  },
+  "2026-05": {
+   "AquaRio": {
+    "trade": 12858,
+    "parque": 81111,
+    "appai": 1486,
+    "escolas": 1972,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 46644,
+    "parque": 110550,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 4253,
+    "parque": 42742,
+    "appai": 1165,
+    "escolas": 1912,
+    "parcial": false
+   }
+  },
+  "2026-06": {
+   "AquaRio": {
+    "trade": 13065,
+    "parque": 76521,
+    "appai": 1286,
+    "escolas": 2372,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 41544,
+    "parque": 95514,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 3583,
+    "parque": 36899,
+    "appai": 1071,
+    "escolas": 1692,
+    "parcial": false
+   }
+  },
+  "2026-07": {
+   "AquaRio": {
+    "trade": 20571,
+    "parque": 122051,
+    "appai": 3495,
+    "escolas": 1764,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 58874,
+    "parque": 135096,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   },
+   "BioParque": {
+    "trade": 8505,
+    "parque": 102319,
+    "appai": 2605,
+    "escolas": 2439,
+    "parcial": false
+   }
+  },
+  "2026-08": {
+   "AquaRio": {
+    "trade": 14168,
+    "parque": 79811,
+    "appai": 1691,
+    "escolas": 1241,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 52825,
+    "parque": 108107,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2026-09": {
+   "AquaRio": {
+    "trade": 15801,
+    "parque": 93466,
+    "appai": 1370,
+    "escolas": 2204,
+    "parcial": false
+   },
+   "Paineiras": {
+    "trade": 46950,
+    "parque": 102764,
+    "appai": null,
+    "escolas": null,
+    "parcial": false
+   }
+  },
+  "2026-10": {
+   "AquaRio": {
+    "trade": 10963,
+    "parque": 52001,
+    "appai": 942,
+    "escolas": 986,
+    "parcial": true
+   },
+   "Paineiras": {
+    "trade": 18393,
+    "parque": 36513,
+    "appai": null,
+    "escolas": null,
+    "parcial": true
+   }
+  }
+ }
+}

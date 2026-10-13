@@ -16,6 +16,7 @@
 //
 // Para ligar: rodar ativarGatilhoTradeAuto() uma vez (pede autorização).
 // Para rodar na hora: tradeAutoAgora().
+// Visitação do parque pela Controladoria (rodar à mão): tradeAutoParqueOficial().
 // ═══════════════════════════════════════════════════════════════════
 
 var TRADE_AUTO_JSON = 'https://api.github.com/repos/comercial-gc/trade-dashboard/contents/trade_diario.json';
@@ -38,23 +39,11 @@ function tradeAutoAtualizar(forcar) {
     '; dados até ' + ('0' + dados.ate).slice(-2) + '/' + dados.mes.slice(5) +
     (dados.avisos && dados.avisos.length ? '; avisos: ' + dados.avisos.join(' | ') : '');
 
+  var parciais = _tradeAutoFecharParciais(ss);
+  if (parciais.length) resumo += '; fórmulas de "Parcial" de meses fechados trocadas pela soma do mês: ' + parciais.join(', ');
   var publicado = '';
-  if (mudDiario.length || mudTop || forcar) {
-    SpreadsheetApp.flush();
-    var d = lerDados();
-    var hist = lerHistorico();
-    var imm;
-    try { imm = lerIntelMercadoPaineiras(); } catch (e) { imm = null; }
-    var eventosRio;
-    try { eventosRio = lerEventosRio(); } catch (e) { eventosRio = []; }
-    var precisaoProjecao;
-    try { precisaoProjecao = registrarHistoricoProjecao(d, hist); } catch (e) { precisaoProjecao = null; }
-    var html = montarHTML(d, {ok:false,tempAtual:'--',icon:'',prev:[],diasChuva:[]}, hist, imm, eventosRio, precisaoProjecao);
-    salvarNoDrive(html);
-    if (!atualizarGitHub(html)) {
-      _tradeAutoLog(ss, resumo + '; ERRO: Dashboard não subiu para o GitHub (GITHUB_TOKEN)');
-      throw new Error('Trade_Auto: planilha preenchida, mas o Dashboard não subiu para o GitHub. Tento de novo na próxima hora.');
-    }
+  if (mudDiario.length || mudTop || parciais.length || forcar) {
+    _tradeAutoPublicar(ss, resumo);
     publicado = '; Dashboard publicado';
   }
   _tradeAutoLog(ss, resumo + publicado);
@@ -65,6 +54,110 @@ function tradeAutoAtualizar(forcar) {
 function tradeAutoGatilho() { tradeAutoAtualizar(false); }
 
 function tradeAutoAgora() { tradeAutoAtualizar(true); }
+
+function _tradeAutoPublicar(ss, resumo) {
+  SpreadsheetApp.flush();
+  var d = lerDados();
+  var hist = lerHistorico();
+  var imm;
+  try { imm = lerIntelMercadoPaineiras(); } catch (e) { imm = null; }
+  var eventosRio;
+  try { eventosRio = lerEventosRio(); } catch (e) { eventosRio = []; }
+  var precisaoProjecao;
+  try { precisaoProjecao = registrarHistoricoProjecao(d, hist); } catch (e) { precisaoProjecao = null; }
+  var html = montarHTML(d, {ok:false,tempAtual:'--',icon:'',prev:[],diasChuva:[]}, hist, imm, eventosRio, precisaoProjecao);
+  salvarNoDrive(html);
+  if (!atualizarGitHub(html)) {
+    _tradeAutoLog(ss, resumo + '; ERRO: Dashboard não subiu para o GitHub (GITHUB_TOKEN)');
+    throw new Error('Trade_Auto: planilha preenchida, mas o Dashboard não subiu para o GitHub. Tento de novo na próxima hora.');
+  }
+}
+
+// 13/10/2026: a linha "Parcial:" de 2025 (trade 25, parque 25) usa SUM(INDEX(X:X,3):INDEX(X:X,2+DAY(TODAY()-1)))
+// para comparar o mesmo período no mês em andamento. Quando o mês fecha, a fórmula continua
+// andando com HOJE() e o mês fechado passa a comparar só alguns dias de 2025 (set/26 mostrava
+// 27.580 no AquaRio em vez de 75.198). Nos meses já fechados, troca pela soma do mês inteiro.
+function _tradeAutoFecharParciais(ss) {
+  var MES_CURTO = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var hoje = new Date(), feitos = [];
+  var rx = /INDEX\(([A-Z]+):\1,(\d+)\):INDEX\(\1:\1,(\d+)\+DAY\(TODAY\(\)-1\)\)/g;
+  for (var ano = 2026; ano <= hoje.getFullYear(); ano++) {
+    for (var m = 0; m < 12; m++) {
+      if (ano === hoje.getFullYear() && m >= hoje.getMonth()) break; // mês atual continua com HOJE()
+      var sh = ss.getSheetByName('Diário ' + MES_CURTO[m] + String(ano).slice(2));
+      if (!sh) continue;
+      var nDias = new Date(ano, m + 1, 0).getDate();
+      var n = Math.min(sh.getLastRow(), 45), w = Math.min(sh.getLastColumn(), 40);
+      var forms = sh.getRange(1, 1, n, w).getFormulas();
+      var vals = sh.getRange(1, 1, n, 2).getValues();
+      for (var r = 0; r < n; r++) {
+        if (String(vals[r][0]).trim() !== 'Parcial:' && String(vals[r][1]).trim() !== 'Parcial:') continue;
+        for (var c = 0; c < w; c++) {
+          var f = forms[r][c];
+          if (!f || f.indexOf('TODAY()') < 0) continue;
+          var novo = f.replace(rx, function (_, col, ini, base) { return col + ini + ':' + col + (Number(base) + nDias); });
+          if (novo !== f && novo.indexOf('TODAY()') < 0) {
+            sh.getRange(r + 1, c + 1).setFormula(novo);
+            feitos.push(sh.getName() + '!' + sh.getRange(r + 1, c + 1).getA1Notation());
+          }
+        }
+      }
+    }
+  }
+  return feitos;
+}
+
+// 13/10/2026 (pedido do Paulo): visitação do parque (parque 26 e parque 25) de jan a set/26 igual à da
+// Controladoria, como no Dash de Performance. Lê trade_parque_oficial.json (gerado a partir de
+// controladoria.json e da base de 2025, que já é a da Controladoria) e grava só as células que
+// diferem, depois de conferir o cabeçalho e a data de cada linha. Rodar à mão quando chegar um
+// fechamento novo da Controladoria: tradeAutoParqueOficial().
+function tradeAutoParqueOficial() {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var h = { 'Accept': 'application/vnd.github.raw+json', 'User-Agent': 'Apps-Script' };
+  if (token) h['Authorization'] = 'token ' + token;
+  var r = UrlFetchApp.fetch('https://api.github.com/repos/comercial-gc/trade-dashboard/contents/trade_parque_oficial.json?t=' + Date.now(), { headers: h, muteHttpExceptions: true });
+  if (r.getResponseCode() !== 200) throw new Error('Trade_Auto: não consegui ler trade_parque_oficial.json (' + r.getResponseCode() + ')');
+  var dados = JSON.parse(r.getContentText());
+  var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
+  var resumo = [], total = 0;
+  Object.keys(dados.abas).forEach(function (aba) {
+    var a = dados.abas[aba], sh = ss.getSheetByName(aba);
+    if (!sh) { resumo.push(aba + ': aba não existe'); return; }
+    var vals = sh.getRange(1, 1, Math.min(sh.getLastRow(), 45), Math.min(sh.getLastColumn(), 40)).getValues();
+    var cab = vals[a.linha_cabecalho - 1];
+    var mud = 0;
+    Object.keys(a.parques).forEach(function (park) {
+      var p = a.parques[park];
+      var h26 = String(cab[p.col_p26 - 1] || '').trim().toLowerCase(), h25 = String(cab[p.col_p25 - 1] || '').trim().toLowerCase();
+      if (h26.indexOf('parque 26') !== 0 || h25.indexOf('parque 25') !== 0)
+        throw new Error('Trade_Auto: cabeçalho de ' + park + ' em "' + aba + '" mudou (' + h26 + ' / ' + h25 + '). Nada foi gravado.');
+      Object.keys(p.dias).forEach(function (dia) {
+        var x = p.dias[dia], dt = vals[x.linha - 1][a.col_data - 1];
+        if (!(dt instanceof Date) || dt.getMonth() + 1 !== a.mes || dt.getDate() !== Number(dia))
+          throw new Error('Trade_Auto: linha ' + x.linha + ' de "' + aba + '" não é o dia ' + dia + '. Nada foi gravado.');
+      });
+      Object.keys(p.dias).forEach(function (dia) {
+        var x = p.dias[dia], row = vals[x.linha - 1];
+        [['p26', p.col_p26], ['p25', p.col_p25]].forEach(function (k) {
+          var novo = x[k[0]];
+          if (novo === null || novo === undefined) return;
+          var velho = row[k[1] - 1];
+          if (typeof velho === 'number' && Math.abs(velho - novo) < 0.5) return;
+          sh.getRange(x.linha, k[1]).setValue(novo);
+          mud++;
+        });
+      });
+    });
+    total += mud;
+    resumo.push(aba + ': ' + mud + ' células');
+  });
+  var parciais = _tradeAutoFecharParciais(ss);
+  var texto = 'Visitação do parque pela Controladoria: ' + resumo.join('; ') + (parciais.length ? '; fórmulas de "Parcial" fechadas: ' + parciais.join(', ') : '');
+  if (total || parciais.length) { _tradeAutoPublicar(ss, texto); texto += '; Dashboard publicado'; }
+  _tradeAutoLog(ss, texto);
+}
+
 
 function _tradeAutoBaixarJson() {
   var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
