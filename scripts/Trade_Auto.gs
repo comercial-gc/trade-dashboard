@@ -3,8 +3,8 @@
 // Preenche sozinho as abas "Diário <Mês><aa>" e "Top Clientes-<Mês>" e republica
 // o Dashboard do Trade (Drive + GitHub).
 // Os números vêm do trade_diario.json do repositório comercial-gc/trade-dashboard,
-// calculado pelo workflow update-trade a partir da pasta do Flux do Paulo
-// (09:45 a 15:00). Este script roda de hora em hora com a conta de quem ativou o
+// calculado pelo workflow update-trade a partir dos brutos da pasta 2026 do Drive
+// (que se atualizam sozinhos por volta das 8h45). Este script roda de hora em hora com a conta de quem ativou o
 // gatilho; só age quando o JSON muda.
 //
 // Grava SOMENTE:
@@ -51,7 +51,27 @@ function tradeAutoAtualizar(forcar) {
 }
 
 // o gatilho passa um objeto de evento como argumento; por isso ele chama esta função
-function tradeAutoGatilho() { tradeAutoAtualizar(false); }
+function tradeAutoGatilho() {
+  _tradeAutoDispararCalculo();
+  tradeAutoAtualizar(false);
+}
+
+// 14/10/2026: as rodadas agendadas do GitHub (workflow update-trade) não estavam disparando. Como
+// reserva, o gatilho de hora em hora também pede o cálculo ao GitHub entre 9h e 17h; o resultado
+// (trade_diario.json) é lido na rodada seguinte. Falha aqui nunca impede o resto.
+function _tradeAutoDispararCalculo() {
+  try {
+    var h = Number(Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'H'));
+    if (h < 9 || h > 17) return;
+    var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+    if (!token) return;
+    UrlFetchApp.fetch('https://api.github.com/repos/comercial-gc/trade-dashboard/actions/workflows/update-trade.yml/dispatches', {
+      method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'User-Agent': 'Apps-Script' },
+      payload: JSON.stringify({ ref: 'main', inputs: { mes: '' } })
+    });
+  } catch (e) { Logger.log('Trade_Auto: não consegui pedir o cálculo ao GitHub: ' + e.message); }
+}
 
 function tradeAutoAgora() { tradeAutoAtualizar(true); }
 
