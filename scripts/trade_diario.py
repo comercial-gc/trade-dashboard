@@ -41,7 +41,12 @@ import trade_regras_agencias as regras  # noqa: E402
 
 socket.setdefaulttimeout(300)
 AQUI = os.path.dirname(os.path.abspath(__file__))
-PASTA_FLUX = "1-VhOHmeTFaaNfgVHdPDDcE55zwXmpEVA"
+PASTA_FLUX = "1-VhOHmeTFaaNfgVHdPDDcE55zwXmpEVA"  # pasta pessoal do Paulo (não é mais a fonte, ver abaixo)
+# 14/10/2026 (Paulo): a fonte é a pasta "2026" do Drive, com os brutos mensais de todos os parques
+# (AQUA_<MÊS>_2026, PAI_<MÊS>_2026), que se atualizam sozinhos todo dia de manhã (~8h45). São as
+# mesmas pastas que alimentam o Dash de Performance (config.json top5_origem_folders).
+PASTAS_BRUTO = {"A": "1A5qKFeQ_cqEACsqiZ_XAw7CR34-6RQr2", "P": "1n7e_VX-iOpnhZkiA9jd8OR1CNPK3WqBn"}
+MES_ARQ = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 VISITACAO_ID = "1Ut5PCIe0oMUwfeRGLaM16HoTelGw0qfd"
 GRAFIAS_JSON = os.path.join(AQUI, "trade_grafias.json")
 # dias que o Paulo preencheu pelo CARD e não devem ser reescritos
@@ -166,7 +171,7 @@ def _listar(drive, pai):
     out, tok = [], None
     while True:
         r = _exec(drive.files().list(q=f"'{pai}' in parents and trashed=false", pageToken=tok, pageSize=200,
-                                     fields="nextPageToken,files(id,name,mimeType,modifiedTime)",
+                                     fields="nextPageToken,files(id,name,mimeType,modifiedTime,size)",
                                      supportsAllDrives=True, includeItemsFromAllDrives=True))
         out += r["files"]
         tok = r.get("nextPageToken")
@@ -175,6 +180,32 @@ def _listar(drive, pai):
 
 
 # ---------------------------------------------------------------- pasta do Flux
+
+def ler_brutos_mes(drive, ano, mes):
+    """Brutos mensais da pasta 2026 do Drive: para cada parque, o arquivo <PREFIXO>_<MÊS>_<ANO> de maior
+    tamanho (mesma regra do Dash de Performance; ignora planilha "TRATADA").
+    -> ({("A"|"P", dia): {...agregados..., "ag": Counter, "arq", "mod"}}, avisos)"""
+    import re as _re
+    avisos, por_dia = [], {}
+    alvo = {MES_ARQ[mes - 1]} | ({"MAIO"} if mes == 5 else set()) | ({"MARCO"} if mes == 3 else set())
+    for parque, pasta in PASTAS_BRUTO.items():
+        cands = []
+        for f in _listar(drive, pasta):
+            if f["mimeType"].endswith("folder") or "TRATAD" in n(f["name"]):
+                continue
+            toks = [t for t in _re.split(r"[_\-. ]+", n(f["name"])) if t]
+            if str(ano) in toks and alvo & set(toks[1:]):
+                cands.append(f)
+        if not cands:
+            avisos.append(f"bruto de {MESES[mes - 1]}/{ano} do {'AquaRio' if parque == 'A' else 'Paineiras'} não encontrado na pasta 2026")
+            continue
+        f = max(cands, key=lambda x: int(x.get("size") or 0))
+        tipo, raw = _baixar(drive, f)
+        h, rows = _tabela(tipo, raw)
+        for d, x in processar(parque, h, rows, ano, mes, f["name"], avisos).items():
+            por_dia[(parque, d)] = dict(x, arq=f["name"], mod=f["modifiedTime"])
+    return por_dia, avisos
+
 
 def ler_pasta_mes(drive, ano, mes):
     """-> ({("A"|"P", dia): {...agregados..., "ag": Counter, "arq", "mod"}}, avisos)"""
@@ -359,7 +390,7 @@ def main():
     limite = min(ult, ontem.day) if (ontem.year, ontem.month) == (ano, mes) else ult
 
     drive = drive_service()
-    dados, avisos = ler_pasta_mes(drive, ano, mes)
+    dados, avisos = ler_brutos_mes(drive, ano, mes)
     vis = ler_visitacao(drive, ano, mes)
     ate = 0
     for d in range(1, limite + 1):  # último dia com os dois parques, sem buraco desde o dia 1
