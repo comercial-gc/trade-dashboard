@@ -914,3 +914,204 @@
   window.tradeMobAplicar = passar;
   agendar(600);
 })();
+
+/* 14/10/2026 (Paulo aprovou a prévia do celular): na faixa de celular do Trade (max-width:860px)
+   1) Barra fixa embaixo com 5 itens: Mês, Acum., Top, Share e Mais (Histórico e Intel.). A barra
+      de cima fica só com o seletor de mês. Usa os mesmos botões de sempre (mobNav2), então o
+      estado das páginas não muda. No celular, link #mar, #acum, #hist, #share, #cli ou #imm abre a página.
+   2) Top Clientes em lista: agência, bilhetes do período e variação vs 2025 sempre visíveis; o
+      toque abre desconto, receita AquaRio e % do parque. A lista é lida da própria tabela (segue
+      todos os filtros); a tabela continua no HTML e volta a aparecer acima de 860px.
+   Desktop (861px+) não muda. */
+(function () {
+  if (window.__tradePatchNavMobile) return;
+  window.__tradePatchNavMobile = true;
+  var MQ = window.matchMedia('(max-width:860px)');
+  var PAGINAS = ['mar', 'acum', 'hist', 'share', 'cli', 'imm'];
+  var ITENS = [
+    { id: 'mar', rot: 'Mês', svg: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>' },
+    { id: 'acum', rot: 'Acum.', svg: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
+    { id: 'cli', rot: 'Top', svg: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM12 13v4M8 20h8"/>' },
+    { id: 'share', rot: 'Share', svg: '<circle cx="12" cy="12" r="8"/><path d="M12 4v8h8"/>' },
+    { id: 'mais', rot: 'Mais', svg: '<path d="M4 7h16M4 12h16M4 17h16"/>' }
+  ];
+  var MAIS = [{ id: 'hist', rot: 'Histórico' }, { id: 'imm', rot: 'Intel. de Mercado' }];
+
+  var css = document.createElement('style');
+  css.id = 'tradePatchNavMobileCss';
+  css.textContent = [
+    '#tpmNav, #tpmMais, #tpmMaisFundo, .tpm-lista{ display:none; }',
+    '@media (max-width:860px){',
+    '  body{ padding-bottom:calc(66px + env(safe-area-inset-bottom)) !important; }',
+    '  .mob-nav2 .mob-nav2-btn, .mob-nav2 .mob-nav2-slider, #mobNav2Slider{ display:none !important; }',
+    '  .mob-nav2{ justify-content:flex-end; -webkit-mask-image:none !important; mask-image:none !important; }',
+    '  .mob-nav2::before{ content:"Mês"; color:#9fb3c2; font-size:12px; font-weight:700; margin-right:auto; text-transform:uppercase; letter-spacing:.05em; }',
+    '  #tpmNav{ display:flex; position:fixed; left:0; right:0; bottom:0; z-index:300; background:#fff; border-top:1px solid #D5E8F0;',
+    '    height:calc(64px + env(safe-area-inset-bottom)); padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); box-shadow:0 -4px 14px rgba(0,0,0,.06); }',
+    '  #tpmNav button{ flex:1; min-width:0; border:none; background:none; font-family:inherit; font-size:12px; font-weight:600; color:#6B8A9E; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:0; cursor:pointer; }',
+    '  #tpmNav .tpm-ic{ width:44px; height:28px; border-radius:14px; display:flex; align-items:center; justify-content:center; }',
+    '  #tpmNav svg{ width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }',
+    '  #tpmNav button.on{ color:#005F8E; }',
+    '  #tpmNav button.on .tpm-ic{ background:#e3f1f8; }',
+    '  [data-theme="dark"] #tpmNav{ background:#10151a; border-top-color:#2b333b; }',
+    '  [data-theme="dark"] #tpmNav button.on{ color:#4fc3e8; } [data-theme="dark"] #tpmNav button.on .tpm-ic{ background:#16293a; }',
+    '  #tpmMaisFundo.aberto{ display:block; position:fixed; inset:0; background:rgba(13,27,42,.3); z-index:301; }',
+    '  #tpmMais.aberto{ display:block; position:fixed; left:0; right:0; bottom:0; z-index:302; background:#fff; border-radius:18px 18px 0 0; padding:8px 14px calc(16px + env(safe-area-inset-bottom)); box-shadow:0 -8px 24px rgba(0,0,0,.14); }',
+    '  [data-theme="dark"] #tpmMais.aberto{ background:#10151a; color:#E7ECEF; }',
+    '  .tpm-grab{ width:44px; height:5px; border-radius:3px; background:#D5E8F0; margin:4px auto 10px; }',
+    '  .tpm-mais-tit{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:17px; font-weight:700; }',
+    '  .tpm-mais-tit button, .tpm-mais-lista button{ min-height:44px; border-radius:12px; border:1px solid #D5E8F0; background:transparent; color:inherit; font-family:inherit; font-size:14px; font-weight:600; padding:6px 14px; cursor:pointer; }',
+    '  .tpm-mais-lista{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }',
+    '  .tpm-mais-lista button{ min-height:48px; text-align:left; }',
+    '  .tpm-mais-lista button.on{ border-color:#005F8E; color:#005F8E; background:#e3f1f8; }',
+    // Top Clientes em lista
+    '  #cli-rank-tbl.tpm-com-lista > table{ display:none !important; }',
+    '  #cli-rank-tbl.tpm-com-lista .tpm-lista{ display:block; }',
+    '  .tpm-lista{ border:1px solid #D5E8F0; border-radius:14px; overflow:hidden; background:#fff; }',
+    '  [data-theme="dark"] .tpm-lista{ background:#171d22; border-color:#2b333b; }',
+    '  .tpm-cap{ font-size:12px; color:#6B8A9E; padding:8px 12px; border-bottom:1px solid #D5E8F0; }',
+    '  .tpm-li{ display:grid; grid-template-columns:28px 1fr auto; gap:8px; align-items:center; padding:10px 12px; border-top:1px solid #D5E8F0; cursor:pointer; min-height:56px; }',
+    '  .tpm-li:first-of-type{ border-top:none; }',
+    '  .tpm-rk{ font-weight:800; color:#6B8A9E; font-size:14px; }',
+    '  .tpm-nm{ font-size:13.5px; font-weight:700; line-height:1.25; min-width:0; overflow-wrap:anywhere; }',
+    '  .tpm-nm small{ display:block; font-weight:500; color:#6B8A9E; font-size:12px; margin-top:2px; }',
+    '  .tpm-nb{ text-align:right; white-space:nowrap; }',
+    '  .tpm-nb b{ display:block; font-size:17px; font-variant-numeric:tabular-nums; }',
+    '  .tpm-nb span{ font-size:12px; font-weight:700; }',
+    '  .tpm-up{ color:#1f7a4d; } .tpm-dn{ color:#b3432b; } .tpm-nd{ color:#6B8A9E; }',
+    '  .tpm-det{ display:none; grid-column:2 / 4; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:12px; color:#6B8A9E; padding-top:4px; }',
+    '  .tpm-li.aberto{ background:#f6fbfd; } [data-theme="dark"] .tpm-li.aberto{ background:#16293a; }',
+    '  .tpm-li.aberto .tpm-det{ display:grid; }',
+    '  .tpm-det b{ display:block; color:inherit; font-size:13px; }',
+    '  .tpm-mais-btn{ display:block; width:100%; min-height:46px; border:none; border-top:1px solid #D5E8F0; background:transparent; color:#005F8E; font-family:inherit; font-weight:700; font-size:14px; cursor:pointer; }',
+    '}',
+    // celular deitado: barra mais baixa para sobrar tela
+    '@media (max-width:860px) and (max-height:500px){',
+    '  body{ padding-bottom:calc(54px + env(safe-area-inset-bottom)) !important; }',
+    '  #tpmNav{ height:calc(52px + env(safe-area-inset-bottom)); }',
+    '  #tpmNav button{ flex-direction:row; gap:6px; font-size:13px; }',
+    '  #tpmNav .tpm-ic{ width:36px; height:26px; }',
+    '}'
+  ].join('\n');
+  document.head.appendChild(css);
+
+  function paginaAtual() { return (typeof curPage !== 'undefined' && curPage) ? curPage : 'mar'; }
+  function marcar() {
+    var nav = document.getElementById('tpmNav');
+    if (!nav) return;
+    var p = paginaAtual();
+    var alvo = ITENS.some(function (i) { return i.id === p; }) ? p : 'mais';
+    nav.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-tpm') === alvo); });
+  }
+  function irPara(id) {
+    fecharMais();
+    var b = document.querySelector('#mobNav2 .mob-nav2-btn[onclick*="\'' + id + '\'"]');
+    if (b) b.click();
+    else if (typeof nav === 'function') { var d = document.querySelector('.np[onclick*="\'' + id + '\'"]'); if (d) nav(d, id); }
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    marcar();
+  }
+  function abrirMais() {
+    var box = document.getElementById('tpmMais');
+    var p = paginaAtual();
+    box.innerHTML = '<div class="tpm-grab"></div><div class="tpm-mais-tit">Mais páginas<button type="button" data-fechar>Fechar</button></div>'
+      + '<div class="tpm-mais-lista">' + MAIS.map(function (m) { return '<button type="button" data-ir="' + m.id + '" class="' + (m.id === p ? 'on' : '') + '">' + m.rot + '</button>'; }).join('') + '</div>';
+    box.querySelector('[data-fechar]').addEventListener('click', fecharMais);
+    box.querySelectorAll('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { irPara(b.getAttribute('data-ir')); }); });
+    box.classList.add('aberto');
+    document.getElementById('tpmMaisFundo').classList.add('aberto');
+  }
+  function fecharMais() {
+    var a = document.getElementById('tpmMais'), f = document.getElementById('tpmMaisFundo');
+    if (a) a.classList.remove('aberto');
+    if (f) f.classList.remove('aberto');
+  }
+  function montarNav() {
+    if (document.getElementById('tpmNav')) return;
+    var navEl = document.createElement('nav');
+    navEl.id = 'tpmNav';
+    navEl.setAttribute('aria-label', 'Navegação do celular');
+    navEl.innerHTML = ITENS.map(function (it) { return '<button type="button" data-tpm="' + it.id + '" aria-label="' + it.rot + '"><span class="tpm-ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + it.svg + '</svg></span>' + it.rot + '</button>'; }).join('');
+    document.body.appendChild(navEl);
+    navEl.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-tpm]');
+      if (!b) return;
+      var id = b.getAttribute('data-tpm');
+      if (id === 'mais') abrirMais(); else irPara(id);
+    });
+    var fundo = document.createElement('div'); fundo.id = 'tpmMaisFundo'; fundo.addEventListener('click', fecharMais); document.body.appendChild(fundo);
+    var mais = document.createElement('div'); mais.id = 'tpmMais'; mais.setAttribute('role', 'dialog'); mais.setAttribute('aria-label', 'Mais páginas'); document.body.appendChild(mais);
+    // cliques nos botões de página originais (desktop ou topo) mantêm a barra marcada
+    document.addEventListener('click', function (e) { if (e.target.closest('.np, .mob-nav2-btn')) setTimeout(marcar, 0); }, true);
+    marcar();
+  }
+
+  // ---------- Top Clientes em lista ----------
+  var LIMITE = 50;
+  var mostrarTodos = false;
+  function txt(c) { return c ? c.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function montarLista() {
+    var wrap = document.getElementById('cli-rank-tbl');
+    if (!wrap) return;
+    var tb = wrap.querySelector('table.cli-tbl');
+    if (!MQ.matches || !tb) { wrap.classList.remove('tpm-com-lista'); return; }
+    var assinatura = tb.rows.length + '|' + txt(tb.rows[1]) + '|' + txt(tb.tHead && tb.tHead.rows[0]) + '|' + mostrarTodos;
+    if (wrap.dataset.tpmAss === assinatura && wrap.querySelector('.tpm-lista')) { wrap.classList.add('tpm-com-lista'); return; }
+    var cab = tb.tHead ? tb.tHead.rows[tb.tHead.rows.length - 1] : tb.rows[0];
+    var h = Array.prototype.map.call(cab.cells, function (c) { return txt(c).toUpperCase(); });
+    var idx = function (re) { for (var i = 0; i < h.length; i++) if (re.test(h[i])) return i; return -1; };
+    var periodos = [];
+    // período: "AGO/2026 → OUT/2026" (com comparação) ou só "OUT/2026" (Só este período)
+    h.forEach(function (t, i) { if (/^(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\/\d{4}/.test(t)) periodos.push(i); });
+    var iBil = periodos[0], iAnt = periodos.length > 1 ? periodos[1] : -1;
+    var iAg = idx(/AG[ÊE]NCIA/), iDesc = idx(/DESCONTO/), iRec = idx(/RECEITA/), iDelta = idx(/Δ\s*VS\s*2025/), iTr = idx(/%\s*TRADE/), iPq = idx(/%\s*PARQUE/);
+    if (iBil === undefined || iAg < 0) { wrap.classList.remove('tpm-com-lista'); return; }
+    var linhas = Array.prototype.filter.call(tb.tBodies[0] ? tb.tBodies[0].rows : [], function (r) { return r.cells.length > iBil; });
+    var total = linhas.length;
+    var vis = mostrarTodos ? linhas : linhas.slice(0, LIMITE);
+    var antRot = iAnt >= 0 ? 'ant. ' : '';
+    var html = '<div class="tpm-cap">Bilhetes em ' + txt(cab.cells[iBil]).toLowerCase().replace(/\s*→\s*/, ' a ') + ' · variação vs 2025' + (iAnt >= 0 ? ' · ant. = ' + txt(cab.cells[iAnt]).toLowerCase().replace(/\s*→\s*/, ' a ') : '') + ' · toque para ver desconto e receita</div>';
+    html += vis.map(function (r) {
+      var c = r.cells;
+      var d = txt(c[iDelta]);
+      var cl = /▲|\+/.test(d) ? 'tpm-up' : /▼|-\d/.test(d) ? 'tpm-dn' : 'tpm-nd';
+      var sub = (iTr >= 0 ? txt(c[iTr]) + ' do Trade' : '') + (iAnt >= 0 ? ' · ' + antRot + txt(c[iAnt]) : '');
+      return '<div class="tpm-li" role="button" tabindex="0"><span class="tpm-rk">' + txt(c[0]) + '</span>'
+        + '<span class="tpm-nm">' + txt(c[iAg]) + '<small>' + sub + '</small></span>'
+        + '<span class="tpm-nb"><b>' + txt(c[iBil]) + '</b><span class="' + cl + '">' + (d || '-') + '</span></span>'
+        + '<div class="tpm-det">'
+        + (iDesc >= 0 ? '<div>Desconto AquaRio<b>' + (txt(c[iDesc]) || '-') + '</b></div>' : '')
+        + (iRec >= 0 ? '<div>Receita AquaRio<b>' + (txt(c[iRec]) || '-') + '</b></div>' : '')
+        + (iPq >= 0 ? '<div>% do parque<b>' + (txt(c[iPq]) || '-') + '</b></div>' : '')
+        + '</div></div>';
+    }).join('');
+    if (total > vis.length) html += '<button type="button" class="tpm-mais-btn" data-tpm-todos>Ver todas as ' + total.toLocaleString('pt-BR') + ' agências</button>';
+    var lista = wrap.querySelector('.tpm-lista');
+    if (!lista) { lista = document.createElement('div'); lista.className = 'tpm-lista'; wrap.appendChild(lista); }
+    lista.innerHTML = html;
+    wrap.dataset.tpmAss = assinatura;
+    wrap.classList.add('tpm-com-lista');
+    lista.querySelectorAll('.tpm-li').forEach(function (li) {
+      var alterna = function () { li.classList.toggle('aberto'); };
+      li.addEventListener('click', alterna);
+      li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alterna(); } });
+    });
+    var bt = lista.querySelector('[data-tpm-todos]');
+    if (bt) bt.addEventListener('click', function () { mostrarTodos = true; montarLista(); });
+  }
+
+  var timer = null;
+  function passar() { timer = null; try { montarNav(); marcar(); montarLista(); } catch (e) { if (window.console) console.warn('[trade_patch nav mobile]', e); } }
+  function agendar(ms) { if (timer) return; timer = setTimeout(passar, ms || 250); }
+  new MutationObserver(function (muts) {
+    // ignora as mudanças da própria lista (senão ela se redesenha em loop)
+    for (var i = 0; i < muts.length; i++) { var t = muts[i].target; if (!(t.closest && t.closest('.tpm-lista'))) { agendar(300); return; } }
+  }).observe(document.body, { childList: true, subtree: true });
+  window.addEventListener('resize', function () { if (!MQ.matches) fecharMais(); agendar(300); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharMais(); });
+  // link direto (#cli etc.), só uma vez ao abrir
+  var h0 = decodeURIComponent((location.hash || '').slice(1));
+  montarNav();
+  if (MQ.matches && PAGINAS.indexOf(h0) >= 0 && h0 !== paginaAtual()) setTimeout(function () { irPara(h0); }, 400);
+  agendar(500);
+})();
