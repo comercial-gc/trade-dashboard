@@ -741,3 +741,176 @@
   if (document.readyState === 'complete') reaplicar();
   else window.addEventListener('load', function () { setTimeout(reaplicar, 300); });
 })();
+
+/* 14/10/2026 (Paulo aprovou seguir com o celular): correções de bug no layout de celular, só na
+   faixa de celular do Trade (max-width:860px, a mesma em que aparecem .mob-header/.mob-nav2).
+   Desktop (861px+) não muda.
+   1) Barra de abas (.mob-nav2) tem "position:relative" com top:48px (sobra do sticky original) e
+      ficava deslocada 48px por cima do primeiro card. Fica no fluxo normal (top:0), sem cobrir nada.
+      Obs.: o sticky original não funciona porque html e body têm overflow-x:hidden; deixar a barra
+      fixa na tela é decisão de layout (prévia da navegação inferior), não entra aqui.
+   2) Alvos de toque: abas, seletor de mês e abas internas do Top com no mínimo 40-44px.
+   3) Texto com menos de 12px sobe pra 12px.
+   4) Top Clientes: # e Agência fixos (sticky) e a tabela abre rolada até a coluna de bilhetes do
+      período selecionado. Intel: régua abre no mês atual. */
+(function () {
+  if (window.__tradePatchMobile) return;
+  window.__tradePatchMobile = true;
+  var MQ = window.matchMedia('(max-width:860px)');
+  var MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  var hoje = new Date();
+  var CHAVE_HOJE = hoje.getFullYear() * 12 + hoje.getMonth();
+
+  var css = document.createElement('style');
+  css.id = 'tradePatchMobileCss';
+  css.textContent = [
+    '@media (max-width:860px){',
+    '  .mob-nav2{ top:0 !important; height:auto !important; min-height:var(--mob-nav2-h); padding:4px 10px !important; }',
+    '  .mob-nav2-btn{ min-height:40px; padding:6px 12px !important; font-size:12px !important; }',
+    '  .mob-nav2-sel{ min-height:40px; }',
+    '  .cli-tab{ min-height:44px; font-size:12px !important; }',
+    '  .cli-seg-btn{ min-height:40px; }',
+    '  .cli-select{ min-height:44px; }',
+    '  .mob-header .bio-global-toggle, .mob-header .theme-toggle-btn{ position:relative; }',
+    '  .mob-header .bio-global-toggle::after, .mob-header .theme-toggle-btn::after{ content:""; position:absolute; inset:-11px -5px; }',
+    '  .cli-tbl th, .cli-tbl td{ font-size:12px; }',
+    '  .cli-tbl th:first-child, .cli-tbl td:first-child{ padding-left:6px; padding-right:4px; }',
+    '  .cli-tbl td:nth-child(2){ white-space:normal; min-width:96px; max-width:118px; line-height:1.25; }',
+    '}'
+  ].join('\n');
+  document.head.appendChild(css);
+
+  function rgba(s) {
+    var m = String(s || '').match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    var p = m[1].split(',').map(function (x) { return parseFloat(x); });
+    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+  }
+  function fundoOpaco(el) {
+    var camadas = [];
+    for (var n = el; n && n.nodeType === 1; n = n.parentElement) {
+      var c = rgba(getComputedStyle(n).backgroundColor);
+      if (c && c.a > 0) { camadas.push(c); if (c.a >= 1) break; }
+    }
+    var base = { r: 255, g: 255, b: 255 };
+    for (var i = camadas.length - 1; i >= 0; i--) {
+      var k = camadas[i];
+      base = { r: k.r * k.a + base.r * (1 - k.a), g: k.g * k.a + base.g * (1 - k.a), b: k.b * k.a + base.b * (1 - k.a) };
+    }
+    return 'rgb(' + Math.round(base.r) + ',' + Math.round(base.g) + ',' + Math.round(base.b) + ')';
+  }
+  function areaRolavel(el) {
+    for (var p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      var ox = getComputedStyle(p).overflowX;
+      if (ox === 'auto' || ox === 'scroll') return p;
+    }
+    return null;
+  }
+  function chaveMes(txt) {
+    var m = String(txt || '').trim().toUpperCase().match(/^(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)[A-ZÇ]*\*?\s*(?:\/\s*(\d{2,4}))?/);
+    if (!m) return null;
+    var a = m[2] ? parseInt(m[2], 10) : hoje.getFullYear();
+    if (a < 100) a += 2000;
+    return a * 12 + MESES.indexOf(m[1]);
+  }
+  function fixar(cel, left) {
+    if (cel.dataset.tpmStk !== undefined) return;
+    cel.dataset.tpmStk = cel.style.cssText;
+    var fundo = fundoOpaco(cel);
+    cel.style.position = 'sticky';
+    cel.style.left = left + 'px';
+    cel.style.zIndex = cel.tagName === 'TH' ? '4' : '3';
+    cel.style.backgroundColor = fundo;
+    cel.style.boxShadow = 'inset -1px 0 0 rgba(0,0,0,.12)';
+  }
+  function rolarAte(area, alvo, largFixa) {
+    if (!alvo || area.dataset.tpmRolou === '1' || area.scrollLeft > 4) return;
+    var ra = area.getBoundingClientRect();
+    var x = alvo.getBoundingClientRect().left - ra.left + area.scrollLeft;
+    var s = x - largFixa - 2;
+    // se o mês ainda cabe sem rolar, não mexe
+    if (alvo.getBoundingClientRect().right <= ra.right) return;
+    if (s > 8) { area.scrollLeft = s; area.dataset.tpmRolou = '1'; }
+  }
+
+  // Top Clientes: # + Agência fixos, rola até a coluna de bilhetes do período ("AGO/2026 → OUT/2026")
+  function topClientes() {
+    var tb = document.querySelector('#cli-rank-tbl table.cli-tbl');
+    if (!tb || !tb.offsetParent || tb.dataset.tpmFeito) return;
+    var area = areaRolavel(tb);
+    if (!area || tb.scrollWidth <= area.clientWidth + 4) return;
+    tb.dataset.tpmFeito = '1';
+    var pad = -(parseFloat(getComputedStyle(area).paddingLeft) || 0);
+    var cab = tb.tHead ? tb.tHead.rows[tb.tHead.rows.length - 1] : tb.rows[0];
+    var w0 = cab.cells[0].offsetWidth;
+    var w1 = cab.cells[1].offsetWidth;
+    Array.prototype.forEach.call(tb.rows, function (r) {
+      if (r.cells.length < 3) return;
+      if (r.cells[0].offsetLeft <= 3) fixar(r.cells[0], pad);
+      if (Math.abs(r.cells[1].offsetLeft - w0) <= 3) fixar(r.cells[1], pad + w0);
+    });
+    var alvo = null;
+    Array.prototype.some.call(cab.cells, function (c) { if (/\d{4}\s*→/.test(c.textContent) && !/^2025/.test(c.textContent.trim())) { alvo = c; return true; } return false; });
+    rolarAte(area, alvo, w0 + w1);
+  }
+  // Intel (.se-regua): já tem 1ª coluna fixa, só abre no mês atual
+  function reguas() {
+    document.querySelectorAll('table.se-regua').forEach(function (tb) {
+      if (!tb.offsetParent) return;
+      var area = areaRolavel(tb);
+      if (!area || area.dataset.tpmRolou === '1' || tb.scrollWidth <= area.clientWidth + 4) return;
+      var cab = tb.tHead ? tb.tHead.rows[tb.tHead.rows.length - 1] : tb.rows[0];
+      var alvo = null, melhor = -1;
+      Array.prototype.forEach.call(cab.cells, function (c) { var k = chaveMes(c.textContent); if (k !== null && k <= CHAVE_HOJE && k > melhor) { melhor = k; alvo = c; } });
+      if (!alvo) return;
+      var largFixa = cab.cells[0].getBoundingClientRect().width;
+      var ra = area.getBoundingClientRect();
+      var rc = alvo.getBoundingClientRect();
+      // mês atual encostado na direita, com os anteriores à esquerda
+      var s = rc.right - ra.left + area.scrollLeft - area.clientWidth + 6;
+      s = Math.min(s, rc.left - ra.left + area.scrollLeft - largFixa - 2);
+      if (s > 8) { area.scrollLeft = s; area.dataset.tpmRolou = '1'; }
+    });
+  }
+  function fonteMinima() {
+    var raizes = document.querySelectorAll('.mob-header, .mob-nav2, .page.on, .foot');
+    if (!raizes.length) raizes = [document.body];
+    Array.prototype.forEach.call(raizes, function (raiz) {
+      raiz.querySelectorAll('*').forEach(function (el) {
+        if (el.dataset && el.dataset.tpmFz !== undefined) return;
+        if (el.closest('svg') || /^(CANVAS|SCRIPT|STYLE)$/.test(el.tagName)) return;
+        var texto = false;
+        for (var i = 0; i < el.childNodes.length; i++) { var n = el.childNodes[i]; if (n.nodeType === 3 && n.textContent.trim()) { texto = true; break; } }
+        if (!texto && !/^(INPUT|SELECT|BUTTON)$/.test(el.tagName)) return;
+        if (!el.offsetParent) return;
+        if (parseFloat(getComputedStyle(el).fontSize) < 11.95) {
+          el.dataset.tpmFz = el.style.getPropertyValue('font-size') + '|' + el.style.getPropertyPriority('font-size');
+          el.style.setProperty('font-size', '12px', 'important');
+        }
+      });
+    });
+  }
+  var timer = null;
+  function passar() {
+    timer = null;
+    if (!MQ.matches) return;
+    try { fonteMinima(); topClientes(); reguas(); } catch (e) { if (window.console) console.warn('[trade_patch mobile]', e); }
+  }
+  function agendar(ms) { if (!MQ.matches || timer) return; timer = setTimeout(passar, ms || 250); }
+  function desfazer() {
+    document.querySelectorAll('[data-tpm-stk]').forEach(function (c) { c.style.cssText = c.dataset.tpmStk; delete c.dataset.tpmStk; });
+    document.querySelectorAll('[data-tpm-fz]').forEach(function (el) {
+      var p = el.dataset.tpmFz.split('|');
+      el.style.removeProperty('font-size');
+      if (p[0]) el.style.setProperty('font-size', p[0], p[1] || '');
+      delete el.dataset.tpmFz;
+    });
+    document.querySelectorAll('[data-tpm-feito]').forEach(function (t) { delete t.dataset.tpmFeito; });
+    document.querySelectorAll('[data-tpm-rolou]').forEach(function (a) { delete a.dataset.tpmRolou; });
+  }
+  new MutationObserver(function () { agendar(300); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', function () { agendar(300); }, true);
+  window.addEventListener('resize', function () { if (!MQ.matches) { desfazer(); return; } agendar(400); });
+  window.tradeMobAplicar = passar;
+  agendar(600);
+})();

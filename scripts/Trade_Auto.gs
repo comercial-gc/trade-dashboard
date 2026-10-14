@@ -64,14 +64,27 @@ function _tradeAutoDispararCalculo() {
     var h = Number(Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'H'));
     if (h < 9 || h > 17) return;
     var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
-    if (!token) return;
-    UrlFetchApp.fetch('https://api.github.com/repos/comercial-gc/trade-dashboard/actions/workflows/update-trade.yml/dispatches', {
+    if (!token) { _tradeAutoLogPedido('pedido de cálculo ao GitHub não enviado: propriedade GITHUB_TOKEN vazia'); return; }
+    var r = UrlFetchApp.fetch('https://api.github.com/repos/comercial-gc/trade-dashboard/actions/workflows/update-trade.yml/dispatches', {
       method: 'post', contentType: 'application/json', muteHttpExceptions: true,
       headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json', 'User-Agent': 'Apps-Script' },
       payload: JSON.stringify({ ref: 'main', inputs: { mes: '' } })
     });
-  } catch (e) { Logger.log('Trade_Auto: não consegui pedir o cálculo ao GitHub: ' + e.message); }
+    var cod = r.getResponseCode();
+    _tradeAutoLogPedido(cod === 204 ? 'cálculo pedido ao GitHub (ok)'
+      : 'pedido de cálculo ao GitHub RECUSADO (HTTP ' + cod + '): ' + r.getContentText().slice(0, 300));
+  } catch (e) { _tradeAutoLogPedido('não consegui pedir o cálculo ao GitHub: ' + e.message); }
 }
+
+function _tradeAutoLogPedido(texto) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
+    _tradeAutoLog(ss, texto);
+  } catch (e) { Logger.log(texto); }
+}
+
+// roda uma vez à mão para testar o pedido ao GitHub sem esperar o gatilho (resultado na aba de log)
+function tradeAutoTestarPedido() { _tradeAutoDispararCalculo(); }
 
 function tradeAutoAgora() { tradeAutoAtualizar(true); }
 
