@@ -17,6 +17,8 @@
 // Para ligar: rodar ativarGatilhoTradeAuto() uma vez (pede autorização).
 // Para rodar na hora: tradeAutoAgora().
 // Visitação do parque pela Controladoria (rodar à mão): tradeAutoParqueOficial().
+// Publicar o que foi preenchido à mão (Diário e Top Clientes), sem a automação sobrescrever:
+// tradePublicarManual() (pode ser atribuída a um botão/desenho na planilha).
 // ═══════════════════════════════════════════════════════════════════
 
 var TRADE_AUTO_JSON = 'https://api.github.com/repos/comercial-gc/trade-dashboard/contents/trade_diario.json';
@@ -32,10 +34,16 @@ function tradeAutoAtualizar(forcar) {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
   var mudDiario = _tradeAutoDiario(ss, dados);
-  var mudTop = _tradeAutoTop(ss, dados);
+  // 16/10/2026: se o Paulo publicou à mão dias que o Drive ainda não tem, o Top Clientes manual
+  // (que já inclui esses dias) não é sobrescrito pelo cálculo mais curto. Quando o Drive alcançar,
+  // a trava sai sozinha e a automação volta a escrever o Top Clientes.
+  var manAte = Number(props.getProperty('TRADE_MANUAL_ATE') || 0), manMes = props.getProperty('TRADE_MANUAL_MES');
+  var travaTop = manMes === dados.mes && manAte > Number(dados.ate);
+  if (!travaTop && manAte) { props.deleteProperty('TRADE_MANUAL_ATE'); props.deleteProperty('TRADE_MANUAL_MES'); }
+  var mudTop = travaTop ? false : _tradeAutoTop(ss, dados);
   var resumo = dados.aba_diario + ': ' + mudDiario.length + ' células' +
     (mudDiario.length ? ' (' + mudDiario.join(', ').slice(0, 2000) + ')' : '') +
-    '; ' + dados.aba_top + ': ' + (mudTop ? 'reescrito com ' + dados.top.linhas.length + ' agências' : 'igual') +
+    '; ' + dados.aba_top + ': ' + (travaTop ? 'preservado (lançado à mão até ' + ('0' + manAte).slice(-2) + ')' : (mudTop ? 'reescrito com ' + dados.top.linhas.length + ' agências' : 'igual')) +
     '; dados até ' + ('0' + dados.ate).slice(-2) + '/' + dados.mes.slice(5) +
     (dados.avisos && dados.avisos.length ? '; avisos: ' + dados.avisos.join(' | ') : '');
 
@@ -87,6 +95,29 @@ function _tradeAutoLogPedido(texto) {
 function tradeAutoTestarPedido() { _tradeAutoDispararCalculo(); }
 
 function tradeAutoAgora() { tradeAutoAtualizar(true); }
+
+// 16/10/2026 (Paulo): publica o Dashboard com o que está na planilha agora (inclusive dias e Top
+// Clientes lançados à mão quando o Drive atrasa) e trava o Top Clientes até o Drive alcançar esse dia.
+function tradePublicarManual() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
+  var props = PropertiesService.getScriptProperties();
+  var dados = _tradeAutoBaixarJson();
+  var ultimo = 0, mes = dados ? dados.mes : null;
+  if (dados && dados.aba_diario) {
+    var sh = ss.getSheetByName(dados.aba_diario);
+    var vals = sh ? sh.getRange(3, 2, 31, 2).getValues() : [];   // colunas B (data) e C (Trade AquaRio)
+    vals.forEach(function (v) { if (v[0] instanceof Date && typeof v[1] === 'number' && v[1] > 0) ultimo = Math.max(ultimo, v[0].getDate()); });
+  }
+  if (ultimo && mes && ultimo > Number(dados.ate)) {
+    props.setProperty('TRADE_MANUAL_ATE', String(ultimo));
+    props.setProperty('TRADE_MANUAL_MES', mes);
+  }
+  var resumo = 'publicação manual: planilha até ' + ('0' + ultimo).slice(-2) + (mes ? '/' + mes.slice(5) : '') +
+    (ultimo > Number(dados && dados.ate) ? ' (Drive até ' + ('0' + dados.ate).slice(-2) + '; Top Clientes travado até o Drive alcançar)' : '');
+  _tradeAutoPublicar(ss, resumo);
+  _tradeAutoLog(ss, resumo + '; Dashboard publicado');
+  try { SpreadsheetApp.getActive().toast('Dashboard do Trade publicado com a planilha até ' + ('0' + ultimo).slice(-2), 'Trade', 5); } catch (e) {}
+}
 
 function _tradeAutoPublicar(ss, resumo) {
   SpreadsheetApp.flush();
