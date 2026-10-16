@@ -151,6 +151,9 @@ def _baixar(drive, f):
 
 
 def _tabela(tipo, raw):
+    # 16/10/2026: o PAI_OUT_2026.xlsx passou a vir como CSV com nome .xlsx (mimeType text/csv) e
+    # quebrava o openpyxl. O formato é decidido pelo conteúdo: xlsx é um zip e começa com "PK".
+    tipo = "xlsx" if raw[:2] == b"PK" else "csv"
     if tipo == "xlsx":
         import openpyxl
         ws = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True).worksheets[0]
