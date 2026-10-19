@@ -14,7 +14,8 @@
 //   - aba oculta "Automação Trade (log)" com o histórico do que foi feito.
 // Fórmulas, 2025, metas e as demais colunas não são tocadas.
 //
-// Para ligar: rodar ativarGatilhoTradeAuto() uma vez (pede autorização).
+// Para ligar: rodar ativarGatilhoTradeAuto() uma vez (pede autorização). Cria a rodada das 09:05
+// (tradeAutoManha) e a de hora em hora (reserva).
 // Para rodar na hora: tradeAutoAgora().
 // Visitação do parque pela Controladoria (rodar à mão): tradeAutoParqueOficial().
 // Publicar o que foi preenchido à mão (Diário e Top Clientes), sem a automação sobrescrever:
@@ -305,9 +306,24 @@ function _tradeAutoLog(ss, texto) {
   log.appendRow([Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'yyyy-MM-dd HH:mm:ss'), texto]);
 }
 
+// 19/10/2026 (Paulo): rodada fixa às 09:05. Pede o cálculo ao GitHub, espera ele terminar
+// (até ~4 min) e já grava e publica. O gatilho de hora em hora continua como reserva para
+// quando o Drive atrasa.
+function tradeAutoManha() {
+  var antes = (_tradeAutoBaixarJson() || {}).gerado_em;
+  _tradeAutoDispararCalculo();
+  for (var i = 0; i < 8; i++) {
+    Utilities.sleep(30000);
+    var j = _tradeAutoBaixarJson();
+    if (j && j.gerado_em && j.gerado_em !== antes) break;
+  }
+  tradeAutoAtualizar(false);
+}
+
 function ativarGatilhoTradeAuto() {
   ScriptApp.getProjectTriggers()
-    .filter(function (t) { return t.getHandlerFunction() === 'tradeAutoGatilho'; })
+    .filter(function (t) { var f = t.getHandlerFunction(); return f === 'tradeAutoGatilho' || f === 'tradeAutoManha'; })
     .forEach(function (t) { ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('tradeAutoManha').timeBased().atHour(9).nearMinute(5).everyDays(1).inTimezone('America/Sao_Paulo').create();
   ScriptApp.newTrigger('tradeAutoGatilho').timeBased().everyHours(1).create();
 }

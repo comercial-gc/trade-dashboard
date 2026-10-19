@@ -9,7 +9,8 @@ name: Números diários do Trade (trade_diario.json)
 
 on:
   schedule:
-    # UTC = Brasília + 3h: 09:45, 10:45, 11:45, 13:00 e 15:00
+    # UTC = Brasília + 3h: 09:05, 09:45, 10:45, 11:45, 13:00 e 15:00
+    - cron: "5 12 * * *"
     - cron: "45 12 * * *"
     - cron: "45 13 * * *"
     - cron: "45 14 * * *"
