@@ -5,14 +5,14 @@
  "meses": {
   "2025-01": {
    "AquaRio": {
-    "trade": 11225,
+    "trade": 11224,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 92846,
+    "trade": 91187,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -28,14 +28,14 @@
   },
   "2025-02": {
    "AquaRio": {
-    "trade": 7509,
+    "trade": 7469,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 77950,
+    "trade": 76690,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -51,14 +51,14 @@
   },
   "2025-03": {
    "AquaRio": {
-    "trade": 6293,
+    "trade": 6133,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 72593,
+    "trade": 71107,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -97,14 +97,14 @@
   },
   "2025-05": {
    "AquaRio": {
-    "trade": 8730,
+    "trade": 8669,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 48282,
+    "trade": 47233,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -120,14 +120,14 @@
   },
   "2025-06": {
    "AquaRio": {
-    "trade": 7449,
+    "trade": 9067,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 45197,
+    "trade": 44080,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -143,14 +143,14 @@
   },
   "2025-07": {
    "AquaRio": {
-    "trade": 15982,
+    "trade": 15871,
     "parque": null,
     "appai": null,
     "escolas": null,
     "parcial": false
    },
    "Paineiras": {
-    "trade": 57465,
+    "trade": 55841,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -166,7 +166,7 @@
   },
   "2025-08": {
    "AquaRio": {
-    "trade": 10494,
+    "trade": 10528,
     "parque": null,
     "appai": null,
     "escolas": null,
@@ -196,7 +196,7 @@
     "parcial": false
    },
    "Paineiras": {
-    "trade": 53401,
+    "trade": 53403,
     "parque": null,
     "appai": null,
     "escolas": null,
