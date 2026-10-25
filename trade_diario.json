@@ -1,11 +1,12 @@
 {
  "versao": 1,
- "gerado_em": "2026-10-24T12:12:05Z",
+ "gerado_em": "2026-10-25T12:12:21Z",
  "mes": "2026-10",
  "ate": 22,
- "limite": 23,
+ "limite": 24,
  "dias_faltando": [
-  23
+  23,
+  24
  ],
  "dias_sem_visitacao": [],
  "protegidos": [
