@@ -935,6 +935,7 @@
     { id: 'share', rot: 'Share', svg: '<circle cx="12" cy="12" r="8"/><path d="M12 4v8h8"/>' },
     { id: 'mais', rot: 'Mais', svg: '<path d="M4 7h16M4 12h16M4 17h16"/>' }
   ];
+  // 26/10/2026: o trade_v2.js (abas OBZ, Indicadores, Origem, Oportunidades) entra no "Mais" por window.__tpmMaisExtra
   var MAIS = [{ id: 'hist', rot: 'Histórico' }, { id: 'imm', rot: 'Intel. de Mercado' }];
 
   var css = document.createElement('style');
@@ -1015,7 +1016,7 @@
     var box = document.getElementById('tpmMais');
     var p = paginaAtual();
     box.innerHTML = '<div class="tpm-grab"></div><div class="tpm-mais-tit">Mais páginas<button type="button" data-fechar>Fechar</button></div>'
-      + '<div class="tpm-mais-lista">' + MAIS.map(function (m) { return '<button type="button" data-ir="' + m.id + '" class="' + (m.id === p ? 'on' : '') + '">' + m.rot + '</button>'; }).join('') + '</div>';
+      + '<div class="tpm-mais-lista">' + MAIS.concat(window.__tpmMaisExtra || []).map(function (m) { return '<button type="button" data-ir="' + m.id + '" class="' + (m.id === p ? 'on' : '') + '">' + m.rot + '</button>'; }).join('') + '</div>';
     box.querySelector('[data-fechar]').addEventListener('click', fecharMais);
     box.querySelectorAll('[data-ir]').forEach(function (b) { b.addEventListener('click', function () { irPara(b.getAttribute('data-ir')); }); });
     box.classList.add('aberto');

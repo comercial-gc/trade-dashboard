@@ -51,6 +51,10 @@ VISITACAO_ID = "1Ut5PCIe0oMUwfeRGLaM16HoTelGw0qfd"
 GRAFIAS_JSON = os.path.join(AQUI, "trade_grafias.json")
 # dias que o Paulo preencheu pelo CARD e não devem ser reescritos
 PROTEGIDOS = {(2026, 10): [1, 2]}
+# 26/10/2026 (Paulo): Portal Service e Condutores (desde ago/26) são TRADE. No CARD vêm com Grupo do Bilhete
+# "E-Commerce" e Local de Venda "Cristo Redentor | Portal Service / Condutores" ("Car Service" no nome antigo);
+# no Flux já vêm como CANAL_VENDA TRADE / PORTAL DE AGENTES. Vale para qualquer arquivo que traga essas colunas.
+PORTAL_TRADE_RE = re.compile(r"PORTAL SERVICE|CONDUTOR|CAR SERVICE")
 # agências que nunca entram no Top Clientes (além das da skill)
 EXCLUIR_EXTRA = {"TESTE"}
 # grafias já decididas (Paulo, 13/10/2026; Great Tour é a grafia de todos os meses de 2026)
@@ -260,8 +264,9 @@ def processar(parque, h, rows, ano, mes, nome_arq, avisos):
             continue
         x = dias.setdefault(dt.day, {"trade": 0.0, "appai": 0.0, "esc": 0.0, "rec": 0.0, "ag": collections.Counter()})
         q = 1
+        portal = PORTAL_TRADE_RE.search(" ".join(n(g(r, c)) for c in ("LOCAL DE VENDA", "BILHETE", "GRUPO DO BILHETE", "NOME INTERNO")))
         if card:
-            if n(g(r, "ORIGEM VENDA")) == "POS" or n(g(r, "GRUPO DO BILHETE")) != "TRADE":
+            if n(g(r, "ORIGEM VENDA")) == "POS" or (n(g(r, "GRUPO DO BILHETE")) != "TRADE" and not portal):
                 continue
             b = n(g(r, "BILHETE"))
             x["trade"] += 1
@@ -270,7 +275,7 @@ def processar(parque, h, rows, ano, mes, nome_arq, avisos):
             ag = "APPAI" if ("APPAI" in b or lv == regras.APPAI_LOCAL_VENDA) else ("" if lv in regras.INTERNOS else lv)
         elif parque == "A":
             local = n(g(r, "LOCAL_VENDA"))
-            if n(g(r, "CANAL_VENDA")) != "TRADE" or (local.startswith("POS") and local != "POS TRADE"):
+            if not portal and (n(g(r, "CANAL_VENDA")) != "TRADE" or (local.startswith("POS") and local != "POS TRADE")):
                 continue
             b = n(g(r, "NOME_BILHETE"))
             x["trade"] += 1
@@ -283,7 +288,7 @@ def processar(parque, h, rows, ano, mes, nome_arq, avisos):
             ag = str(g(r, "NOME_AGENCIA") or "").strip()
             if "BINAMIK" in n(ag):
                 continue
-            if not (n(g(r, "CANAL_VENDA")) == "TRADE" or any(k in cat for k in ("GUIA", "AGENCIA", "OPERADORA", "TRADE"))):
+            if not (portal or n(g(r, "CANAL_VENDA")) == "TRADE" or any(k in cat for k in ("GUIA", "AGENCIA", "OPERADORA", "TRADE"))):
                 continue
             q = num(g(r, "QTDE_TOTAL"))
             x["trade"] += q
