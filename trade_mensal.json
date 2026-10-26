@@ -312,7 +312,7 @@
    },
    "Paineiras": {
     "trade": 74467,
-    "parque": 146223,
+    "parque": 146233,
     "appai": null,
     "escolas": null,
     "parcial": false
@@ -328,7 +328,7 @@
   "2026-03": {
    "AquaRio": {
     "trade": 11124,
-    "parque": 86768,
+    "parque": 86767,
     "appai": 1134,
     "escolas": 172,
     "parcial": false
@@ -351,14 +351,14 @@
   "2026-04": {
    "AquaRio": {
     "trade": 10550,
-    "parque": 76670,
+    "parque": 76961,
     "appai": 1494,
     "escolas": 1230,
     "parcial": false
    },
    "Paineiras": {
     "trade": 57031,
-    "parque": 134840,
+    "parque": 135221,
     "appai": null,
     "escolas": null,
     "parcial": false
@@ -374,14 +374,14 @@
   "2026-05": {
    "AquaRio": {
     "trade": 12858,
-    "parque": 81111,
+    "parque": 81141,
     "appai": 1486,
     "escolas": 1972,
     "parcial": false
    },
    "Paineiras": {
     "trade": 46644,
-    "parque": 110550,
+    "parque": 110560,
     "appai": null,
     "escolas": null,
     "parcial": false
@@ -420,14 +420,14 @@
   "2026-07": {
    "AquaRio": {
     "trade": 20571,
-    "parque": 122051,
+    "parque": 121851,
     "appai": 3495,
     "escolas": 1764,
     "parcial": false
    },
    "Paineiras": {
     "trade": 58874,
-    "parque": 135096,
+    "parque": 135093,
     "appai": null,
     "escolas": null,
     "parcial": false
@@ -443,14 +443,14 @@
   "2026-08": {
    "AquaRio": {
     "trade": 14168,
-    "parque": 79811,
+    "parque": 79782,
     "appai": 1691,
     "escolas": 1241,
     "parcial": false
    },
    "Paineiras": {
     "trade": 52825,
-    "parque": 108107,
+    "parque": 108105,
     "appai": null,
     "escolas": null,
     "parcial": false
@@ -466,7 +466,7 @@
    },
    "Paineiras": {
     "trade": 59571,
-    "parque": 102320,
+    "parque": 101741,
     "appai": null,
     "escolas": null,
     "parcial": false
