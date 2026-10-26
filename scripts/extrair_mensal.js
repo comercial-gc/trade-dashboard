@@ -31,7 +31,9 @@ for (let m = 0; m < 12; m++) {
       trade,
       parque: typeof parque === 'number' ? parque : null,
       appai: ((D.hist26['appai_' + tk]) || [])[m] ?? null,
-      escolas: ((D.hist26['escolas_' + tk]) || [])[m] ?? null,
+      // 26/10/2026 (Paulo): Escolar do mês = soma dos dias (escolarAppai); em jan/26 a linha "Parcial" marcava 0 e os dias somam 85
+      escolas: (((D.meses || [])[m] || {}).escolarAppai || {})[tk] && typeof D.meses[m].escolarAppai[tk].esc26 === 'number'
+        ? D.meses[m].escolarAppai[tk].esc26 : (((D.hist26['escolas_' + tk]) || [])[m] ?? null),
       parcial: m === mesAtual,
     };
   }

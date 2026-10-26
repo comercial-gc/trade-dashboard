@@ -125,8 +125,8 @@
     }).catch(function (e) { if (obrig) DADOS.erro[nome] = e.message; return null; });
   }
   var promessa = Promise.all([getJSON('trade_indicadores.json', true), getJSON('feriados_mercados.json', true),
-    getJSON('trade_agencias_cadastro.json', false)]).then(function (r) {
-    DADOS.ind = r[0]; DADOS.fer = r[1]; DADOS.cad = r[2]; DADOS.carregado = true;
+    getJSON('trade_agencias_cadastro.json', false), getJSON('trade_extra.json', false)]).then(function (r) {
+    DADOS.ind = r[0]; DADOS.fer = r[1]; DADOS.cad = r[2]; DADOS.extra = r[3]; DADOS.carregado = true;
     if (window.__tv2Pagina && RENDER[window.__tv2Pagina]) RENDER[window.__tv2Pagina]();
   });
 
@@ -999,6 +999,321 @@
     if (mudou) setTimeout(function () {
       try { if (typeof window.renderMes === 'function' && (!window.curPage || window.curPage === 'mar')) window.renderMes(window.mesSelecionado && window.mesSelecionado.aqua ? window.mesSelecionado : D.meses[IDX]); } catch (e) { }
     }, 400);
+  })();
+
+  // ================================================================ abas antigas: números que precisam bater (26/10/2026)
+  (function () {
+    var mudou = false;
+    // (a) Escolar de jan/26: a linha "Parcial:" da planilha marca 0, mas os dias somam 85 (Paulo: vale 85).
+    // Regra geral: quando a soma dos dias (escolarAppai) diverge do resumo do mês, vale a soma dos dias.
+    (D.meses || []).forEach(function (m, i) {
+      var e = m.escolarAppai && m.escolarAppai.aqua;
+      if (!e || typeof e.esc26 !== 'number') return;
+      var atual = (D.hist26.escolas_aqua || [])[i];
+      if (typeof atual === 'number' && atual !== e.esc26) {
+        var dif = e.esc26 - atual;
+        D.hist26.escolas_aqua[i] = e.esc26;
+        if (m.aqua) m.aqua.escolas = e.esc26;
+        for (var j = i; j < D.meses.length; j++) { var a = D.meses[j].acum && D.meses[j].acum.aqua; if (a && typeof a.escolas === 'number') a.escolas += dif; }
+        if (i === IDX && D.mesAtual && D.mesAtual.aqua) D.mesAtual.aqua.escolas = e.esc26;
+        mudou = true;
+      }
+    });
+    // (b) APPAI no Top 10 do mês: mesmo número da coluna APPAI da planilha (o ranking contava 2 bilhetes a mais)
+    (D.meses || []).forEach(function (m, i) {
+      var tp = m.topClientesPainel && m.topClientesPainel.aqua, ap = (D.hist26.appai_aqua || [])[i];
+      if (!tp || typeof ap !== 'number' || !ap) return;
+      tp.forEach(function (c) { if (c.n === 'APPAI' && c.v26 !== ap) { c.v26 = ap; if (c.v25) c.delta = Math.round((ap / c.v25 - 1) * 1000) / 10; mudou = true; } });
+    });
+    if (mudou) setTimeout(function () {
+      try { if (typeof window.renderMes === 'function' && (!window.curPage || window.curPage === 'mar')) window.renderMes(window.mesSelecionado && window.mesSelecionado.aqua ? window.mesSelecionado : D.meses[IDX]); } catch (e) { }
+    }, 450);
+
+    var fmtN = function (v) { return v == null ? '-' : Math.round(v).toLocaleString('pt-BR'); };
+    var fmtR = function (v) { return v == null ? '-' : 'R$ ' + (v / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' mil'; };
+    var fmtP = function (v) { return v == null ? '-' : (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; };
+    function delta(a, b, pp) {
+      if (a == null || b == null || (!pp && !b)) return '';
+      var d = pp ? (a - b) * 100 : (a / b - 1) * 100;
+      var t = Math.abs(d).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + (pp ? 'pp' : '%');
+      return ' <span class="ae-cdelta ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + t + '</span>';
+    }
+    // (c) Acumulado > Escolar: o mês em andamento comparava com o mesmo mês de 2025 INTEIRO (out: 2.815 x 2.649).
+    // Agora o lado 2025 do mês corrente e do acumulado é o mesmo período (1 a 25/10/25), com receita do trade_extra.json.
+    function escolarHist() {
+      var tb = el('escolarHistTable');
+      var tx = DADOS.extra;
+      if (!tb || tb.dataset.tv2 === '1' || MA.isFechado || !tx || !tx.aquario) return;
+      var e = MA.escolarAppai && MA.escolarAppai.aqua;
+      if (!e) return;
+      var dias = tx.aquario.dias || {}, pref = '2025-' + String(IDX + 1).padStart(2, '0') + '-';
+      var p25 = { escV: 0, tradeV: 0, parqueV: 0 }, full25 = { escV: 0, tradeV: 0, parqueV: 0 }, ac25 = { escV: 0, tradeV: 0, parqueV: 0 };
+      Object.keys(dias).forEach(function (ds) {
+        if (ds.slice(0, 4) !== '2025') return;
+        var v = dias[ds], mm = Number(ds.slice(5, 7)) - 1, dd = Number(ds.slice(8, 10));
+        var ok = mm < IDX || (mm === IDX && dd <= DIA_ATUAL);
+        if (ds.indexOf(pref) === 0) { full25.escV += v[1]; full25.tradeV += v[5]; full25.parqueV += v[7]; if (dd <= DIA_ATUAL) { p25.escV += v[1]; p25.tradeV += v[5]; p25.parqueV += v[7]; } }
+        if (ok) { ac25.escV += v[1]; ac25.tradeV += v[5]; ac25.parqueV += v[7]; }
+      });
+      var esc25 = e.esc25, tr25 = MA.aqua.real25, pq25 = MA.aqua.par25;
+      var escAc25 = 0, trAc25 = 0, pqAc25 = 0;
+      for (var i = 0; i <= IDX; i++) {
+        var ei = D.meses[i].escolarAppai && D.meses[i].escolarAppai.aqua;
+        escAc25 += ei ? (ei.esc25 || 0) : 0; trAc25 += D.meses[i].aqua.real25 || 0; pqAc25 += D.meses[i].aqua.par25 || 0;
+      }
+      var col = IDX + 1, colAc = tb.querySelectorAll('thead th').length - 1;
+      var linhas = tb.querySelectorAll('tbody tr');
+      function poe(r, c, v26txt, v25, v26, pp, fmt) {
+        var td = linhas[r] && linhas[r].children[c]; if (!td) return;
+        var c25 = td.querySelector('.ae-c25'); if (!c25) return;
+        c25.innerHTML = fmt(v25) + delta(v26, v25, pp);
+        c25.title = '2025 no mesmo período (até ' + String(DIA_ATUAL).padStart(2, '0') + '/' + String(IDX + 1).padStart(2, '0') + ')';
+      }
+      function num(td) { var t = td && td.querySelector('.ae-c26'); return t ? t.textContent : ''; }
+      function pn(t) { return Number(String(t).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+      // valores de 2026 que já estão na tabela (mesma base do resto da aba)
+      var esc26 = e.esc26, escAc26 = pn(num(linhas[0].children[colAc]));
+      var rec26 = pn(num(linhas[3].children[col])) * 1000, recAc26 = pn(num(linhas[3].children[colAc])) * 1000;
+      var shT26 = pn(num(linhas[1].children[col])) / 100, shP26 = pn(num(linhas[2].children[col])) / 100;
+      var shTAc26 = pn(num(linhas[1].children[colAc])) / 100, shPAc26 = pn(num(linhas[2].children[colAc])) / 100;
+      var rT26 = pn(num(linhas[4].children[col])) / 100, rP26 = pn(num(linhas[5].children[col])) / 100;
+      var rTAc26 = pn(num(linhas[4].children[colAc])) / 100, rPAc26 = pn(num(linhas[5].children[colAc])) / 100;
+      // mês corrente
+      poe(0, col, '', esc25, esc26, false, fmtN);
+      poe(1, col, '', tr25 ? esc25 / tr25 : null, shT26, true, fmtP);
+      poe(2, col, '', pq25 ? esc25 / pq25 : null, shP26, true, fmtP);
+      poe(3, col, '', p25.escV, rec26, false, fmtR);
+      poe(4, col, '', p25.tradeV ? p25.escV / p25.tradeV : null, rT26, true, fmtP);
+      poe(5, col, '', p25.parqueV ? p25.escV / p25.parqueV : null, rP26, true, fmtP);
+      // acumulado (jan até o mesmo dia)
+      poe(0, colAc, '', escAc25, escAc26, false, fmtN);
+      poe(1, colAc, '', trAc25 ? escAc25 / trAc25 : null, shTAc26, true, fmtP);
+      poe(2, colAc, '', pqAc25 ? escAc25 / pqAc25 : null, shPAc26, true, fmtP);
+      poe(3, colAc, '', ac25.escV, recAc26, false, fmtR);
+      poe(4, colAc, '', ac25.tradeV ? ac25.escV / ac25.tradeV : null, rTAc26, true, fmtP);
+      poe(5, colAc, '', ac25.parqueV ? ac25.escV / ac25.parqueV : null, rPAc26, true, fmtP);
+      tb.dataset.tv2 = '1';
+      var th = tb.querySelectorAll('thead th')[col];
+      if (th && th.textContent.indexOf('*') < 0) th.textContent = th.textContent + '*';
+      if (!el('tv2-esc-nota')) {
+        var n = document.createElement('div');
+        n.id = 'tv2-esc-nota'; n.className = 'cc-s'; n.style.margin = '6px 0 0';
+        n.textContent = '* ' + MES[IDX] + '/26 parcial até ' + String(DIA_ATUAL).padStart(2, '0') + '/' + String(IDX + 1).padStart(2, '0') + ': o lado 2025 deste mês e do Acumulado é o mesmo período de 2025, não o mês inteiro.';
+        tb.parentNode.insertBefore(n, tb.nextSibling);
+      }
+    }
+    // (d) Histórico: o card de 2025 vinha do "Consolidado 2025" (AquaRio 123.879) e o bloco abaixo do Parcial
+    // (125.158). O card passa a usar o mesmo total do bloco; o Parque 2025 do bloco passa a ser o ano inteiro.
+    function historico() {
+      var row = el('rowHist25');
+      if (!row) return;
+      parque25Hist();
+      if (row.dataset.tv2 === '1') return;
+      var soma = function (a) { return (a || []).reduce(function (s, v) { return s + (typeof v === 'number' ? v : 0); }, 0); };
+      var t25 = { aqua: 0, pai: 0 };
+      ['aqua', 'pai'].forEach(function (k) { for (var i = 0; i < 12; i++) t25[k] += i < IDX && D.meses[i] ? (D.meses[i][k].real25 || 0) : ((D.hist25[k] || [])[i] || 0); });
+      var t24 = { aqua: soma(D.hist24.aqua), pai: soma(D.hist24.pai) };
+      var cards = row.querySelectorAll('.acum-card');
+      [['aqua', 0], ['pai', 2]].forEach(function (x) {
+        var c = cards[x[1]]; if (!c) return;
+        var v = c.querySelector('.acum-v26'), m = c.querySelector('.acum-v25'), d = c.querySelector('.acum-delta');
+        var meta = m ? pn(m.textContent.split('·')[0]) : 0;
+        if (v) v.textContent = fmtN(t25[x[0]]);
+        if (m && meta) { var dm = t25[x[0]] / meta - 1; m.textContent = 'Meta: ' + fmtN(meta) + ' · ' + (dm >= 0 ? '▲ ' : '▼ ') + Math.abs(dm * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'; }
+        if (d && t24[x[0]]) { var d4 = t25[x[0]] / t24[x[0]] - 1; d.className = 'acum-delta ' + (d4 >= 0 ? 'up' : 'dn'); d.textContent = (d4 >= 0 ? '▲' : '▼') + ' vs 2024: ' + (d4 >= 0 ? '+' : '-') + Math.abs(d4 * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'; }
+      });
+      var tot = cards[3];
+      if (tot) {
+        var tv = tot.querySelector('.acum-v26'), tm = tot.querySelector('.acum-v25'), td = tot.querySelector('.acum-delta');
+        var tt = t25.aqua + t25.pai, tmeta = tm ? pn(tm.textContent.split('·')[0]) : 0, t4 = t24.aqua + t24.pai;
+        if (tv) tv.textContent = fmtN(tt);
+        if (tm && tmeta) { var dm2 = tt / tmeta - 1; tm.textContent = 'Meta: ' + fmtN(tmeta) + ' · ' + (dm2 >= 0 ? '▲ ' : '▼ ') + Math.abs(dm2 * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'; }
+        if (td && t4) { var d5 = tt / t4 - 1; td.className = 'acum-delta ' + (d5 >= 0 ? 'up' : 'dn'); td.textContent = (d5 >= 0 ? '▲' : '▼') + ' vs 2024: ' + (d5 >= 0 ? '+' : '-') + Math.abs(d5 * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%'; }
+      }
+      row.dataset.tv2 = '1';
+    }
+    // Parque 2025 do bloco: ano inteiro (Histórico do Dash de Performance), assim que o JSON chegar
+    function parque25Hist() {
+      var p25 = DADOS.ind && DADOS.ind.parque2025;
+      if (p25) [['hkpi_aqua', 'AquaRio'], ['hkpi_pai', 'Paineiras']].forEach(function (x) {
+        var box = el(x[0]); if (!box) return;
+        var tot25 = Object.keys(p25[x[1]] || {}).reduce(function (s, k) { return s + p25[x[1]][k]; }, 0);
+        box.querySelectorAll('.hist-kpi-yr').forEach(function (y) {
+          var tag = y.querySelector('.hist-kpi-tag');
+          if (!tag || tag.textContent.trim() !== '2025') return;
+          var p = Array.prototype.filter.call(y.querySelectorAll('.hist-kpi-p'), function (z) { return /Parque/.test(z.textContent); })[0];
+          if (p && tot25 && p.textContent.indexOf('*') >= 0) { p.innerHTML = 'Parque: <strong>' + fmtN(tot25) + '</strong>'; p.removeAttribute('title'); }
+        });
+        Array.prototype.forEach.call(box.querySelectorAll('*'), function (z) { if (z.children.length === 0 && /^\* Parque 2025/.test(z.textContent.trim())) z.style.display = 'none'; });
+      });
+    }
+    function pn(t) { return Number(String(t).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+    // (e) textos: "Â·" quebrado, "feriado(s)", subtítulos que ainda citam o BioParque
+    function textos(raiz) {
+      var w = document.createTreeWalker(raiz || document.body, NodeFilter.SHOW_TEXT, null);
+      var n;
+      while ((n = w.nextNode())) {
+        var t = n.nodeValue, o = t;
+        if (t.indexOf('Â') >= 0) t = t.replace(/Â·/g, '·').replace(/Â /g, ' ');
+        if (t.indexOf('(s)') >= 0) t = t.replace(/\b1 feriado\(s\)/g, '1 feriado').replace(/feriado\(s\)/g, 'feriados');
+        if (t.indexOf(' -- ') >= 0) t = t.replace(/ -- /g, ' · ');
+        if (/BioParque e AquaRio|AquaRio e BioParque/.test(t)) t = t.replace(/BioParque e AquaRio|AquaRio e BioParque/g, 'AquaRio');
+        if (t !== o) n.nodeValue = t;
+      }
+    }
+    var tm = null;
+    function passar() {
+      tm = null;
+      try { escolarHist(); historico(); textos(document.querySelector('.page.on') || document.body); } catch (e) { if (window.console) console.warn('[trade_v2 abas antigas]', e); }
+    }
+    new MutationObserver(function () { if (!tm) tm = setTimeout(passar, 250); }).observe(document.body, { childList: true, subtree: true });
+    window.__tv2Passar = passar;
+    promessa.then(passar);
+  })();
+
+  // ================================================================ UX (26/10/2026, leitura do agente de UX)
+  (function () {
+    var css = document.createElement('style');
+    css.textContent = [
+      // contraste do texto secundário (3,6:1 -> ~5,5:1) e rótulos legíveis
+      ':root:not([data-theme="dark"]){--muted:#4F6B7D}',
+      '.cli-kpi-label,.acum-label,.tb-l,.hist-kpi-tag,.hs-l{font-size:10.5px!important}',
+      '.cc-s,.sec-s,.cli-kpi-sub{font-size:11px}',
+      // faixa escura da aba do mês: repetia Total, OBZ e Projeção do topo; fica só a Receita
+      '#pg-mar .total-bar .tb-div{display:none}',
+      // BioParque saiu do grupo em ago/26: some o botão de ocultar/mostrar
+      '#bioGlobalToggleDesktop,#bioGlobalToggleMob{display:none!important}',
+      // previsão do tempo: 7 dias em vez de 16
+      '#pvWeatherBody .pv-weather-days > :nth-child(n+8){display:none}',
+      // eventos do mês: 3 visíveis, o resto atrás do botão
+      '.tv2-ev-fechado > :nth-child(n+4){display:none}',
+      '.tv2-ev-mais{margin-top:6px;background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-family:inherit;font-size:11px;font-weight:600;color:var(--aqua);cursor:pointer}',
+      // tema escuro: linha Total da tabela sem o fundo marrom
+      'html[data-theme="dark"] .pktbl-total{background:#1d252c!important}'
+    ].join('\n');
+    document.head.appendChild(css);
+    function faixa() {
+      var bar = document.querySelector('#pg-mar .total-bar');
+      if (!bar) return;
+      ['tot_real', 'tot_obz', 'tot_proj'].forEach(function (id) { var v = el(id); var it = v && v.closest('.tb-i'); if (it) it.style.display = 'none'; });
+    }
+    function eventos() {
+      document.querySelectorAll('#pg-mar .ctx-list').forEach(function (l) {
+        if (l.children.length <= 4 || l.dataset.tv2) return;
+        l.dataset.tv2 = '1';
+        l.classList.add('tv2-ev-fechado');
+        var b = document.createElement('button');
+        b.className = 'tv2-ev-mais'; b.textContent = 'Ver todos os ' + l.children.length + ' eventos';
+        b.onclick = function () { var f = l.classList.toggle('tv2-ev-fechado'); b.textContent = f ? 'Ver todos os ' + l.children.length + ' eventos' : 'Mostrar só os 3 primeiros'; };
+        l.parentNode.insertBefore(b, l.nextSibling);
+      });
+    }
+    // Top Clientes, "vs Últimos N meses": com o mês corrente parcial, a janela atual tinha menos dias que a
+    // anterior (ago a 25/out x mai a jul). Agora as duas janelas usam só meses fechados (jul a set x abr a jun).
+    var perOrig = window.cliGetPeriodo;
+    if (typeof perOrig === 'function') {
+      window.cliGetPeriodo = function () {
+        var r = perOrig.apply(this, arguments);
+        try {
+          if (!r || !r.cur || !r.cur.length || r.yoy || ['1m', '3m', '6m', '12m'].indexOf(window.cliPeriodo) < 0) return r;
+          var ult = r.cur[r.cur.length - 1];
+          if (!ult || ult.label !== MA.label || MA.isFechado) return r;
+          var meses = (D.meses2025 || []).concat(D.meses || []).filter(function (m) { return m.clientes && m.clientes.length; });
+          var anc = meses.indexOf(ult) - 1, n = r.n;
+          if (anc < 0) return r;
+          var cur = meses.slice(Math.max(0, anc - n + 1), anc + 1);
+          var prev = anc >= n ? meses.slice(Math.max(0, anc - n * 2 + 1), anc - n + 1) : [];
+          var lbl = function (a) { return a.length === 1 ? a[0].label : a[0].label + ' → ' + a[a.length - 1].label; };
+          r.cur = cur; r.prev = prev; r.curLabel = lbl(cur) + ' (meses fechados)'; r.prevLabel = prev.length ? lbl(prev) : '-';
+          if (typeof cliGetEquiv2025 === 'function') { r.equiv2025 = cliGetEquiv2025(cur); if (typeof cliEquiv2025Label === 'function') r.equiv2025Label = cliEquiv2025Label(r.equiv2025); }
+        } catch (e) { }
+        return r;
+      };
+    }
+    var t = null;
+    new MutationObserver(function () { if (!t) t = setTimeout(function () { t = null; try { faixa(); eventos(); } catch (e) { } }, 250); }).observe(document.body, { childList: true, subtree: true });
+    faixa(); eventos();
+  })();
+
+  // ================================================================ menu em 4 seções (26/10/2026, leitura de UX)
+  // 10 abas soltas no topo viraram 4 seções com submenu. Os botões originais continuam no HTML (escondidos),
+  // e cada item do submenu clica no botão original: nav(), initCharts e o resto do script não mudam.
+  (function () {
+    var SECOES = [
+      ['res', 'Resultado', [['mar', '📅 Mês'], ['acum', '📊 Acumulado'], ['obz', '🎯 OBZ'], ['hist', '📈 Histórico']]],
+      ['cli', 'Clientes', [['cli', '🏆 Top Clientes'], ['op', '💡 Oportunidades']]],
+      ['mer', 'Mercado', [['share', '🔄 Share Trade'], ['imm', '🗻 Intel. Mercado'], ['ori', '🌎 Origem']]],
+      ['par', 'Parques', [['ind', '🏞️ Indicadores Parques']]]
+    ];
+    var topo = document.querySelector('.topbar');
+    var orig = function (id) { return document.querySelector('.topbar .np[onclick*="\'' + id + '\'"]:not(.tv2-sec)'); };
+    if (!topo || !orig('mar')) return;
+    var css = document.createElement('style');
+    css.textContent = [
+      '.topbar .np:not(.tv2-sec){display:none!important}',
+      '.tv2-sec{display:inline-flex;align-items:center;gap:5px}',
+      '.tv2-sec small{opacity:.75;font-weight:500}',
+      '.tv2-menu{position:fixed;z-index:400;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.18);padding:6px;min-width:190px;display:none}',
+      '.tv2-menu.aberto{display:block}',
+      '.tv2-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-radius:7px;padding:9px 12px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer}',
+      '.tv2-menu button:hover{background:var(--aqua-pale)}',
+      '.tv2-menu button.on{color:var(--aqua);background:var(--aqua-pale)}'
+    ].join('\n');
+    document.head.appendChild(css);
+    var menu = document.createElement('div');
+    menu.className = 'tv2-menu';
+    document.body.appendChild(menu);
+    var ancora = orig('mar'), botoes = {};
+    SECOES.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'np tv2-sec'; b.type = 'button'; b.setAttribute('data-sec', s[0]);
+      ancora.parentNode.insertBefore(b, ancora);
+      botoes[s[0]] = b;
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (s[2].length === 1) { fechar(); orig(s[2][0][0]).click(); return; }
+        if (menu.classList.contains('aberto') && menu.dataset.sec === s[0]) { fechar(); return; }
+        var cur = window.curPage;
+        menu.innerHTML = s[2].map(function (it) {
+          var rot = it[1] + (it[0] === 'mar' && el('navMesLabel') ? ' · ' + el('navMesLabel').textContent : '');
+          return '<button type="button" data-ir="' + it[0] + '" class="' + (it[0] === cur ? 'on' : '') + '">' + rot + '</button>';
+        }).join('');
+        menu.querySelectorAll('[data-ir]').forEach(function (x) { x.onclick = function () { fechar(); orig(x.getAttribute('data-ir')).click(); }; });
+        var r = b.getBoundingClientRect();
+        menu.style.left = Math.min(r.left, window.innerWidth - 210) + 'px'; menu.style.top = (r.bottom + 6) + 'px';
+        menu.dataset.sec = s[0];
+        menu.classList.add('aberto');
+      });
+    });
+    function fechar() { menu.classList.remove('aberto'); }
+    document.addEventListener('click', function (e) { if (!e.target.closest('.tv2-menu')) fechar(); });
+    window.addEventListener('scroll', fechar, { passive: true });
+    function secaoDe(id) { return SECOES.filter(function (s) { return s[2].some(function (it) { return it[0] === id; }); })[0]; }
+    function rotular(id) {
+      var cur = id || window.curPage || 'mar';
+      SECOES.forEach(function (s) {
+        var b = botoes[s[0]], ativo = s[2].some(function (it) { return it[0] === cur; });
+        var item = ativo ? s[2].filter(function (it) { return it[0] === cur; })[0] : null;
+        b.innerHTML = s[1] + (ativo && s[2].length > 1 ? ' <small>· ' + item[1].replace(/^\S+\s/, '') + '</small>' : '') + (s[2].length > 1 ? ' ▾' : '');
+        b.classList.toggle('on', ativo);
+      });
+    }
+    // o indicador deslizante passa a marcar a seção (o botão original está escondido)
+    var slideOrig = window._slideIndicator;
+    if (typeof slideOrig === 'function') {
+      window._slideIndicator = function (slider, btn) {
+        if (slider && slider.id === 'navSlider') {
+          var m = btn && !btn.classList.contains('tv2-sec') && /'(\w+)'/.exec(btn.getAttribute('onclick') || '');
+          var id = m ? m[1] : (window.curPage || 'mar');
+          rotular(id);
+          var s = secaoDe(id);
+          if (s) btn = botoes[s[0]];
+        }
+        return slideOrig(slider, btn);
+      };
+    }
+    rotular();
+    setTimeout(function () { window._slideIndicator(el('navSlider'), null); }, 200);
   })();
 
   // ================================================================ indicador do menu (26/10/2026)

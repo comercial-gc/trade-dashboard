@@ -17,7 +17,7 @@
 // Para ligar: rodar ativarGatilhoTradeAuto() uma vez (pede autorização). Cria a rodada das 09:05
 // (tradeAutoManha) e a de hora em hora (reserva).
 // Para rodar na hora: tradeAutoAgora().
-// Visitação do parque pela Controladoria (rodar à mão): tradeAutoParqueOficial().
+// Visitação do parque pela Controladoria: automática no gatilho; para forçar, tradeAutoParqueOficial().
 // Publicar o que foi preenchido à mão (Diário e Top Clientes), sem a automação sobrescrever:
 // tradePublicarManual() (pode ser atribuída a um botão/desenho na planilha).
 // ═══════════════════════════════════════════════════════════════════
@@ -63,6 +63,7 @@ function tradeAutoAtualizar(forcar) {
 function tradeAutoGatilho() {
   _tradeAutoDispararCalculo();
   tradeAutoAtualizar(false);
+  try { _tradeAutoParque(false); } catch (e) { _tradeAutoLogPedido('visitação do parque pela Controladoria não aplicada: ' + e.message); }
 }
 
 // 14/10/2026: as rodadas agendadas do GitHub (workflow update-trade) não estavam disparando. Como
@@ -172,55 +173,77 @@ function _tradeAutoFecharParciais(ss) {
   return feitos;
 }
 
-// 13/10/2026 (pedido do Paulo): visitação do parque (parque 26 e parque 25) de jan a set/26 igual à da
-// Controladoria, como no Dash de Performance. Lê trade_parque_oficial.json (gerado a partir de
-// controladoria.json e da base de 2025, que já é a da Controladoria) e grava só as células que
-// diferem, depois de conferir o cabeçalho e a data de cada linha. Rodar à mão quando chegar um
-// fechamento novo da Controladoria: tradeAutoParqueOficial().
-function tradeAutoParqueOficial() {
+// Visitação do parque (parque 26 e parque 25) igual à do Dash de Performance com a Controladoria ligada.
+// 13/10/2026: versão manual para jan a set/26. 26/10/2026 (Paulo: "visitação do parque tem que bater com os
+// números da Controladoria, fechados e parcial"): o trade_parque_oficial.json é gerado todo dia pela rotina
+// das 08:00 (meses fechados: diário da Controladoria e, no dia sem fechamento, a planilha Visitação Parques
+// 2026; mês corrente: só os dias que a Controladoria já mandou, o resto segue o cálculo diário) e esta função
+// roda sozinha no gatilho de hora em hora quando o arquivo muda. Acha as colunas de cada aba "Diário" pelo
+// cabeçalho ("parque 26" / "parque 25" sob o título AQUARIO / PAINEIRAS) e confere a data de cada linha.
+// Para forçar na hora: tradeAutoParqueOficial().
+function tradeAutoParqueOficial() { _tradeAutoParque(true); }
+
+function _tradeAutoParque(forcar) {
   var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   var h = { 'Accept': 'application/vnd.github.raw+json', 'User-Agent': 'Apps-Script' };
   if (token) h['Authorization'] = 'token ' + token;
   var r = UrlFetchApp.fetch('https://api.github.com/repos/comercial-gc/trade-dashboard/contents/trade_parque_oficial.json?t=' + Date.now(), { headers: h, muteHttpExceptions: true });
   if (r.getResponseCode() !== 200) throw new Error('Trade_Auto: não consegui ler trade_parque_oficial.json (' + r.getResponseCode() + ')');
   var dados = JSON.parse(r.getContentText());
+  var props = PropertiesService.getScriptProperties();
+  if (!forcar && props.getProperty('TRADE_PARQUE_GERADO') === dados.gerado_em) return;
+  if (dados.versao !== 2 || !dados.meses) throw new Error('Trade_Auto: trade_parque_oficial.json em formato antigo');
   var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
+  var ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  var TIT = { AQUARIO: 'AquaRio', PAINEIRAS: 'Paineiras' };
   var resumo = [], total = 0;
-  Object.keys(dados.abas).forEach(function (aba) {
-    var a = dados.abas[aba], sh = ss.getSheetByName(aba);
+  Object.keys(dados.meses).forEach(function (mesTxt) {
+    var mes = Number(mesTxt), aba = 'Diário ' + ABREV[mes - 1] + '26', sh = ss.getSheetByName(aba);
     if (!sh) { resumo.push(aba + ': aba não existe'); return; }
     var vals = sh.getRange(1, 1, Math.min(sh.getLastRow(), 45), Math.min(sh.getLastColumn(), 40)).getValues();
-    var cab = vals[a.linha_cabecalho - 1];
+    var hr = -1;
+    for (var i = 0; i < 6 && hr < 0; i++) if (vals[i].some(function (v) { return String(v || '').trim().toLowerCase().indexOf('parque 26') === 0; })) hr = i;
+    if (hr < 1) { resumo.push(aba + ': cabeçalho "parque 26" não encontrado'); return; }
+    var dc = -1;
+    for (var j = 0; j < 5 && dc < 0; j++) for (var k = hr + 1; k < hr + 5; k++) if (vals[k] && vals[k][j] instanceof Date) { dc = j; break; }
+    if (dc < 0) { resumo.push(aba + ': coluna de data não encontrada'); return; }
+    var blocos = [];
+    vals[hr - 1].forEach(function (v, j2) { var t = String(v || '').trim().toUpperCase(); if (TIT[t] || t === 'BIOPARQUE') blocos.push([j2, TIT[t] || null]); });
     var mud = 0;
-    Object.keys(a.parques).forEach(function (park) {
-      var p = a.parques[park];
-      var h26 = String(cab[p.col_p26 - 1] || '').trim().toLowerCase(), h25 = String(cab[p.col_p25 - 1] || '').trim().toLowerCase();
-      if (h26.indexOf('parque 26') !== 0 || h25.indexOf('parque 25') !== 0)
-        throw new Error('Trade_Auto: cabeçalho de ' + park + ' em "' + aba + '" mudou (' + h26 + ' / ' + h25 + '). Nada foi gravado.');
-      Object.keys(p.dias).forEach(function (dia) {
-        var x = p.dias[dia], dt = vals[x.linha - 1][a.col_data - 1];
-        if (!(dt instanceof Date) || dt.getMonth() + 1 !== a.mes || dt.getDate() !== Number(dia))
-          throw new Error('Trade_Auto: linha ' + x.linha + ' de "' + aba + '" não é o dia ' + dia + '. Nada foi gravado.');
-      });
-      Object.keys(p.dias).forEach(function (dia) {
-        var x = p.dias[dia], row = vals[x.linha - 1];
-        [['p26', p.col_p26], ['p25', p.col_p25]].forEach(function (k) {
-          var novo = x[k[0]];
+    blocos.forEach(function (b, bi) {
+      var park = b[1];
+      if (!park || !dados.meses[mesTxt][park]) return;
+      var j1 = bi + 1 < blocos.length ? blocos[bi + 1][0] : b[0] + 12, c26 = -1, c25 = -1;
+      for (var c = b[0]; c < Math.min(j1, vals[hr].length); c++) {
+        var t = String(vals[hr][c] || '').trim().toLowerCase();
+        if (c26 < 0 && t.indexOf('parque 26') === 0) c26 = c;
+        if (c25 < 0 && t.indexOf('parque 25') === 0) c25 = c;
+      }
+      if (c26 < 0 || c25 < 0) { resumo.push(aba + ' ' + park + ': colunas parque 26/25 não encontradas'); return; }
+      var dias = dados.meses[mesTxt][park];
+      for (var r2 = hr + 1; r2 < vals.length; r2++) {
+        var dt = vals[r2][dc];
+        if (!(dt instanceof Date) || dt.getMonth() + 1 !== mes) continue;
+        var x = dias[String(dt.getDate())];
+        if (!x) continue;
+        [[x[0], c26], [x[1], c25]].forEach(function (par) {
+          var novo = par[0];
           if (novo === null || novo === undefined) return;
-          var velho = row[k[1] - 1];
+          var velho = vals[r2][par[1]];
           if (typeof velho === 'number' && Math.abs(velho - novo) < 0.5) return;
-          sh.getRange(x.linha, k[1]).setValue(novo);
+          sh.getRange(r2 + 1, par[1] + 1).setValue(novo);
           mud++;
         });
-      });
+      }
     });
     total += mud;
     resumo.push(aba + ': ' + mud + ' células');
   });
   var parciais = _tradeAutoFecharParciais(ss);
-  var texto = 'Visitação do parque pela Controladoria: ' + resumo.join('; ') + (parciais.length ? '; fórmulas de "Parcial" fechadas: ' + parciais.join(', ') : '');
+  var texto = 'Visitação do parque pela Controladoria (' + dados.gerado_em + '): ' + resumo.join('; ') + (parciais.length ? '; fórmulas de "Parcial" fechadas: ' + parciais.join(', ') : '');
   if (total || parciais.length) { _tradeAutoPublicar(ss, texto); texto += '; Dashboard publicado'; }
   _tradeAutoLog(ss, texto);
+  props.setProperty('TRADE_PARQUE_GERADO', dados.gerado_em);
 }
 
 
@@ -318,6 +341,7 @@ function tradeAutoManha() {
     if (j && j.gerado_em && j.gerado_em !== antes) break;
   }
   tradeAutoAtualizar(false);
+  try { _tradeAutoParque(false); } catch (e) { _tradeAutoLogPedido('visitação do parque pela Controladoria não aplicada: ' + e.message); }
 }
 
 function ativarGatilhoTradeAuto() {
