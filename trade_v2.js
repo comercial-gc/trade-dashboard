@@ -99,7 +99,7 @@
     }, 0);
     return h;
   }
-  function rotulo(t) { return '<span style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">' + t + '</span>'; }
+  function rotulo(t) { return '<span style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">' + t + '</span>'; }
   function controle(t, html) { return '<div style="display:flex;flex-direction:column;gap:3px">' + rotulo(t) + html + '</div>'; }
   function kpi(lbl, val, sub, delta, cor) {
     return '<div class="cli-kpi-card"><div class="cli-kpi-label">' + lbl + '</div><div class="cli-kpi-val" style="color:' + (cor || 'var(--text)') + '">' + val + '</div>' +
@@ -196,6 +196,13 @@
       linhas + '</div>';
   }
   var obzEstado = { k: 't' };
+  // 3 faixas (UX, 26/10): >= 100% da meta verde, 95 a 99,9% âmbar, abaixo de 95% vermelho. No mês em andamento
+  // a meta é proporcional aos dias já passados.
+  function corAting(o) {
+    if (!o || !o.meta) return '#B8C4CC';
+    var r = o.real / (o.fechado ? o.meta : o.meta * o.dia / o.diasMes);
+    return r >= 1 ? '#1B8A4C' : r >= 0.95 ? '#E8A820' : '#C0392B';
+  }
   function renderOBZ() {
     var pg = el('tv2-obz-corpo');
     var k = obzEstado.k;
@@ -206,13 +213,12 @@
     html += '<div class="cli-kpis-ag" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">' +
       saldoCard('Trade · AquaRio', obzMes(IDX, 'a'), COR.a, 'bilhetes') +
       saldoCard('Trade · Paineiras', obzMes(IDX, 'p'), COR.p, 'bilhetes') +
-      saldoCard('Trade · AquaRio + Paineiras', obzMes(IDX, 't'), COR.t, 'bilhetes') +
       saldoCard('Visitação Escolar · AquaRio', escMes(IDX), '#E8A820', 'escolares') + '</div>';
     // ---- gráfico Trade x OBZ
     var ms = [];
     for (var i = 0; i <= IDX; i++) ms.push(obzMes(i, k));
     html += '<div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Visitação Trade x OBZ · ' + NOME[k] + ' · 2026</div>' +
-      '<div class="cc-s">Barras = realizado (verde acima da meta, vermelho abaixo; no mês em andamento a comparação é com a meta proporcional aos dias já passados) · linha = meta OBZ · tracejado = 2025 no mesmo período · ' + mesLbl(ym(2026, IDX)) + ' ' + REF_TXT + '</div></div>' +
+      '<div class="cc-s">Barras = realizado (verde: meta batida; âmbar: 95 a 99,9%; vermelho: abaixo de 95%; no mês em andamento a comparação é com a meta proporcional aos dias já passados) · linha = meta OBZ · tracejado = 2025 no mesmo período · ' + mesLbl(ym(2026, IDX)) + ' ' + REF_TXT + '</div></div>' +
       '<div style="height:260px"><canvas id="tv2-c-obz"></canvas></div></div>';
     html += tabelaOBZ(ms, function (o) { return anteriorTrade(o.i, k); }, 'Trade');
     // ---- Escolar
@@ -227,13 +233,13 @@
       'O mês em andamento é comparado com 2025 até o mesmo dia e com o mês anterior pela <strong>média diária</strong>, para não comparar parcial com mês inteiro. ' +
       'BioParque fica fora: saiu do grupo em ago/26.');
     pg.innerHTML = html;
-    var cores = ms.map(function (o) { return o.meta && o.real >= (o.fechado ? o.meta : o.meta * o.dia / o.diasMes) ? '#1B8A4C' : '#C0392B'; });
+    var cores = ms.map(function (o) { return corAting(o); });
     grafico('tv2-c-obz', { type: 'bar', data: { labels: ms.map(function (o) { return MES[o.i]; }), datasets: [
       { type: 'line', label: 'Meta OBZ', data: ms.map(function (o) { return o.meta || null; }), borderColor: tinta(), backgroundColor: tinta(), borderWidth: 2, pointRadius: 3, order: 0 },
       { type: 'line', label: '2025 (mesmo período)', data: ms.map(function (o) { return o.r25 || null; }), borderColor: '#9AA9B4', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 1 },
       { label: 'Realizado 2026', data: ms.map(function (o) { return o.real; }), backgroundColor: cores, borderRadius: 4, order: 2 }] },
       options: { scales: eixos(), plugins: { tooltip: { callbacks: { afterBody: function (it) { var o = ms[it[0].dataIndex]; return o.meta ? 'Atingimento: ' + pf(o.real / o.meta) + (o.fechado ? '' : ' (' + REF_TXT + ')') : 'Sem meta'; } } } } } });
-    var coresE = es.map(function (o) { return !o.meta ? '#B8C4CC' : o.real >= (o.fechado ? o.meta : o.meta * o.dia / o.diasMes) ? '#1B8A4C' : '#C0392B'; });
+    var coresE = es.map(function (o) { return corAting(o); });
     grafico('tv2-c-esc', { type: 'bar', data: { labels: es.map(function (o) { return MES[o.i]; }), datasets: [
       { type: 'line', label: 'Meta', data: es.map(function (o) { return o.meta || null; }), borderColor: tinta(), borderWidth: 2, pointRadius: 3, order: 0 },
       { type: 'line', label: '2025 (mesmo período)', data: es.map(function (o) { return o.r25 || null; }), borderColor: '#9AA9B4', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, order: 1 },
@@ -292,7 +298,7 @@
     var a = Number(x.m.slice(0, 4)), i = Number(x.m.slice(5, 7)) - 1, tot = 0, b2b = 0;
     Object.keys(x.b.dias).forEach(function (ds) { tot += x.b.dias[ds][0]; b2b += x.b.dias[ds][1]; });
     var of = a === 2026 ? (D.hist26[PK[x.p]] || [])[i] : tradeMesCheio(2025, i, x.p);
-    var par = ((a === 2026 ? D.histPar26 : D.histPar25)[PK[x.p]] || [])[i];
+    var par = a === 2026 ? (D.histPar26[PK[x.p]] || [])[i] : parque2025(x.p, i);
     return { b2b: b2b && typeof of === 'number' && of > 0 ? of / b2b : 1, tot: tot && typeof par === 'number' && par > 0 ? par / tot : 1 };
   }
   function tipoDia(ds) {
@@ -304,6 +310,14 @@
 
   // ================================================================ INDICADORES PARQUES
   var indEstado = { k: 't', per: '12m' };
+  // Visitação de 2025 do mês inteiro: a do Histórico do Dash de Performance (trade_indicadores.json, parque2025).
+  // O HTML só tem jan-set/25 inteiros: out/25 lá é o mesmo período do mês corrente (1 a 25/10) e nov/dez vêm vazios.
+  function parque2025(x, i) {
+    var v = ((DADOS.ind && DADOS.ind.parque2025) || {})[NOME_TIND[x]];
+    var k = ym(2025, i);
+    if (v && typeof v[k] === 'number') return v[k];
+    return i < IDX ? ((D.histPar25 || {})[PK[x]] || [])[i] : null;
+  }
   function serieMensal(k) { // B2B oficial, total do parque (Controladoria), B2C = total − B2B
     var out = [];
     [2025, 2026].forEach(function (ano) {
@@ -312,7 +326,7 @@
         var b2b = 0, tot = 0, ok = true;
         parquesSel(k).forEach(function (x) {
           var t = ano === 2026 ? (D.hist26[PK[x]] || [])[i] : tradeMesCheio(2025, i, x);
-          var p = ((ano === 2026 ? D.histPar26 : D.histPar25)[PK[x]] || [])[i];
+          var p = ano === 2026 ? (D.histPar26[PK[x]] || [])[i] : parque2025(x, i);
           if (typeof t !== 'number' || typeof p !== 'number' || !p) ok = false;
           b2b += t || 0; tot += p || 0;
         });
@@ -421,7 +435,7 @@
         linhas.push({ e: e, p: x, v: v, ref: mref, n: ref.length });
       });
     });
-    linhas.sort(function (a, b) { return a.e.data < b.e.data ? 1 : -1; });
+    linhas.sort(function (a, b) { return a.e.data !== b.e.data ? (a.e.data < b.e.data ? 1 : -1) : (a.p < b.p ? -1 : a.p > b.p ? 1 : 0); });
     var cats = {};
     linhas.forEach(function (l) { cats[l.e.categoria || '-'] = (cats[l.e.categoria || '-'] || 0) + 1; });
     var h = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center">' + rotulo('Categoria') + '<select class="cli-select" id="tv2-ev-cat"><option value="">Todas (' + linhas.length + ')</option>' +
@@ -431,8 +445,16 @@
       var c = (el('tv2-ev-cat') || {}).value || '';
       var ls = linhas.filter(function (l) { return !c || (l.e.categoria || '-') === c; });
       var t = '<table class="cli-tbl"><thead><tr><th>Data</th><th>Parque</th><th>Categoria</th><th>Evento (cadastrado)</th><th style="text-align:right">Visitação do dia</th><th style="text-align:right">Referência</th><th style="text-align:right">Observado</th></tr></thead><tbody>';
+      var visto = {};
       ls.slice(0, 150).forEach(function (l) {
         var dlt = l.v != null && l.ref ? l.v / l.ref - 1 : null;
+        var g = l.e.data + '|' + l.p;
+        if (visto[g]) { // mesmo dia e parque: o número do dia aparece uma vez só
+          t += '<tr><td style="white-space:nowrap;color:var(--muted)">' + dataBR(l.e.data) + '</td><td style="color:var(--muted)">' + NOME[l.p] + '</td><td style="font-size:10.5px;color:var(--muted)">' + esc(l.e.categoria) + '</td>' +
+            '<td style="font-size:11px;max-width:420px">' + esc(l.e.evento) + '</td><td colspan="3" style="text-align:center;font-size:10.5px;color:var(--muted)">mesmo dia da linha acima</td></tr>';
+          return;
+        }
+        visto[g] = true;
         t += '<tr><td style="white-space:nowrap">' + dataBR(l.e.data) + '</td><td>' + NOME[l.p] + '</td><td style="font-size:10.5px;color:var(--muted)">' + esc(l.e.categoria) + '</td>' +
           '<td style="font-size:11px;max-width:420px">' + esc(l.e.evento) + '</td><td style="text-align:right">' + (l.v == null ? '<span style="color:var(--muted)">sem dado</span>' : nf(l.v)) + '</td>' +
           '<td style="text-align:right" title="média de ' + l.n + ' dias iguais do mês sem evento">' + nf(l.ref) + '</td><td style="text-align:right">' + pill(dlt) + '</td></tr>';
@@ -571,7 +593,7 @@
         (compAnt ? '<td style="text-align:right">' + pf(shA) + '</td><td style="text-align:right">' + (sh != null && shA != null ? pill(sh - shA, function (x) { return (x * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' p.p.'; }) : '-') + '</td>' : '') + '</tr>';
     }
     top.forEach(function (n, i) { html += linha(i + 1, n, volSeg(P[n], seg), PA[n] ? volSeg(PA[n], seg) : 0); });
-    if (resto.length) html += linha('', 'Demais ' + resto.length + ' países', resto.reduce(function (a, n) { return a + volSeg(P[n], seg); }, 0), resto.reduce(function (a, n) { return a + (PA[n] ? volSeg(PA[n], seg) : 0); }, 0));
+    if (resto.length) html += linha('', 'Demais registros (' + resto.length + ' nomes de país)', resto.reduce(function (a, n) { return a + volSeg(P[n], seg); }, 0), resto.reduce(function (a, n) { return a + (PA[n] ? volSeg(PA[n], seg) : 0); }, 0));
     if (P['(não informado)']) html += linha('', '(não informado)', volSeg(P['(não informado)'], seg), PA['(não informado)'] ? volSeg(PA['(não informado)'], seg) : 0);
     if (P[SUSPEITO]) html += linha('', SUSPEITO + ' ⓘ', volSeg(P[SUSPEITO], seg), PA[SUSPEITO] ? volSeg(PA[SUSPEITO], seg) : 0);
     html += '<tr><td></td><td><strong>Total</strong></td><td style="text-align:right"><strong>' + nf(base) + '</strong></td><td style="text-align:right">100%</td>' + (compAnt ? '<td></td><td></td>' : '') + '</tr></tbody></table>' +
@@ -579,11 +601,11 @@
       '<div class="cc-s" style="margin-top:6px">ⓘ Afeganistão, Albânia e África do Sul são os primeiros itens da lista de países do sistema de venda e aparecem com volume sem paralelo, quase todo de agência: ficam fora do ranking, como erro de preenchimento. Grafias diferentes do mesmo país (com e sem acento, acento quebrado) foram unificadas.</div></div>' +
       '<div class="cc"><div class="cc-h"><div class="cc-t">Evolução do share · 6 maiores mercados estrangeiros</div><div class="cc-s">% do total do mês (base com Brasil e não informado)</div></div><div style="height:300px"><canvas id="tv2-c-pais"></canvas></div></div></div>';
     // ---- antecedência por país
-    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ANTECEDÊNCIA DE COMPRA POR PAÍS</div><div class="sec-s">Países com pelo menos 300 bilhetes com data válida no período · todos os canais · ordenado pela média</div></div></div>' + avisoAntec(bl);
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ANTECEDÊNCIA DE COMPRA POR PAÍS</div><div class="sec-s">Países com pelo menos 300 bilhetes com data válida no período · todos os canais · maiores mercados primeiro</div></div></div>' + avisoAntec(bl);
     var PAnt = somaPaises(bl.filter(antecOk));
     var ant = Object.keys(PAnt).filter(function (n) { return n !== '(não informado)' && n !== SUSPEITO && PAnt[n][3] >= 300; }).map(function (n) {
       var v = PAnt[n]; return { n: n, q: v[3], media: v[2] / v[3], f: v.slice(4).map(function (x) { return x / v[3]; }) };
-    }).sort(function (a, b) { return b.media - a.media; });
+    }).sort(function (a, b) { return b.q - a.q; });
     var FX = ['Mesmo dia', '1–2', '3–7', '8–14', '15–30', '31+'];
     html += '<div class="cc" style="margin-bottom:14px;overflow-x:auto"><table class="cli-tbl"><thead><tr><th>País</th><th style="text-align:right">Bilhetes c/ data</th><th style="text-align:right">Média (dias)</th>' +
       FX.map(function (f) { return '<th style="text-align:right">' + f + '</th>'; }).join('') + '</tr></thead><tbody>' +
@@ -695,7 +717,7 @@
       Object.keys(a.m).forEach(function (mm) { b.m[mm] = (b.m[mm] || 0) + a.m[mm]; });
       if ((a.qn || 0) > (b.qn || 0)) { b.qn = a.qn; b.n = a.n; }
     });
-    Object.values(B).forEach(function (b) { b.cod = b.cods.join(', ') || b.cod; });
+    Object.values(B).forEach(function (b) { b.cod = b.cods.join(', ') || b.cod; b.n = alias(b.n); });
     var up = ultimaPlanilha();
     var lista = [], vendeuPlanilha = 0;
     Object.values(B).forEach(function (a) {
@@ -722,7 +744,7 @@
       'cruzada com o Top Clientes da planilha TRADE. Referência: ' + dataBR(ref) + ' · corte: venda antes de ' + dataBR(corteS) + '.</div></div><span class="badge">' + ls.length + ' agências</span></div>';
     html += '<div class="cli-kpis-ag">' + kpi('Agências inativas (6m+)', nf(ls.length), 'com ' + minQ + '+ bilhetes no histórico') +
       kpi('Bilhetes no histórico', nf(ls.reduce(function (a, x) { return a + x.q; }, 0)), 'volume que essas agências já compraram') +
-      kpi('Média mensal quando ativas', nf(ls.reduce(function (a, x) { return a + x.mediaAtiva; }, 0)), 'potencial de reativação por mês') +
+      kpi('Ritmo típico somado', nf(ls.reduce(function (a, x) { return a + x.mediaAtiva; }, 0)) + '/mês', 'soma da média mensal de cada agência nos meses em que comprou (referência, não previsão)') +
       kpi('Reativadas pela planilha', nf(vendeuPlanilha), 'sem venda no bruto, mas com venda recente no Top Clientes: ficam fora') + '</div>';
     html += aviso('⚠️ <strong>Limites:</strong> (1) só aparecem agências que já venderam desde jan/25. Agência cadastrada que nunca vendeu não está em nenhuma base que o Dash lê. ' +
       '(2) No Paineiras, antes de ago/26 a venda de agência na bilheteria vinha sem o nome da agência no bruto; por isso a lista é cruzada com o Top Clientes da planilha. ' +
@@ -730,13 +752,14 @@
     html += '<div class="cc" style="overflow-x:auto"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
       controle('Buscar', '<input id="tv2-op-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome ou código" value="' + esc(opEstado.busca) + '">') +
       controle('Mínimo no histórico', '<select class="cli-select" id="tv2-op-min">' + ['1', '10', '50', '100', '500'].map(function (v) { return '<option value="' + v + '"' + (v === opEstado.min ? ' selected' : '') + '>' + v + '+ bilhetes</option>'; }).join('') + '</select>') +
-      controle('Ordenar por', '<select class="cli-select" id="tv2-op-ord">' + [['dias', 'Tempo sem vender'], ['hist', 'Histórico de vendas'], ['media', 'Média mensal quando ativa'], ['local', 'Localização']].map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === opEstado.ord ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>') +
+      controle('Ordenar por', '<select class="cli-select" id="tv2-op-ord">' + [['dias', 'Tempo sem vender'], ['hist', 'Histórico de vendas'], ['media', 'Média mensal quando ativa']].concat(DADOS.cad ? [['local', 'Localização']] : []).map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === opEstado.ord ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>') +
       '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" id="tv2-op-xls">⬇️ Excel</button></div>';
-    html += '<table class="cli-tbl"><thead><tr><th>Agência</th><th>Código</th><th>Cidade / UF</th><th>Última venda</th><th style="text-align:right">Sem vender</th><th style="text-align:right">Bilhetes (hist.)</th>' +
+    var cadOp = !!DADOS.cad;
+    html += '<table class="cli-tbl"><thead><tr><th>Agência</th><th>Código</th>' + (cadOp ? '<th>Cidade / UF</th>' : '') + '<th>Última venda</th><th style="text-align:right">Sem vender</th><th style="text-align:right">Bilhetes (hist.)</th>' +
       '<th style="text-align:right">Média/mês ativa</th><th>Parques</th><th>Meses com venda</th></tr></thead><tbody>';
     ls.slice(0, 300).forEach(function (a) {
       html += '<tr><td><strong>' + esc(a.n) + '</strong></td><td style="font-size:10.5px;color:var(--muted)">' + esc(/^\d/.test(a.cod) ? a.cod : '-') + '</td>' +
-        '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
+        (cadOp ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' : '') +
         '<td style="white-space:nowrap">' + dataBR(a.uv) + '</td><td style="text-align:right"><strong>' + a.mesesSem + ' meses</strong></td><td style="text-align:right">' + nf(a.q) + '</td>' +
         '<td style="text-align:right">' + nf(a.mediaAtiva) + '</td><td>' + Object.keys(a.pq).map(function (x) { return '<span class="cli-pill" style="background:' + (x === 'a' ? 'var(--aqua-pale);color:var(--aqua)' : 'var(--pai-pale);color:var(--pai)') + '">' + NOME[x] + '</span>'; }).join(' ') + '</td>' +
         '<td style="font-size:10.5px;color:var(--muted)">' + a.mesesAtivos + ' (' + mesLbl(Object.keys(a.m).sort()[0]) + ' a ' + mesLbl(a.uv.slice(0, 7)) + ')</td></tr>';
@@ -797,7 +820,9 @@
     var t25 = arr.reduce(function (s, a) { return s + a.v25; }, 0), t26 = arr.reduce(function (s, a) { return s + a.v26; }, 0);
     var per = 'Jan–' + MES[c.ate] + ' 2026 x Jan–' + MES[c.ate] + ' 2025';
     var html = '<div class="cli-period-info tot">Mapa de Canal · ' + per + ' · AquaRio + Paineiras · Trade por agência (Top Clientes da planilha TRADE). Volume alto/baixo pela mediana de 2026 (' + nf(c.mediana) + ' bilhetes).</div>';
-    html += '<div class="cli-kpis-ag">' + kpi('Volume 2026', nf(t26), per.split(' x ')[0]) + kpi('Volume 2025', nf(t25), 'mesmo período') +
+    var of26 = 0; for (var i = 0; i <= c.ate; i++) of26 += ((D.hist26.aqua || [])[i] || 0) + ((D.hist26.pai || [])[i] || 0);
+    html += '<div class="cli-kpis-ag">' + kpi('Volume 2026 (agências identificadas)', nf(t26), per.split(' x ')[0] + ' · ' + pf(of26 ? t26 / of26 : null) + ' do Trade oficial (' + nf(of26) + ')') +
+      kpi('Volume 2025', nf(t25), 'mesmo período') +
       kpi('Variação', pf(varPct(t26, t25)), sinal(t26 - t25, nf) + ' bilhetes') + kpi('Compradores', nf(arr.length), 'com venda em algum dos 2 anos') + '</div>';
     html += '<div class="row4" style="margin-bottom:14px">' + GRUPOS.map(function (g) {
       var ls = arr.filter(function (a) { return a.g === g[0]; }).sort(function (a, b) { return b.v26 - a.v26; });
@@ -807,11 +832,8 @@
     html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
       controle('Buscar', '<input id="tv2-car-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome da agência" value="' + esc(carEstado.busca) + '">') +
       controle('Grupo', '<select class="cli-select" id="tv2-car-grupo"><option value="">Todos</option>' + GRUPOS.map(function (g) { return '<option' + (g[0] === carEstado.grupo ? ' selected' : '') + '>' + g[0] + '</option>'; }).join('') + '</select>') +
-      controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') + '</div>';
-    if (!DADOS.cad) {
-      html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia:</strong> nenhuma base do Dash traz esses campos (a UF/PAIS do bruto é do visitante, não da agência). ' +
-        'As colunas ficam "sem cadastro" até carregarmos o cadastro oficial de agências (código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso).');
-    }
+      (DADOS.cad ? controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') : '') + '</div>';
+    if (!DADOS.cad) carEstado.loc = '0';
     var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
     if (carEstado.loc === '1') {
       var L = {};
@@ -823,15 +845,18 @@
     } else {
       ls.sort(function (a, b) { return b.v26 - a.v26; });
       var flag = function (v) { return v == null ? '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>' : v === true || v === 'sim' ? '✔' : v === false || v === 'não' ? '-' : esc(v); };
-      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th><th style="text-align:right">2025</th><th style="text-align:right">2026</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
+      var cad = !!DADOS.cad;
+      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">2025</th><th style="text-align:right">2026</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
         ls.slice(0, 300).map(function (a) {
           var g = GRUPOS.filter(function (x) { return x[0] === a.g; })[0];
-          return '<tr><td><strong>' + esc(a.n) + '</strong></td><td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
-            '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' +
+          return '<tr><td><strong>' + esc(a.n) + '</strong></td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
+            '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' : '') +
             '<td style="text-align:right">' + nf(a.v25) + '</td><td style="text-align:right"><strong>' + nf(a.v26) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
         }).join('') + '</tbody></table>' + (ls.length > 300 ? '<div class="cc-s" style="margin-top:6px">Mostrando 300 de ' + ls.length + '.</div>' : '') + '</div>';
     }
+    if (!DADOS.cad) html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia</strong> entram aqui quando o cadastro oficial de agências for carregado ' +
+      '(código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso). Nenhuma base do Dash traz esses campos: a UF/PAIS do bruto é do visitante, não da agência.');
     html += aviso('ℹ️ <strong>Sobre o Mapa de Canal anexado:</strong> o arquivo classifica <em>compradores</em> em 4 grupos de ação (volume x crescimento), não traz uma taxonomia de canais. ' +
       'A segmentação acima usa exatamente a mesma regra (mediana de volume de 2026 e variação % vs 2025, mesmo período) sobre os números oficiais do Top Clientes; os canais continuam os da planilha TRADE. ' +
       'Pela regra do mapa, agência nova (sem compra em 2025) não conta como crescimento e cai em "Recuperar volume" ou "Reavaliar esforço"; ela aparece com a etiqueta "novo" na coluna Δ %.');
@@ -840,7 +865,7 @@
     var t;
     el('tv2-car-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { carEstado.busca = v; renderCarteira(); var b = el('tv2-car-busca'); b.focus(); b.setSelectionRange(v.length, v.length); }, 300); };
     el('tv2-car-grupo').onchange = function () { carEstado.grupo = this.value; renderCarteira(); };
-    el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
+    if (el('tv2-car-loc')) el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
   }
 
   // ================================================================ páginas e navegação
@@ -913,14 +938,25 @@
   // celular: entram no menu "Mais" da barra inferior (trade_patch.js lê window.__tpmMaisExtra ao abrir)
   window.__tpmMaisExtra = PAGINAS.map(function (p) { return { id: p[0], rot: p[1].replace(/^\S+\s/, '') }; });
   // navegação: as abas novas não passam pelo initCharts do script principal
+  // as abas novas não usam o mês do topo (têm filtro de período próprio): o seletor some enquanto elas estão abertas
+  function seletorMes(mostrar) {
+    ['mesSeletor', 'mobMesSel'].forEach(function (id) { var e = el(id); if (e) e.style.visibility = mostrar ? '' : 'hidden'; });
+  }
   var initOrig = window.initCharts;
   window.initCharts = function (id, md) {
+    seletorMes(!RENDER[id]);
     if (RENDER[id]) { window.__tv2Pagina = id; return RENDER[id](); }
     window.__tv2Pagina = null;
     return initOrig(id, md);
   };
   var mobOrig = window.buildMobContent;
   if (typeof mobOrig === 'function') window.buildMobContent = function (id, md) { if (RENDER[id]) return; return mobOrig(id, md); };
+  // a Carteira tem período e base próprios: esconde a faixa de período e os filtros de parque/período do Ranking
+  function controlesCli(mostrar) {
+    ['cli-period-info'].forEach(function (id) { var e = el(id); if (e) e.style.visibility = mostrar ? '' : 'hidden'; });
+    var c = document.querySelector('#pg-cli .cli-controls');
+    if (c) Array.prototype.forEach.call(c.children, function (ch) { if (!/Exportar/.test(ch.textContent)) ch.style.display = mostrar ? '' : 'none'; });
+  }
   var setTabOrig = window.cliSetTab;
   if (typeof setTabOrig === 'function') {
     window.cliSetTab = function (tab, btn) {
@@ -930,13 +966,144 @@
         btn.classList.add('on');
         ['ranking', 'agencia', 'share', 'insights'].forEach(function (x) { var p = el('cli-panel-' + x); if (p) p.style.display = 'none'; });
         pn.style.display = '';
+        controlesCli(false);
         renderCarteira();
         return;
       }
       if (pn) pn.style.display = 'none';
+      controlesCli(true);
       return setTabOrig(tab, btn);
     };
   }
+  // ================================================================ base única do Trade (26/10/2026)
+  // O painel APPAI/Escolar usava como "Trade" a soma dos dias sem a linha Extras (ex.: jan/26 18.475), enquanto
+  // todas as outras abas usam o Trade oficial da linha "Parcial:" (18.673). Os % de APPAI e Escolar sobre o
+  // Trade passam a usar o oficial, o mesmo número da aba do mês, do Acumulado e do Histórico.
+  (function () {
+    var pct = function (n, d) { return d > 0 ? Math.round(n / d * 1000) / 10 : 0; };
+    var mudou = false;
+    function alinhar(o, trade) {
+      if (!o || typeof trade !== 'number' || o.trade === trade) return;
+      o.trade = trade;
+      if ('esc26' in o) { o.escShareTrade = pct(o.esc26, trade); o.appShareTrade = pct(o.app26, trade); }
+      if ('escolas' in o) { o.escShareTrade = pct(o.escolas, trade); o.appShareTrade = pct(o.appai, trade); }
+      mudou = true;
+    }
+    (D.meses || []).forEach(function (m, i) { if (m.escolarAppai) alinhar(m.escolarAppai.aqua, (D.hist26.aqua || [])[i]); });
+    ((D.appaiEscolarHist || {}).serie || []).forEach(function (x) {
+      var mm = /^(\w{3})\/26$/.exec(x.label || '');
+      if (!mm) return;
+      var i = MES.indexOf(mm[1]);
+      if (i >= 0) alinhar(x.aqua, (D.hist26.aqua || [])[i]);
+    });
+    if (mudou) setTimeout(function () {
+      try { if (typeof window.renderMes === 'function' && (!window.curPage || window.curPage === 'mar')) window.renderMes(window.mesSelecionado && window.mesSelecionado.aqua ? window.mesSelecionado : D.meses[IDX]); } catch (e) { }
+    }, 400);
+  })();
+
+  // ================================================================ indicador do menu (26/10/2026)
+  // O sublinhado do menu do topo ficava torto: ele é posicionado no clique, mas logo depois a página nova
+  // muda de altura, a barra de rolagem vertical aparece/some e os botões (alinhados à direita da marca)
+  // andam ~15px; as fontes carregando depois também mudam a largura dos botões. Agora a calha da barra
+  // de rolagem fica sempre reservada e o indicador é recalculado sempre que o topo ou um botão muda.
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = 'html{scrollbar-gutter:stable}';
+    document.head.appendChild(st);
+    function ajustar() {
+      if (typeof _slideIndicator !== 'function') return;
+      _slideIndicator(el('navSlider'), document.querySelector('.topbar .np.on'));
+      var mb = document.querySelector('.mob-nav2-btn.on');
+      if (mb) _slideIndicator(el('mobNav2Slider'), mb);
+    }
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(ajustar);
+      var tb = document.querySelector('.topbar');
+      if (tb) ro.observe(tb);
+      document.querySelectorAll('.topbar .np').forEach(function (b) { ro.observe(b); });
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustar);
+    window.addEventListener('load', ajustar);
+    document.addEventListener('click', function (e) { if (e.target.closest('.np, .mob-nav2-btn')) { setTimeout(ajustar, 120); setTimeout(ajustar, 450); } }, true);
+    setTimeout(ajustar, 300);
+  })();
+
+  // ================================================================ "Faltam para a meta" na aba do mês (26/10/2026)
+  // Os cards "A captar AquaRio / Paineiras" ficavam espremidos na barra de totais e mostravam "0" e "-990/dia"
+  // quando a meta já tinha sido batida. Viram cards próprios: quanto falta e o ritmo por dia nos dias restantes,
+  // ou "Meta batida" com quanto ficou acima.
+  (function () {
+    var css = document.createElement('style');
+    css.textContent = '.tv2-faltam{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:14px 0}' +
+      '.tv2-fc{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--c);border-radius:12px;padding:14px 18px}' +
+      '.tv2-fc-l{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--c)}' +
+      '.tv2-fc-v{font-family:"Bebas Neue",sans-serif;font-size:32px;line-height:1.05;color:var(--text);margin-top:4px}' +
+      '.tv2-fc-p{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:8px;font-size:11.5px;font-weight:700;background:var(--cp);color:var(--c)}' +
+      '.tv2-fc-s{font-size:10.5px;color:var(--muted);margin-top:6px}' +
+      '.tv2-fc.ok .tv2-fc-v{color:var(--up)}';
+    document.head.appendChild(css);
+    function mesSel() {
+      var m = (typeof mesSelecionado === 'object' && mesSelecionado && mesSelecionado.aqua) ? mesSelecionado : null;
+      return m || D.meses[IDX] || D.mesAtual;
+    }
+    function render() {
+      var bar = document.querySelector('#pg-mar .total-bar');
+      if (!bar) return;
+      ['aqua_saldo', 'pai_saldo', 'bio_saldo'].forEach(function (id) {
+        var v = el(id); if (!v) return;
+        var it = v.closest('.tb-i'); if (it) it.style.display = 'none';
+        var p = it && it.previousElementSibling; if (p && p.classList.contains('tb-div')) p.style.display = 'none';
+      });
+      var box = el('tv2-faltam');
+      if (!box) { box = document.createElement('div'); box.id = 'tv2-faltam'; box.className = 'tv2-faltam'; bar.parentNode.insertBefore(box, bar.nextSibling); }
+      var m = mesSel(), fechado = !!m.isFechado;
+      var dias = fechado ? 0 : Number(m.diasRestantes != null ? m.diasRestantes : (D.mesAtual || {}).diasRestantes) || 0;
+      var pq = [['AquaRio', m.aqua, '#005F8E', 'var(--aqua-pale)'], ['Paineiras', m.pai, '#2D6A2B', 'var(--pai-pale)']];
+      if (window._bioAtivo && m.bio && m.bio.obz) pq.push(['BioParque', m.bio, '#C25A00', 'var(--bio-pale)']);
+      box.innerHTML = pq.map(function (x) {
+        var d = x[1] || {}, meta = d.obz || 0, real = d.real26 || 0, falta = meta - real;
+        var head, val, pillTxt, sub, ok = falta <= 0;
+        if (!meta) { head = x[0] + ' · sem meta'; val = '-'; pillTxt = 'meta OBZ não cadastrada'; sub = ''; }
+        else if (ok) { head = x[0] + ' · meta atingida'; val = 'Meta batida'; pillTxt = '+' + nf(-falta) + ' acima da meta'; sub = nf(real) + ' de ' + nf(meta) + ' (' + pf(real / meta) + ')'; }
+        else if (fechado) { head = x[0] + ' · faltaram para a meta'; val = nf(falta); pillTxt = 'mês fechado'; sub = nf(real) + ' de ' + nf(meta) + ' (' + pf(real / meta) + ')'; }
+        else { head = x[0] + ' · faltam para a meta'; val = nf(falta); pillTxt = dias ? nf(falta / dias) + '/dia · ' + dias + ' dias restantes' : 'último dia'; sub = nf(real) + ' de ' + nf(meta) + ' (' + pf(real / meta) + ')'; }
+        return '<div class="tv2-fc' + (ok && meta ? ' ok' : '') + '" style="--c:' + x[2] + ';--cp:' + x[3] + '"><div class="tv2-fc-l">' + head + '</div><div class="tv2-fc-v">' + val + '</div>' +
+          '<div class="tv2-fc-p">' + pillTxt + '</div>' + (sub ? '<div class="tv2-fc-s">' + sub + '</div>' : '') + '</div>';
+      }).join('');
+    }
+    // celular: o card do parque mostra "A captar" com valor negativo quando a meta foi batida
+    function mobile() {
+      var m = mesSel();
+      document.querySelectorAll('.mob-pk-stat-l').forEach(function (l) {
+        if (l.textContent.trim() !== 'A captar') return;
+        var v = l.nextElementSibling, d = v && v.nextElementSibling;
+        var card = l.closest('.mob-pk') || l.parentNode.parentNode.parentNode;
+        var txt = card ? card.textContent : '';
+        var pk = /AquaRio/i.test(txt) ? m.aqua : /Paineiras/i.test(txt) ? m.pai : /BioParque/i.test(txt) ? m.bio : null;
+        if (!pk || !pk.obz) { l.textContent = 'Faltam p/ meta'; return; }
+        var falta = pk.obz - (pk.real26 || 0);
+        if (falta <= 0) {
+          l.textContent = 'Meta batida';
+          if (v) { v.textContent = '+' + nf(-falta); v.style.color = 'var(--up)'; }
+          if (d) d.textContent = 'acima da meta';
+        } else {
+          l.textContent = 'Faltam p/ meta';
+          if (v) v.textContent = nf(falta);
+        }
+      });
+    }
+    var t = null;
+    function agendar() { if (t) return; t = setTimeout(function () { t = null; try { render(); mobile(); } catch (e) { if (window.console) console.warn('[trade_v2 faltam]', e); } }, 60); }
+    var alvo = el('aqua_saldo');
+    if (alvo) new MutationObserver(agendar).observe(alvo, { childList: true, characterData: true, subtree: true });
+    var pgMar = el('pg-mar');
+    if (pgMar) new MutationObserver(function () {
+      var tem = Array.prototype.some.call(pgMar.querySelectorAll('.mob-pk-stat-l'), function (l) { return l.textContent.trim() === 'A captar'; });
+      if (tem) mobile(); // só troca texto quando ainda existe "A captar": não dispara de novo
+    }).observe(pgMar, { childList: true, subtree: true });
+    agendar();
+  })();
+
   // tema: redesenha a aba aberta (cores dos eixos)
   var temaOrig = window.toggleTheme;
   if (typeof temaOrig === 'function') window.toggleTheme = function () { var r = temaOrig.apply(this, arguments); if (window.__tv2Pagina) RENDER[window.__tv2Pagina](); return r; };
