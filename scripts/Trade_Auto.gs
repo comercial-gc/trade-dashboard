@@ -61,9 +61,26 @@ function tradeAutoAtualizar(forcar) {
 
 // o gatilho passa um objeto de evento como argumento; por isso ele chama esta função
 function tradeAutoGatilho() {
+  // 21/10/2026: espera o cálculo pedido agora terminar (até ~4 min) em vez de só ler na próxima hora.
+  // Só espera entre 9h e 17h, que é quando o cálculo é pedido (ver _tradeAutoDispararCalculo).
+  var antes = (_tradeAutoBaixarJson() || {}).gerado_em;
   _tradeAutoDispararCalculo();
+  var h = Number(Utilities.formatDate(new Date(), 'America/Sao_Paulo', 'H'));
+  if (h >= 9 && h <= 17) _tradeAutoEsperarJson(antes, 8);
   tradeAutoAtualizar(false);
   try { _tradeAutoParque(false); } catch (e) { _tradeAutoLogPedido('visitação do parque pela Controladoria não aplicada: ' + e.message); }
+}
+
+// 21/10/2026 (Paulo): espera o trade_diario.json do cálculo que acabou de ser pedido, checando a cada
+// 30s, no máximo `voltas` vezes (o Apps Script corta a execução em 6 min). Se o Drive ainda não
+// tiver o dia de ontem, segue com o que houver; a rodada seguinte completa.
+function _tradeAutoEsperarJson(antes, voltas) {
+  for (var i = 0; i < voltas; i++) {
+    var j = _tradeAutoBaixarJson();
+    if (j && j.gerado_em && j.gerado_em !== antes) return j;
+    Utilities.sleep(30000);
+  }
+  return null;
 }
 
 // 14/10/2026: as rodadas agendadas do GitHub (workflow update-trade) não estavam disparando. Como
@@ -335,11 +352,7 @@ function _tradeAutoLog(ss, texto) {
 function tradeAutoManha() {
   var antes = (_tradeAutoBaixarJson() || {}).gerado_em;
   _tradeAutoDispararCalculo();
-  for (var i = 0; i < 8; i++) {
-    Utilities.sleep(30000);
-    var j = _tradeAutoBaixarJson();
-    if (j && j.gerado_em && j.gerado_em !== antes) break;
-  }
+  _tradeAutoEsperarJson(antes, 8);
   tradeAutoAtualizar(false);
   try { _tradeAutoParque(false); } catch (e) { _tradeAutoLogPedido('visitação do parque pela Controladoria não aplicada: ' + e.message); }
 }
