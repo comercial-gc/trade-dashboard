@@ -1,7 +1,7 @@
 {
  "versao": 1,
  "fonte": "Dash do Trade (planilha TRADE, validada com Bia/Nikolas)",
- "dataRef": "26/10/2026",
+ "dataRef": "27/10/2026",
  "meses": {
   "2025-01": {
    "AquaRio": {
@@ -474,15 +474,15 @@
   },
   "2026-10": {
    "AquaRio": {
-    "trade": 21540,
-    "parque": 99798,
-    "appai": 1692,
+    "trade": 21999,
+    "parque": 102772,
+    "appai": 1706,
     "escolas": 2815,
     "parcial": true
    },
    "Paineiras": {
-    "trade": 44302,
-    "parque": 86632,
+    "trade": 45310,
+    "parque": 88708,
     "appai": null,
     "escolas": null,
     "parcial": true
