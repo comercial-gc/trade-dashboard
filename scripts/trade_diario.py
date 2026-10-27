@@ -55,6 +55,11 @@ PROTEGIDOS = {(2026, 10): [1, 2]}
 # "E-Commerce" e Local de Venda "Cristo Redentor | Portal Service / Condutores" ("Car Service" no nome antigo);
 # no Flux já vêm como CANAL_VENDA TRADE / PORTAL DE AGENTES. Vale para qualquer arquivo que traga essas colunas.
 PORTAL_TRADE_RE = re.compile(r"PORTAL SERVICE|CONDUTOR|CAR SERVICE")
+# 27/10/2026 (Paulo): o Portal do Agente do Paineiras chega no Flux como ECOMMERCE, sem agência. Os pedidos
+# que o CARD classifica como Trade ficam em trade_pai_card.json (scripts/trade_pai_card.py, alimentado pela
+# tarefa diária do CARD) e contam como Trade, como na planilha da Bia/Nikolas em ago e set.
+PAI_CARD_JSON = os.path.join(AQUI, "..", "trade_pai_card.json")
+PAI_CARD = json.load(open(PAI_CARD_JSON, encoding="utf-8"))["lbs"] if os.path.exists(PAI_CARD_JSON) else {}
 # agências que nunca entram no Top Clientes (além das da skill)
 EXCLUIR_EXTRA = {"TESTE"}
 # grafias já decididas (Paulo, 13/10/2026; Great Tour é a grafia de todos os meses de 2026)
@@ -288,8 +293,12 @@ def processar(parque, h, rows, ano, mes, nome_arq, avisos):
             ag = str(g(r, "NOME_AGENCIA") or "").strip()
             if "BINAMIK" in n(ag):
                 continue
-            if not (portal or n(g(r, "CANAL_VENDA")) == "TRADE" or any(k in cat for k in ("GUIA", "AGENCIA", "OPERADORA", "TRADE"))):
+            lb = n(g(r, "LB"))
+            card_trade = bool(lb) and lb in PAI_CARD
+            if not (portal or card_trade or n(g(r, "CANAL_VENDA")) == "TRADE" or any(k in cat for k in ("GUIA", "AGENCIA", "OPERADORA", "TRADE"))):
                 continue
+            if card_trade and not ag:
+                ag = PAI_CARD[lb]
             q = num(g(r, "QTDE_TOTAL"))
             x["trade"] += q
             x["rec"] += num(g(r, "VALOR"))
