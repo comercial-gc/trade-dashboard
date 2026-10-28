@@ -868,18 +868,164 @@
     if (el('tv2-car-loc')) el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
   }
 
+  // ================================================================ Cancelamento (28/10/2026)
+  // Pedido da gerente comercial (via Paulo): % de cancelamento mensal (os 2 parques, filtrável), % por agência mês a mês,
+  // relação com o clima e cancelado em R$. Fonte: trade_cancelamento.json (CARD Robo\canc_agrega.py), CARD por período
+  // de visita, só Trade. Cancelado = Cancelada (Estorno) + Cancelado gerou crédito; pedido de cancelamento à parte;
+  // não pago fora; no-show = aprovado sem entrada com visita até ontem.
+  var cancEstado = { k: 't', mes: '', met: 'canc', min: '100' };
+  DADOS.canc = null;
+  var promessaCanc = getJSON('trade_cancelamento.json', true).then(function (j) {
+    DADOS.canc = j;
+    if (window.__tv2Pagina === 'canc') renderCanc();
+  });
+  function cancSoma(lst) {
+    var o = { ag: 0, canc: 0, ped: 0, util: 0, ns: 0, fut: 0, rs_ag: 0, rs_canc: 0, rs_ns: 0 };
+    lst.forEach(function (x) { if (x) Object.keys(o).forEach(function (c) { o[c] += x[c] || 0; }); });
+    return o;
+  }
+  function cancParques(k) { return k === 't' ? ['AquaRio', 'Paineiras'] : [k === 'a' ? 'AquaRio' : 'Paineiras']; }
+  // meses com base completa para todos os parques do filtro (o Paineiras só tem o Trade no CARD desde ago/26)
+  function cancMeses() {
+    var C = DADOS.canc, ps = cancParques(cancEstado.k), ini = ps.map(function (p) { return (C.inicio || {})[p] || ''; }).sort().pop() || '';
+    var s = {};
+    ps.forEach(function (p) { Object.keys((C.meses || {})[p] || {}).forEach(function (m) { if (m >= ini) s[m] = 1; }); });
+    return Object.keys(s).sort();
+  }
+  function cancMes(k, m) { return cancSoma(cancParques(k).map(function (p) { return ((DADOS.canc.meses || {})[p] || {})[m]; })); }
+  // % de no-show sobre o que já devia ter acontecido (agendado menos visita futura)
+  function txNs(o) { var b = o.ag - o.fut; return b > 0 ? o.ns / b : null; }
+  function txCanc(o) { return o.ag ? o.canc / o.ag : null; }
+  function rs(v) { return v == null ? '-' : 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+
+  function renderCanc() {
+    var pg = el('tv2-canc-corpo');
+    if (!DADOS.canc) { carregando('tv2-canc-corpo', 'trade_cancelamento.json'); return; }
+    var C = DADOS.canc, ms = cancMeses(), k = cancEstado.k;
+    if (!ms.length) { pg.innerHTML = aviso('Sem dados de cancelamento ainda.'); return; }
+    if (!cancEstado.mes || ms.indexOf(cancEstado.mes) < 0) cancEstado.mes = ms[ms.length - 1];
+    var sel = el('tv2-canc-mes');
+    if (sel) sel.innerHTML = ms.slice().reverse().map(function (m) { return '<option value="' + m + '"' + (m === cancEstado.mes ? ' selected' : '') + '>' + mesLbl(m) + '</option>'; }).join('');
+    var mSel = cancEstado.mes, ate = C.ate, parcial = mSel === ate.slice(0, 7);
+    var M = cancMes(k, mSel), ANO = cancSoma(ms.map(function (m) { return cancMes(k, m); }));
+    var corK = COR[k];
+    var h = '<div class="cli-kpis-ag" style="margin-bottom:14px">' +
+      kpi('Bilhetes agendados', nf(M.ag), mesLbl(mSel) + (parcial ? ' (parcial até ' + dataBR(ate).slice(0, 5) + ')' : ''), null, corK) +
+      kpi('Cancelados', pf(txCanc(M)), nf(M.canc) + ' bilhetes · ' + rs(M.rs_canc) + (M.ped ? '<br>+ ' + nf(M.ped) + ' com pedido de cancelamento em andamento' : '')) +
+      kpi('No-show', pf(txNs(M)), nf(M.ns) + ' bilhetes · ' + rs(M.rs_ns)) +
+      kpi('Acumulado ' + mesLbl(ms[0]) + ' a ' + mesLbl(ms[ms.length - 1]), pf(txCanc(ANO)) + ' · ' + pf(txNs(ANO)), 'cancelado · no-show · ' + rs(ANO.rs_canc + ANO.rs_ns) + ' perdidos') +
+      '</div>';
+    h += '<div class="row2"><div class="cc"><div class="cc-h"><div class="cc-t">% de cancelamento e no-show por mês</div><div class="cc-s">' + NOME[k] + ' · sobre os bilhetes Trade agendados para o mês</div></div><div style="height:260px"><canvas id="tv2-c-canc"></canvas></div></div>' +
+      '<div class="cc"><div class="cc-h"><div class="cc-t">Valor perdido por mês (R$)</div><div class="cc-s">Preço dos bilhetes cancelados e dos no-shows</div></div><div style="height:260px"><canvas id="tv2-c-canc-rs"></canvas></div></div></div>';
+    h += '<div class="cc" style="margin:14px 0;overflow-x:auto" id="tv2-canc-ag"></div>';
+    h += '<div class="cc" style="margin-bottom:14px;overflow-x:auto" id="tv2-canc-clima"></div>';
+    h += aviso('ℹ️ <strong>Como ler:</strong> agendado = bilhetes Trade com visita marcada no mês (CARD, período de visita; vendas em maquininha e não pagos ficam fora). ' +
+      '<strong>Cancelado</strong> = estorno ou crédito gerado. <strong>No-show</strong> = bilhete aprovado, com visita até ' + dataBR(ate).slice(0, 5) + ', sem entrada registrada; o % de no-show é sobre os bilhetes cuja visita já passou. ' +
+      '<strong>Pedido de cancelamento</strong> = ainda aprovado, mas com cancelamento solicitado. <strong>Paineiras só a partir de ago/26</strong>: antes disso a venda Trade do parque não passava pelo CARD, e o AquaRio tem histórico desde jan/26 (na visão dos dois parques, a partir de ago/26). Agência = local de venda no CARD (pedidos do comercial sem agência ficam agrupados). Atualizado todo dia; os meses recentes ainda podem mudar com cancelamentos feitos depois.');
+    pg.innerHTML = h;
+    var lbl = ms.map(mesLbl);
+    grafico('tv2-c-canc', { type: 'line', data: { labels: lbl, datasets: [
+      { label: '% cancelado', data: ms.map(function (m) { var v = txCanc(cancMes(k, m)); return v == null ? null : +(v * 100).toFixed(2); }), borderColor: '#C0392B', backgroundColor: '#C0392B', tension: .25, pointRadius: 3 },
+      { label: '% no-show', data: ms.map(function (m) { var v = txNs(cancMes(k, m)); return v == null ? null : +(v * 100).toFixed(2); }), borderColor: '#E67E22', backgroundColor: '#E67E22', tension: .25, pointRadius: 3 }] },
+      options: { scales: eixos({ y: { beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return v + '%'; } } } }),
+        plugins: { tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + (c.raw == null ? '-' : c.raw.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%'); } } } } } });
+    grafico('tv2-c-canc-rs', { type: 'bar', data: { labels: lbl, datasets: [
+      { label: 'Cancelado', data: ms.map(function (m) { return Math.round(cancMes(k, m).rs_canc); }), backgroundColor: '#C0392B', stack: 's' },
+      { label: 'No-show', data: ms.map(function (m) { return Math.round(cancMes(k, m).rs_ns); }), backgroundColor: '#E67E22', stack: 's' }] },
+      options: { scales: eixos({ x: { stacked: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return 'R$ ' + nf(v); } } } }),
+        plugins: { tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + rs(c.raw); } } } } } });
+    renderCancAg(ms);
+    renderCancClima();
+  }
+
+  // % por agência: mês a mês (histórico) + total do período
+  function renderCancAg(ms) {
+    var C = DADOS.canc, k = cancEstado.k, met = cancEstado.met, min = Number(cancEstado.min);
+    var ag = {};
+    cancParques(k).forEach(function (p) {
+      Object.keys((C.agencias || {})[p] || {}).forEach(function (a) {
+        var o = C.agencias[p][a];
+        ag[a] = ag[a] || {};
+        Object.keys(o).forEach(function (m) { ag[a][m] = cancSoma([ag[a][m], o[m]]); });
+      });
+    });
+    var linhas = Object.keys(ag).map(function (a) {
+      var t = cancSoma(ms.map(function (m) { return ag[a][m]; }));
+      return { a: a, t: t, m: ag[a] };
+    }).filter(function (l) { return l.t.ag >= min; });
+    var tx = met === 'canc' ? txCanc : txNs;
+    linhas.sort(function (x, y) { return (met === 'canc' ? y.t.canc - x.t.canc : y.t.ns - x.t.ns) || y.t.ag - x.t.ag; });
+    var cor = function (v) { if (v == null) return ''; var a = Math.min(1, v / 0.15); return 'background:rgba(192,57,43,' + (0.08 + a * 0.55).toFixed(2) + ')'; };
+    var h = '<div class="cc-h" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end"><div><div class="cc-t">% por agência, mês a mês</div><div class="cc-s">' + NOME[k] + ' · ' + linhas.length + ' agências com ' + nf(min) + '+ bilhetes agendados no período · ordenado por bilhetes ' + (met === 'canc' ? 'cancelados' : 'no-show') + '</div></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' + controle('Indicador', seg('tv2-canc-met', [['canc', '% cancelado'], ['ns', '% no-show']], met, function (v) { cancEstado.met = v; renderCancAg(ms); })) +
+      controle('Mínimo', '<select class="cli-select" id="tv2-canc-min">' + ['10', '100', '500', '1000'].map(function (v) { return '<option value="' + v + '"' + (v === cancEstado.min ? ' selected' : '') + '>' + v + '+ bilhetes</option>'; }).join('') + '</select>') +
+      '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);align-self:flex-end" id="tv2-canc-xls">⬇️ Excel</button></div></div>';
+    h += '<table class="cli-table" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Agência</th>' + ms.map(function (m) { return '<th>' + mesLbl(m) + '</th>'; }).join('') +
+      '<th>Agendados</th><th>' + (met === 'canc' ? 'Cancelados' : 'No-show') + '</th><th>%</th><th>R$ perdido</th></tr></thead><tbody>';
+    linhas.forEach(function (l) {
+      var v = tx(l.t);
+      h += '<tr><td style="text-align:left;white-space:nowrap">' + esc(l.a) + '</td>' + ms.map(function (m) { var o = l.m[m]; var x = o ? tx(o) : null; return '<td style="text-align:right;' + cor(x) + '" title="' + (o ? nf(o.ag) + ' agendados' : '') + '">' + (o && o.ag ? pf(x) : '-') + '</td>'; }).join('') +
+        '<td style="text-align:right">' + nf(l.t.ag) + '</td><td style="text-align:right">' + nf(met === 'canc' ? l.t.canc : l.t.ns) + '</td><td style="text-align:right;font-weight:700;' + cor(v) + '">' + pf(v) + '</td><td style="text-align:right">' + rs(met === 'canc' ? l.t.rs_canc : l.t.rs_ns) + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    var box = el('tv2-canc-ag');
+    box.innerHTML = h;
+    el('tv2-canc-min').onchange = function () { cancEstado.min = this.value; renderCancAg(ms); };
+    el('tv2-canc-xls').onclick = function () {
+      if (typeof XLSX === 'undefined') return;
+      var aoa = [['Agência'].concat(ms.map(mesLbl).map(function (x) { return x + ' agendados'; }), ms.map(mesLbl).map(function (x) { return x + ' cancelados'; }), ms.map(mesLbl).map(function (x) { return x + ' no-show'; }), ['Agendados', 'Cancelados', 'No-show', 'R$ cancelado', 'R$ no-show'])];
+      linhas.forEach(function (l) {
+        aoa.push([l.a].concat(ms.map(function (m) { return (l.m[m] || {}).ag || 0; }), ms.map(function (m) { return (l.m[m] || {}).canc || 0; }), ms.map(function (m) { return (l.m[m] || {}).ns || 0; }),
+          [l.t.ag, l.t.canc, l.t.ns, Math.round(l.t.rs_canc), Math.round(l.t.rs_ns)]));
+      });
+      var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Cancelamento');
+      XLSX.writeFile(wb, 'cancelamento_trade_' + k + '.xlsx');
+    };
+  }
+
+  // clima: dias por faixa de chuva no Rio, com % de cancelamento e no-show dos bilhetes daquele dia
+  function renderCancClima() {
+    var C = DADOS.canc, k = cancEstado.k, ch = C.chuva || {}, ate = C.ate;
+    var F = [['sem', 'Sem chuva (até 1 mm)', function (x) { return x < 1; }], ['leve', 'Chuva (1 a 10 mm)', function (x) { return x >= 1 && x < 10; }], ['forte', 'Chuva forte (10 mm ou mais)', function (x) { return x >= 10; }]];
+    var g = {}, DS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'], porDia = {};
+    F.forEach(function (f) { g[f[0]] = { dias: {}, ag: 0, canc: 0, ns: 0, util: 0 }; });
+    cancParques(k).forEach(function (p) {
+      Object.keys((C.dias || {})[p] || {}).forEach(function (d) {
+        if (d > ate || d.slice(0, 7) < (cancMeses()[0] || '')) return;
+        var v = C.dias[p][d], mm = ch[d];
+        var w = DS[new Date(d + 'T12:00:00').getDay()];
+        porDia[w] = porDia[w] || { ag: 0, canc: 0, ns: 0 };
+        porDia[w].ag += v[0]; porDia[w].canc += v[1]; porDia[w].ns += v[2];
+        if (mm == null) return;
+        var f = F.filter(function (f) { return f[2](mm); })[0];
+        var o = g[f[0]]; o.dias[d] = 1; o.ag += v[0]; o.canc += v[1]; o.ns += v[2]; o.util += v[3];
+      });
+    });
+    var h = '<div class="cc-h"><div class="cc-t">Clima e dia da semana</div><div class="cc-s">' + NOME[k] + ' · chuva do dia da visita no Rio (Open-Meteo) · % sobre os bilhetes Trade agendados para aqueles dias</div></div>' +
+      '<div class="row2"><table class="cli-table" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Chuva no dia da visita</th><th>Dias</th><th>Agendados</th><th>% cancelado</th><th>% no-show</th></tr></thead><tbody>' +
+      F.map(function (f) { var o = g[f[0]]; return '<tr><td style="text-align:left">' + f[1] + '</td><td style="text-align:right">' + nf(Object.keys(o.dias).length) + '</td><td style="text-align:right">' + nf(o.ag) + '</td><td style="text-align:right">' + pf(o.ag ? o.canc / o.ag : null) + '</td><td style="text-align:right">' + pf(o.ag ? o.ns / o.ag : null) + '</td></tr>'; }).join('') +
+      '</tbody></table><table class="cli-table" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Dia da semana</th><th>Agendados</th><th>% cancelado</th><th>% no-show</th></tr></thead><tbody>' +
+      ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'].map(function (w) { var o = porDia[w] || { ag: 0, canc: 0, ns: 0 }; return '<tr><td style="text-align:left">' + w + '</td><td style="text-align:right">' + nf(o.ag) + '</td><td style="text-align:right">' + pf(o.ag ? o.canc / o.ag : null) + '</td><td style="text-align:right">' + pf(o.ag ? o.ns / o.ag : null) + '</td></tr>'; }).join('') +
+      '</tbody></table></div><div class="cc-s" style="margin-top:6px">Mostra o que foi observado, não prova causa: o cancelamento costuma ser decidido antes do dia, e a chuva pesa mais no no-show (o grupo não aparece).</div>';
+    el('tv2-canc-clima').innerHTML = h;
+  }
+
   // ================================================================ páginas e navegação
   var PAGINAS = [
     ['obz', '🎯 OBZ', '🎯 OBZ', 'OBZ · TRADE E ESCOLAR', 'Realizado x meta OBZ, comparativos e quanto falta para a meta do mês'],
     ['ind', '🏞️ Indicadores Parques', '🏞️ Indic.', 'INDICADORES PARQUES', 'B2B x B2C, tipo de dia, eventos e antecedência de compra'],
     ['ori', '🌎 Origem', '🌎 Origem', 'ORIGEM DOS VISITANTES', 'Share e antecedência por país e feriados dos mercados principais'],
-    ['op', '💡 Oportunidades', '💡 Oport.', 'OPORTUNIDADES', 'Agências que já compraram e estão paradas há mais de 6 meses']
+    ['op', '💡 Oportunidades', '💡 Oport.', 'OPORTUNIDADES', 'Agências que já compraram e estão paradas há mais de 6 meses'],
+    ['canc', '🚫 Cancelamento', '🚫 Cancel.', 'CANCELAMENTO E NO-SHOW · TRADE', '% de bilhetes Trade cancelados e não utilizados, por mês, agência e clima']
   ];
-  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp };
+  window.__tv2CancMes = function (v) { cancEstado.mes = v; renderCanc(); };
+  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp, canc: renderCanc };
   function filtros(id) {
     if (id === 'obz') return controle('Parque do gráfico', seg('tv2-obz-k', [['t', 'AquaRio + Paineiras'], ['a', 'AquaRio'], ['p', 'Paineiras']], obzEstado.k, function (v) { obzEstado.k = v; renderOBZ(); }));
     if (id === 'ind') return controle('Parque', seg('tv2-ind-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], indEstado.k, function (v) { indEstado.k = v; renderInd(); })) +
       controle('Período', seg('tv2-ind-per', PERIODOS, indEstado.per, function (v) { indEstado.per = v; renderInd(); }));
+    if (id === 'canc') return controle('Parque', seg('tv2-canc-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], cancEstado.k, function (v) { cancEstado.k = v; renderCanc(); })) +
+      controle('Mês dos indicadores', '<select class="cli-select" id="tv2-canc-mes" onchange="window.__tv2CancMes(this.value)"></select>');
     if (id === 'ori') return controle('Parque', seg('tv2-ori-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], oriEstado.k, function (v) { oriEstado.k = v; renderOri(); })) +
       controle('Período', seg('tv2-ori-per', PERIODOS, oriEstado.per, function (v) { oriEstado.per = v; renderOri(); })) +
       controle('Canal', seg('tv2-ori-seg', [['tot', 'Total'], ['b2b', 'B2B'], ['b2c', 'B2C']], oriEstado.seg, function (v) { oriEstado.seg = v; renderOri(); })) +
