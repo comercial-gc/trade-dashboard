@@ -1,10 +1,12 @@
 {
  "versao": 1,
- "gerado_em": "2026-10-27T17:55:46Z",
+ "gerado_em": "2026-10-28T12:12:48Z",
  "mes": "2026-10",
  "ate": 26,
- "limite": 26,
- "dias_faltando": [],
+ "limite": 27,
+ "dias_faltando": [
+  27
+ ],
  "dias_sem_visitacao": [],
  "protegidos": [
   1,
@@ -124,7 +126,7 @@
   },
   {
    "dia": 12,
-   "C": 2254.0,
+   "C": 2253.0,
    "E": 9751.0,
    "I": 308.0,
    "J": 0.0,
@@ -2160,6 +2162,7 @@
   "A24": "AQUA_OUT_2026.xlsx",
   "A25": "AQUA_OUT_2026.xlsx",
   "A26": "AQUA_OUT_2026.xlsx",
+  "A27": "AQUA_OUT_2026.xlsx",
   "P01": "PAI_OUT_2026.xlsx",
   "P02": "PAI_OUT_2026.xlsx",
   "P03": "PAI_OUT_2026.xlsx",
