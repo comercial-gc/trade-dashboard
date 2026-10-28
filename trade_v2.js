@@ -1387,7 +1387,7 @@
   (function () {
     var SECOES = [
       ['res', 'Resultado', [['mar', '📅 Mês'], ['acum', '📊 Acumulado'], ['obz', '🎯 OBZ'], ['hist', '📈 Histórico']]],
-      ['cli', 'Clientes', [['cli', '🏆 Top Clientes'], ['op', '💡 Oportunidades']]],
+      ['cli', 'Clientes', [['cli', '🏆 Top Clientes'], ['op', '💡 Oportunidades'], ['canc', '🚫 Cancelamento']]],
       ['mer', 'Mercado', [['share', '🔄 Share Trade'], ['imm', '🗻 Intel. Mercado'], ['ori', '🌎 Origem']]],
       ['par', 'Parques', [['ind', '🏞️ Indicadores Parques']]]
     ];
