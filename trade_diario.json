@@ -1,9 +1,9 @@
 {
  "versao": 1,
- "gerado_em": "2026-10-28T12:47:14Z",
+ "gerado_em": "2026-10-29T12:12:29Z",
  "mes": "2026-10",
- "ate": 27,
- "limite": 27,
+ "ate": 28,
+ "limite": 28,
  "dias_faltando": [],
  "dias_sem_visitacao": [],
  "protegidos": [
@@ -31,7 +31,7 @@
    "J": 50.0,
    "K": 94012.7,
    "M": 728.0,
-   "O": 910.0,
+   "O": 904.0,
    "S": 56634.0
   },
   {
@@ -42,7 +42,7 @@
    "J": 0.0,
    "K": 16719.0,
    "M": 1344.0,
-   "O": 1959.0,
+   "O": 1943.0,
    "S": 108897.0
   },
   {
@@ -52,9 +52,9 @@
    "I": 20.0,
    "J": 0.0,
    "K": 21688.1,
-   "M": 1730.0,
-   "O": 3048.0,
-   "S": 133803.0
+   "M": 1692.0,
+   "O": 2928.0,
+   "S": 130497.0
   },
   {
    "dia": 6,
@@ -63,9 +63,9 @@
    "I": 8.0,
    "J": 93.0,
    "K": 44250.3,
-   "M": 1191.0,
-   "O": 2066.0,
-   "S": 91095.0
+   "M": 1186.0,
+   "O": 2038.0,
+   "S": 90687.0
   },
   {
    "dia": 7,
@@ -75,7 +75,7 @@
    "J": 265.0,
    "K": 54232.4,
    "M": 815.0,
-   "O": 1285.0,
+   "O": 1284.0,
    "S": 62409.0
   },
   {
@@ -85,9 +85,9 @@
    "I": 4.0,
    "J": 311.0,
    "K": 49449.3,
-   "M": 2405.0,
-   "O": 4109.0,
-   "S": 188667.0
+   "M": 2401.0,
+   "O": 3985.0,
+   "S": 188319.0
   },
   {
    "dia": 9,
@@ -96,9 +96,9 @@
    "I": 19.0,
    "J": 197.0,
    "K": 50415.6,
-   "M": 2980.0,
-   "O": 4930.0,
-   "S": 234972.0
+   "M": 2963.0,
+   "O": 4678.0,
+   "S": 233493.0
   },
   {
    "dia": 10,
@@ -107,9 +107,9 @@
    "I": 164.0,
    "J": 1.0,
    "K": 104937.8,
-   "M": 3367.0,
-   "O": 5188.0,
-   "S": 269385.0
+   "M": 3350.0,
+   "O": 4950.0,
+   "S": 267906.0
   },
   {
    "dia": 11,
@@ -118,9 +118,9 @@
    "I": 260.0,
    "J": 0.0,
    "K": 146264.5,
-   "M": 2854.0,
-   "O": 4797.0,
-   "S": 227844.0
+   "M": 2848.0,
+   "O": 4560.0,
+   "S": 227403.0
   },
   {
    "dia": 12,
@@ -130,7 +130,7 @@
    "J": 0.0,
    "K": 134887.3,
    "M": 2288.0,
-   "O": 4008.0,
+   "O": 3823.0,
    "S": 182643.0
   },
   {
@@ -140,9 +140,9 @@
    "I": 18.0,
    "J": 165.0,
    "K": 62609.5,
-   "M": 2843.0,
-   "O": 4864.0,
-   "S": 223023.0
+   "M": 2831.0,
+   "O": 4638.0,
+   "S": 222060.0
   },
   {
    "dia": 14,
@@ -151,9 +151,9 @@
    "I": 16.0,
    "J": 96.0,
    "K": 50335.6,
-   "M": 2434.0,
-   "O": 4601.0,
-   "S": 192945.0
+   "M": 2421.0,
+   "O": 4345.0,
+   "S": 191841.0
   },
   {
    "dia": 15,
@@ -162,9 +162,9 @@
    "I": 211.0,
    "J": 0.0,
    "K": 91368.8,
-   "M": 2107.0,
-   "O": 3847.0,
-   "S": 163485.0
+   "M": 2090.0,
+   "O": 3664.0,
+   "S": 162033.0
   },
   {
    "dia": 16,
@@ -173,9 +173,9 @@
    "I": 60.0,
    "J": 182.0,
    "K": 70663.2,
-   "M": 2528.0,
-   "O": 4322.0,
-   "S": 197229.0
+   "M": 2501.0,
+   "O": 4078.0,
+   "S": 195123.0
   },
   {
    "dia": 17,
@@ -184,9 +184,9 @@
    "I": 161.0,
    "J": 28.0,
    "K": 73553.5,
-   "M": 2292.0,
-   "O": 3817.0,
-   "S": 180372.0
+   "M": 2271.0,
+   "O": 3605.0,
+   "S": 178653.0
   },
   {
    "dia": 18,
@@ -195,9 +195,9 @@
    "I": 99.0,
    "J": 19.0,
    "K": 74003.2,
-   "M": 2845.0,
-   "O": 4595.0,
-   "S": 225936.0
+   "M": 2816.0,
+   "O": 4352.0,
+   "S": 223521.0
   },
   {
    "dia": 19,
@@ -206,9 +206,9 @@
    "I": 18.0,
    "J": 126.0,
    "K": 52647.8,
-   "M": 2237.0,
-   "O": 3755.0,
-   "S": 175707.0
+   "M": 2210.0,
+   "O": 3626.0,
+   "S": 173547.0
   },
   {
    "dia": 20,
@@ -217,9 +217,9 @@
    "I": 5.0,
    "J": 202.0,
    "K": 38471.5,
-   "M": 2019.0,
-   "O": 3022.0,
-   "S": 156930.0
+   "M": 2016.0,
+   "O": 3009.0,
+   "S": 156669.0
   },
   {
    "dia": 21,
@@ -228,9 +228,9 @@
    "I": 10.0,
    "J": 282.0,
    "K": 50361.0,
-   "M": 2408.0,
-   "O": 3483.0,
-   "S": 188829.0
+   "M": 2385.0,
+   "O": 3410.0,
+   "S": 186882.0
   },
   {
    "dia": 22,
@@ -239,9 +239,9 @@
    "I": 18.0,
    "J": 328.0,
    "K": 65166.0,
-   "M": 1770.0,
-   "O": 2415.0,
-   "S": 137892.0
+   "M": 1766.0,
+   "O": 2400.0,
+   "S": 137544.0
   },
   {
    "dia": 23,
@@ -250,9 +250,9 @@
    "I": 21.0,
    "J": 324.0,
    "K": 66222.4,
-   "M": 2100.0,
-   "O": 3537.0,
-   "S": 160851.0
+   "M": 2090.0,
+   "O": 3476.0,
+   "S": 160035.0
   },
   {
    "dia": 24,
@@ -261,9 +261,9 @@
    "I": 85.0,
    "J": 77.0,
    "K": 56233.2,
-   "M": 3549.0,
-   "O": 4938.0,
-   "S": 284694.0
+   "M": 3453.0,
+   "O": 4704.0,
+   "S": 277206.0
   },
   {
    "dia": 25,
@@ -272,9 +272,9 @@
    "I": 28.0,
    "J": 0.0,
    "K": 75311.9,
-   "M": 1821.0,
-   "O": 2950.0,
-   "S": 144972.0
+   "M": 1800.0,
+   "O": 2908.0,
+   "S": 143145.0
   },
   {
    "dia": 26,
@@ -284,7 +284,7 @@
    "J": 0.0,
    "K": 42466.6,
    "M": 1356.0,
-   "O": 2076.0,
+   "O": 2062.0,
    "S": 105534.0
   },
   {
@@ -294,58 +294,74 @@
    "I": 13.0,
    "J": 323.0,
    "K": 52072.7,
-   "M": 2935.0,
-   "O": 4671.0,
-   "S": 233199.0
+   "M": 2888.0,
+   "O": 4436.0,
+   "S": 229110.0
+  },
+  {
+   "dia": 28,
+   "C": 317.0,
+   "E": 1323.0,
+   "I": 3.0,
+   "J": 112.0,
+   "K": 25163.7,
+   "M": 1979.0,
+   "O": 4014.0,
+   "S": 153558.0
   }
  ],
  "top": {
-  "subtitulo": "AquaRio · Paineiras Corcovado | Out/2026 (01 a 27/10)",
+  "subtitulo": "AquaRio · Paineiras Corcovado | Out/2026 (01 a 28/10)",
   "linhas": [
    [
     "C2 RIO VIAGENS E TURISMO S.A.",
-    630,
-    2715
+    649,
+    2793
    ],
    [
     "ONERIO PASS INGRESSOS E ACESSOS",
-    3259,
+    3274,
     0
    ],
    [
     "RIO CARIOCA TOUR TURISMO LIMITADA",
-    74,
-    3067
+    77,
+    3160
    ],
    [
     "MIGUEL LEONARDO PEPE QUERALES",
     0,
-    2404
+    2496
    ],
    [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
-    1744
+    1806
    ],
    [
     "APPAI",
-    1719,
+    1722,
     0
    ],
    [
     "HIGH CLASS TAXI AEREO LTDA",
-    232,
-    1409
+    243,
+    1309
    ],
    [
     "HYD BRAZILIAN TOURS / IN BUZIOS",
     20,
-    1475
+    1498
    ],
    [
     "BRAZIL OFFICIAL DMC TOURS AND EVENTS LTDA-ME",
     0,
-    1374
+    1447
+   ],
+   [
+    "FERIAS RIO VIAGENS E TURISMO LTDA",
+    0,
+    1286
    ],
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
@@ -353,119 +369,114 @@
     1269
    ],
    [
-    "FERIAS RIO VIAGENS E TURISMO LTDA",
-    0,
-    1257
-   ],
-   [
     "GIULIA VALENTINI",
-    11,
-    1085
+    13,
+    1118
    ],
    [
     "WTT",
     0,
-    989
+    1006
    ],
    [
     "JS AGENCIAS DE VIAGENS E TURISMO LTDA",
     0,
-    961
+    974
    ],
    [
     "BRASIL SHOW TURISMO LTDA",
     22,
-    866
+    902
    ],
    [
     "FERNANDO R FERNANDES TRANSPORTE LTDA",
     0,
-    778
+    812
    ],
    [
     "THIAGO GOMES BARBOSA",
     0,
-    747
+    804
    ],
    [
     "TOURIST CLUB",
     0,
-    706
+    744
    ],
    [
     "SMART RIO",
     0,
-    666
+    680
    ],
    [
     "MARKTOUR",
     59,
-    557
+    576
    ],
    [
     "ERIKA SOUSA DE SA",
     0,
-    584
-   ],
-   [
-    "CLUB WEB SERVIÇOS DIGITAIS LTDA",
-    564,
-    0
+    622
    ],
    [
     "RUHM TURISMO",
     0,
-    559
+    576
+   ],
+   [
+    "CLUB WEB SERVIÇOS DIGITAIS LTDA",
+    569,
+    0
    ],
    [
     "MARINHO TURISMO BUZIOS LTDA",
     0,
-    494
+    526
    ],
    [
     "GUSTAVO ELIAS ANDOLPHI LIZCANO",
     0,
-    492
+    512
    ],
    [
     "EL SHERPA TURISMO LTDA",
     0,
-    461
+    471
    ],
    [
     "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
     0,
-    428
-   ],
-   [
-    "CARIOCA TROPICAL TURISMO LTDA",
-    0,
-    406
-   ],
-   [
-    "BEATRIZ TIMOTEO BRAZ",
-    0,
-    389
+    439
    ],
    [
     "GALLERY VIAGENS E TURISMO LTDA",
     0,
-    384
+    424
+   ],
+   [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    421
    ],
    [
     "M A N BRITTO PASSEIOS TURISTICOS - ME",
     0,
-    361
+    395
+   ],
+   [
+    "BEATRIZ TIMOTEO BRAZ",
+    0,
+    390
    ],
    [
     "KRIOK TURISMO LTDA",
     0,
-    356
+    384
    ],
    [
     "VICTOR HUGO VALERIANO",
     0,
-    352
+    372
    ],
    [
     "JEEP TUOR / SOBRE TERRA",
@@ -473,44 +484,54 @@
     343
    ],
    [
+    "MLJ TRANSPORTE LTDA",
+    0,
+    342
+   ],
+   [
+    "KINGS / KING TURISMO",
+    0,
+    338
+   ],
+   [
     "DOUGLAS PIENTZNAUER DE MORAES",
     0,
     323
    ],
    [
-    "KINGS / KING TURISMO",
-    0,
-    322
-   ],
-   [
     "LEANDRO AUGUSTO REGIS NEVES",
     0,
-    311
+    321
    ],
    [
     "ICD - INGRESSO COM DESCONTO",
-    309,
+    319,
     0
-   ],
-   [
-    "MLJ TRANSPORTE LTDA",
-    0,
-    298
-   ],
-   [
-    "BEALOCAL TOURS OPERADORA LTDA",
-    0,
-    292
    ],
    [
     "CRV TRANSPORTE E TURISMO LTDA",
     0,
-    288
+    318
+   ],
+   [
+    "BEALOCAL TOURS OPERADORA LTDA",
+    0,
+    297
    ],
    [
     "ANTONIO CARLOS GOMES",
     0,
-    280
+    290
+   ],
+   [
+    "YURI EZEQUIEL SANTOS",
+    0,
+    287
+   ],
+   [
+    "QUEL TOUR LTDA",
+    0,
+    264
    ],
    [
     "XODO TOUR VIAGENS E TURISMO LTDA",
@@ -518,19 +539,9 @@
     261
    ],
    [
-    "YURI EZEQUIEL SANTOS",
-    0,
-    257
-   ],
-   [
-    "QUEL TOUR LTDA",
-    0,
-    256
-   ],
-   [
     "LUCAS ALEXANDER MORAES DA COSTA",
     0,
-    245
+    255
    ],
    [
     "O ARENCIBIA VALDES AGENCIA DE VIAGENS E TURISMO",
@@ -538,19 +549,19 @@
     228
    ],
    [
-    "VIA CAPI VIAGENS E TURISMO LTDA",
-    36,
-    176
+    "J. G. JORGE TURISMO",
+    0,
+    225
    ],
    [
     "LUIZ FERNANDO BARRETO DE SOUZA",
     0,
-    207
+    208
    ],
    [
-    "J. G. JORGE TURISMO",
-    0,
-    200
+    "VIA CAPI VIAGENS E TURISMO LTDA",
+    36,
+    161
    ],
    [
     "LEONARDO SOLIDADE DOS SANTOS PEREIRA",
@@ -560,7 +571,12 @@
    [
     "GABRIEL GOULART LTDA",
     0,
-    186
+    193
+   ],
+   [
+    "ALEXANDRE ALVES ROBERTO",
+    0,
+    177
    ],
    [
     "RAFAEL NEVES DE ARAUJO",
@@ -568,24 +584,44 @@
     176
    ],
    [
-    "ALEXANDRE ALVES ROBERTO",
-    0,
-    174
+    "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
+    176,
+    0
    ],
    [
-    "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
-    168,
-    0
+    "R.P.T. RIO PARADISE TOUR AGENCIA DE VIAGEM E TURIS",
+    0,
+    172
    ],
    [
     "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
     0,
-    153
+    166
+   ],
+   [
+    "YASMIM OLIVIA SANTANA FARIA DA SILVEIRA",
+    1,
+    158
    ],
    [
     "3B TOUR AND TRAVEL LTDA",
     3,
-    146
+    153
+   ],
+   [
+    "GO NOW TOURS",
+    111,
+    40
+   ],
+   [
+    "WELLINGTON LUIS DE FARIAS ARAUJO",
+    0,
+    150
+   ],
+   [
+    "LEANDRO DOS SANTOS GALDINO",
+    0,
+    148
    ],
    [
     "RIO MAXIMO",
@@ -593,29 +629,9 @@
     137
    ],
    [
-    "GO NOW TOURS",
-    108,
-    38
-   ],
-   [
-    "WELLINGTON LUIS DE FARIAS ARAUJO",
+    "MARCOS JOSE MONTEIRO",
     0,
-    146
-   ],
-   [
-    "YASMIM OLIVIA SANTANA FARIA DA SILVEIRA",
-    1,
-    145
-   ],
-   [
-    "IGOR REIS BARROS",
-    3,
-    138
-   ],
-   [
-    "LEANDRO DOS SANTOS GALDINO",
-    0,
-    141
+    144
    ],
    [
     "PROMOTIONAL TRAVEL VIAGENS E TURISMO LTDA",
@@ -623,14 +639,14 @@
     0
    ],
    [
-    "MARCOS JOSE MONTEIRO",
-    0,
-    131
+    "IGOR REIS BARROS",
+    3,
+    132
    ],
    [
-    "R.P.T. RIO PARADISE TOUR AGENCIA DE VIAGEM E TURIS",
+    "ANDREWS MARQUES DE SOUZA",
     0,
-    130
+    134
    ],
    [
     "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
@@ -638,9 +654,19 @@
     124
    ],
    [
+    "LUIZ CLAUDIO SILVA DOS SANTOS",
+    0,
+    122
+   ],
+   [
     "RHUANN RODRIGUES",
     0,
-    124
+    120
+   ],
+   [
+    "THAIAN NASCIMENTO DA SILVA",
+    0,
+    120
    ],
    [
     "LUCAS DA SILVA BARRETO",
@@ -648,17 +674,7 @@
     119
    ],
    [
-    "LUIZ CLAUDIO SILVA DOS SANTOS",
-    0,
-    114
-   ],
-   [
     "MARCIO SALLES SERRA LIMA",
-    0,
-    112
-   ],
-   [
-    "THAIAN NASCIMENTO DA SILVA",
     0,
     112
    ],
@@ -668,9 +684,9 @@
     112
    ],
    [
-    "VINICIUS ROCHA DE SOUSA",
+    "MARCUS VINICIUS SANTOS SANTIAGO",
     0,
-    105
+    108
    ],
    [
     "FABIO SEBASTIAO FIGUEIREDO MELO",
@@ -678,12 +694,7 @@
     102
    ],
    [
-    "MARCUS VINICIUS SANTOS SANTIAGO",
-    0,
-    102
-   ],
-   [
-    "ANDREWS MARQUES DE SOUZA",
+    "CLEBER SANTOS",
     0,
     99
    ],
@@ -698,9 +709,14 @@
     99
    ],
    [
+    "VINICIUS ROCHA DE SOUSA",
+    0,
+    99
+   ],
+   [
     "CREW ONLY LTDA",
     0,
-    96
+    98
    ],
    [
     "RODRIGO DA SILVA MOURAO",
@@ -708,17 +724,17 @@
     93
    ],
    [
+    "VITOR HUGO PAIVA DA SILVA",
+    0,
+    92
+   ],
+   [
     "RONALDO ARMANDO",
     0,
     91
    ],
    [
-    "CLEBER SANTOS",
-    0,
-    90
-   ],
-   [
-    "HEADOUT EXPERIENCES",
+    "JOSE GUILHERME ALVES DE MORAES",
     0,
     89
    ],
@@ -728,14 +744,14 @@
     89
    ],
    [
+    "HEADOUT EXPERIENCES",
+    0,
+    87
+   ],
+   [
     "YGOR DA SILVA BRAGA DE LACERDA",
     0,
     86
-   ],
-   [
-    "JOSE GUILHERME ALVES DE MORAES",
-    0,
-    85
    ],
    [
     "L DE C HIPOLITO AGENCIA DE VIAGENS EIRELI",
@@ -743,7 +759,12 @@
     85
    ],
    [
-    "VITOR HUGO PAIVA DA SILVA",
+    "PAULO EDUARDO BERNARDES DE OLIVEIRA",
+    0,
+    84
+   ],
+   [
+    "RIO SUNNY TOURS TURISMO LTDA",
     0,
     84
    ],
@@ -751,6 +772,11 @@
     "CLAUDIO EDUARDO DE MORAES",
     0,
     82
+   ],
+   [
+    "SILVANA DEL CARMEN AVACA",
+    0,
+    81
    ],
    [
     "CHI SIU JING",
@@ -763,9 +789,9 @@
     79
    ],
    [
-    "MARCOS SEQUEIRA",
+    "PEGADA TOUR EXPERIENCE LTDA",
     0,
-    77
+    79
    ],
    [
     "THIAGO GODOI DE CASTRO",
@@ -793,17 +819,17 @@
     75
    ],
    [
+    "MARCOS SEQUEIRA",
+    0,
+    75
+   ],
+   [
     "INTERTOURING AG. DE VIAG. E TUR. LTDA.",
     15,
     59
    ],
    [
-    "JOAO CARLOS BRANDAO",
-    0,
-    74
-   ],
-   [
-    "PAULO EDUARDO BERNARDES DE OLIVEIRA",
+    "JUAN CARLOS BADARO DA SILVA",
     0,
     74
    ],
@@ -823,9 +849,9 @@
     68
    ],
    [
-    "SILVANA DEL CARMEN AVACA",
+    "JOAO CARLOS BRANDAO",
     0,
-    72
+    70
    ],
    [
     "JORGE DOS SANTOS PEREIRA",
@@ -833,24 +859,14 @@
     69
    ],
    [
-    "PEGADA TOUR EXPERIENCE LTDA",
-    0,
-    67
-   ],
-   [
     "COLEGIO ELEVA EDUCACAO LTDA",
     66,
     0
    ],
    [
-    "JUAN CARLOS BADARO DA SILVA",
-    0,
-    65
-   ],
-   [
     "MARIA JESUS DE ARAUJO GUZMAN",
     0,
-    63
+    65
    ],
    [
     "ALINE ELEUTERIO DE SA",
@@ -863,12 +879,12 @@
     0
    ],
    [
-    "DIEGO ALMEIDA BARBOSA DA SILVA",
+    "JONATHAN NOGUEIRA ABRAO",
     0,
-    61
+    62
    ],
    [
-    "MATHEUS WAGNER DOS SANTOS",
+    "DIEGO ALMEIDA BARBOSA DA SILVA",
     0,
     61
    ],
@@ -878,7 +894,17 @@
     61
    ],
    [
+    "ADRIANO GOMES ALONSO",
+    0,
+    60
+   ],
+   [
     "FABIANO BERNARDO DA SILVA",
+    0,
+    60
+   ],
+   [
+    "VIRGILIO OLIVEIRA PAPA",
     0,
     60
    ],
@@ -888,14 +914,24 @@
     59
    ],
    [
+    "DIOGO SANTANNA DE SOUZA",
+    0,
+    59
+   ],
+   [
     "JUAN SALVADOR ECHEVERRIA MARZAN",
     7,
     51
    ],
    [
-    "JONATHAN NOGUEIRA ABRAO",
+    "KM TURISMO RIO LTDA",
     0,
-    57
+    58
+   ],
+   [
+    "MATHEUS WAGNER DOS SANTOS",
+    0,
+    58
    ],
    [
     "NEWTON VICTOR",
@@ -903,29 +939,9 @@
     57
    ],
    [
-    "RIO SUNNY TOURS TURISMO LTDA",
-    0,
-    57
-   ],
-   [
-    "VIRGILIO OLIVEIRA PAPA",
-    0,
-    57
-   ],
-   [
     "ALMIR DOS SANTOS FERREIRA",
     0,
     56
-   ],
-   [
-    "KM TURISMO RIO LTDA",
-    0,
-    56
-   ],
-   [
-    "DIOGO SANTANNA DE SOUZA",
-    0,
-    55
    ],
    [
     "FABIANO ACRIS MARTINS",
@@ -943,14 +959,29 @@
     54
    ],
    [
-    "SEBASTIAO VERLINGUE DA SILVA FILHO",
+    "MILENA PAULA BARBOSA DA SILVA",
     0,
-    52
+    54
+   ],
+   [
+    "FRANCISCO EDUARDO JOSE DA SILVA",
+    0,
+    53
+   ],
+   [
+    "ULISSES ARAUJO MATIAS",
+    0,
+    53
    ],
    [
     "ANDERSON CHAVES DA COSTA",
     0,
-    51
+    52
+   ],
+   [
+    "SEBASTIAO VERLINGUE DA SILVA FILHO",
+    0,
+    52
    ],
    [
     "M. G. DE LIMA TURISMO",
@@ -958,19 +989,14 @@
     6
    ],
    [
-    "ADRIANO GOMES ALONSO",
+    "RIO NAMORAL TOUR LTDA",
     0,
-    50
+    51
    ],
    [
-    "FRANCISCO EDUARDO JOSE DA SILVA",
-    0,
-    50
-   ],
-   [
-    "ULISSES ARAUJO MATIAS",
-    0,
-    50
+    "THEOPHILO DE SOUZA ALVES",
+    7,
+    43
    ],
    [
     "AGENCIA DE TURISMO VOYAGEZ RIO LTDA",
@@ -1003,7 +1029,7 @@
     48
    ],
    [
-    "MILENA PAULA BARBOSA DA SILVA",
+    "FRANCISCO COSTA DE PAULA",
     0,
     48
    ],
@@ -1013,14 +1039,14 @@
     47
    ],
    [
-    "THEOPHILO DE SOUZA ALVES",
-    7,
-    40
+    "MARCELO CAETANO VIEIRA DA SILVA",
+    0,
+    47
    ],
    [
-    "RIO NAMORAL TOUR LTDA",
+    "MARCOS ALVES DE SOUZA MARQUES",
     0,
-    44
+    47
    ],
    [
     "BRUNO LUIZ DIAS",
@@ -1038,16 +1064,6 @@
     43
    ],
    [
-    "MARCELO CAETANO VIEIRA DA SILVA",
-    0,
-    43
-   ],
-   [
-    "MARCOS ALVES DE SOUZA MARQUES",
-    0,
-    43
-   ],
-   [
     "ANDERSON DE OLIVEIRA SEVERIANO",
     0,
     42
@@ -1058,19 +1074,29 @@
     42
    ],
    [
-    "FRANCISCO COSTA DE PAULA",
-    0,
-    42
-   ],
-   [
     "MAURICIO DE AZEVEDO DUTRA",
     0,
     42
    ],
    [
-    "DANIEL GOMES DAS CHAGAS",
+    "TRAVEL E EXPERIENCES RJ LTDA",
+    1,
+    41
+   ],
+   [
+    "CARLOS EDUARDO MONTESINOS DE NAVARRO GIACOMOCARLOS",
     0,
     39
+   ],
+   [
+    "SIDNEY DENNER BEZERRA MASCARENHAS",
+    0,
+    39
+   ],
+   [
+    "DANIEL GOMES DAS CHAGAS",
+    0,
+    38
    ],
    [
     "GGIR TURISMO RECEPTIVO LTDA",
@@ -1078,12 +1104,12 @@
     38
    ],
    [
-    "TRAVEL E EXPERIENCES RJ LTDA",
-    1,
-    37
+    "PE NO MUNDO TOUR TURISMO E EXPERIENCIAS LTDA",
+    0,
+    38
    ],
    [
-    "SIDNEY DENNER BEZERRA MASCARENHAS",
+    "LEONARDO MOURA DE OLIVEIRA DE JESUS",
     0,
     37
    ],
@@ -1093,14 +1119,9 @@
     37
    ],
    [
-    "ANYE FRANCHINI",
-    13,
-    23
-   ],
-   [
-    "FABIO SILVA RIBEIRO",
-    5,
-    31
+    "ANDRE ZAVA FERNANDES",
+    0,
+    36
    ],
    [
     "MARCIO TORRES CORREIA",
@@ -1113,9 +1134,9 @@
     35
    ],
    [
-    "CARLOS EDUARDO MONTESINOS DE NAVARRO GIACOMOCARLOS",
-    0,
-    35
+    "ANYE FRANCHINI",
+    13,
+    22
    ],
    [
     "WELYSON SERPA FERREIRA",
@@ -1123,14 +1144,19 @@
     35
    ],
    [
-    "LEONARDO MOURA DE OLIVEIRA DE JESUS",
+    "FABIO SILVA RIBEIRO",
+    5,
+    29
+   ],
+   [
+    "GLP TOUR LTDA",
     0,
     34
    ],
    [
-    "PE NO MUNDO TOUR TURISMO E EXPERIENCIAS LTDA",
-    0,
-    34
+    "LUIZ CLAUDIO MONTEIRO COSTA",
+    8,
+    26
    ],
    [
     "RIO INSIDER ADVENTURES LTDA",
@@ -1178,9 +1204,9 @@
     25
    ],
    [
-    "LUIZ CLAUDIO MONTEIRO COSTA",
-    8,
-    24
+    "ROBSON DA COSTA PINTO",
+    0,
+    32
    ],
    [
     "SURF INN TURISMO LTDA",
@@ -1208,22 +1234,17 @@
     31
    ],
    [
+    "YURI MARTINS DE CARVALHO",
+    0,
+    31
+   ],
+   [
     "AGENCIA FALCAO TOUR LTDA",
     0,
     30
    ],
    [
-    "ANDRE ZAVA FERNANDES",
-    0,
-    30
-   ],
-   [
     "GILMAR DA SILVA",
-    0,
-    30
-   ],
-   [
-    "GLP TOUR LTDA",
     0,
     30
    ],
@@ -1263,6 +1284,11 @@
     28
    ],
    [
+    "RODRIGO PAIVA FREIRE",
+    2,
+    26
+   ],
+   [
     "THIAGO ALVES DA SILVA",
     0,
     28
@@ -1278,17 +1304,7 @@
     26
    ],
    [
-    "RODRIGO PAIVA FREIRE",
-    2,
-    24
-   ],
-   [
     "RONALDO DE MORAES COUTO",
-    0,
-    26
-   ],
-   [
-    "YURI MARTINS DE CARVALHO",
     0,
     26
    ],
@@ -1308,19 +1324,14 @@
     8
    ],
    [
-    "THIAGO TRAVASSOS FORTUNA",
-    0,
-    24
-   ],
-   [
     "RENE GEORGE",
     22,
     0
    ],
    [
-    "ROSIVALDO VICENTE DOS SANTOS",
+    "FRANK HOPFE",
     0,
-    22
+    21
    ],
    [
     "LUIZ FLAVIO AGENCIA",
@@ -1329,11 +1340,6 @@
    ],
    [
     "PAULO WAGNER",
-    0,
-    21
-   ],
-   [
-    "ROBSON DA COSTA PINTO",
     0,
     21
    ],
@@ -1348,6 +1354,11 @@
     20
    ],
    [
+    "MARCELO DE SA RIBEIRO",
+    0,
+    20
+   ],
+   [
     "BRASIL ECO-ADVENTURE VIAGENS E TURISMO LTDA",
     0,
     19
@@ -1358,12 +1369,12 @@
     19
    ],
    [
-    "FRANK HOPFE",
+    "LUIZ AUGUSTO ANDRADE",
     0,
     19
    ],
    [
-    "LUIZ AUGUSTO ANDRADE",
+    "THIAGO TRAVASSOS FORTUNA",
     0,
     19
    ],
@@ -1393,12 +1404,17 @@
     18
    ],
    [
-    "MARCELO DE SA RIBEIRO",
+    "ROSIVALDO VICENTE DOS SANTOS",
+    0,
+    18
+   ],
+   [
+    "VALDECIR PAES DA SILVA",
     0,
     17
    ],
    [
-    "VALDECIR PAES DA SILVA",
+    "WILLIAM LIMA ZAPAROLLI",
     0,
     17
    ],
@@ -1414,11 +1430,6 @@
    ],
    [
     "PEDRO LIBER ECHEVERRIA MARZAN",
-    0,
-    15
-   ],
-   [
-    "WILLIAM LIMA ZAPAROLLI",
     0,
     15
    ],
@@ -1443,6 +1454,11 @@
     0
    ],
    [
+    "ALEXANDRE FERREIRA NEUMANN",
+    0,
+    13
+   ],
+   [
     "MARIANA PILLER CARVALHO DE OLIVEIRA",
     0,
     13
@@ -1464,6 +1480,11 @@
    ],
    [
     "JULIA DE OLIVEIRA BARBOSA",
+    0,
+    12
+   ],
+   [
+    "LUCIO FLAVIO PEREIRA MARTINS",
     0,
     12
    ],
@@ -1553,7 +1574,7 @@
     10
    ],
    [
-    "ALEXANDRE FERREIRA NEUMANN",
+    "ANDERSON BORBA DA FONSECA",
     0,
     9
    ],
@@ -1603,6 +1624,11 @@
     8
    ],
    [
+    "DIEGO MAIA LOPES DA SILVA",
+    0,
+    8
+   ],
+   [
     "ESTADIA CARIOCA AGENCIA DE VIAGEM LTDA",
     0,
     8
@@ -1618,7 +1644,7 @@
     0
    ],
    [
-    "LUCIO FLAVIO PEREIRA MARTINS",
+    "LEONARDO AUGUSTO DE ANDRADE SANTOS",
     0,
     8
    ],
@@ -1636,11 +1662,6 @@
     "ALINNE CUNHA PANARO F FRANCO",
     7,
     0
-   ],
-   [
-    "ANDERSON BORBA DA FONSECA",
-    0,
-    7
    ],
    [
     "ANTONIO SERGIO MACEDO COSTA",
@@ -1683,6 +1704,11 @@
     0
    ],
    [
+    "RENAN MORAIS DOS SANTOS",
+    0,
+    7
+   ],
+   [
     "ROCIO PELLEGRINI",
     7,
     0
@@ -1723,11 +1749,6 @@
     0
    ],
    [
-    "DIEGO MAIA LOPES DA SILVA",
-    0,
-    6
-   ],
-   [
     "FRANCINALDO SILVA",
     6,
     0
@@ -1749,6 +1770,11 @@
    ],
    [
     "PAULO JOSE",
+    0,
+    6
+   ],
+   [
+    "RIO DE BICICLETAS SERVICOS DE GUIA E LOCACAO LTDA",
     0,
     6
    ],
@@ -1826,11 +1852,6 @@
     "JOAO FERREIRA PIMENTEL FILHO",
     5,
     0
-   ],
-   [
-    "RENAN MORAIS DOS SANTOS",
-    0,
-    5
    ],
    [
     "ROGERIO CARLOS ALMEIDA DE FARIAS",
@@ -1963,6 +1984,11 @@
     0
    ],
    [
+    "JONAS JORGE MARINHO BEZERRA",
+    0,
+    3
+   ],
+   [
     "RODOLFO FRANCISCO VIEIRA DA SILVA",
     3,
     0
@@ -2003,7 +2029,7 @@
     0
    ],
    [
-    "LEONARDO AUGUSTO DE ANDRADE SANTOS",
+    "EXCLUSIVE BRAZIL VIAGENS E TURISMO LTDA",
     0,
     2
    ],
@@ -2172,6 +2198,7 @@
   "A25": "AQUA_OUT_2026.xlsx",
   "A26": "AQUA_OUT_2026.xlsx",
   "A27": "AQUA_OUT_2026.xlsx",
+  "A28": "AQUA_OUT_2026.xlsx",
   "P01": "PAI_OUT_2026.xlsx",
   "P02": "PAI_OUT_2026.xlsx",
   "P03": "PAI_OUT_2026.xlsx",
@@ -2198,7 +2225,8 @@
   "P24": "PAI_OUT_2026.xlsx",
   "P25": "PAI_OUT_2026.xlsx",
   "P26": "PAI_OUT_2026.xlsx",
-  "P27": "PAI_OUT_2026.xlsx"
+  "P27": "PAI_OUT_2026.xlsx",
+  "P28": "PAI_OUT_2026.xlsx"
  },
  "avisos": []
 }
