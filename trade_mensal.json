@@ -490,15 +490,15 @@
   },
   "2026-11": {
    "AquaRio": {
-    "trade": 0,
-    "parque": 0,
-    "appai": 0,
+    "trade": 1480,
+    "parque": 6950,
+    "appai": 331,
     "escolas": 0,
     "parcial": true
    },
    "Paineiras": {
-    "trade": 0,
-    "parque": 0,
+    "trade": 5337,
+    "parque": 8490,
     "appai": null,
     "escolas": null,
     "parcial": true
