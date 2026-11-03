@@ -69,10 +69,12 @@ MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "A
          "Outubro", "Novembro", "Dezembro"]
 ABREV = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 # coluna da aba Diário -> (parque, campo, começo esperado do cabeçalho na linha 2)
+# cabeçalho esperado na linha 2 da aba Diário; {aa} = ano do mês com 2 dígitos (03/11/2026: era "26" fixo e
+# a virada para 2027 faria o Trade_Auto recusar gravar)
 COLUNAS = {
-    "C": ("A", "trade", "trade 26"), "E": ("A", "parque", "parque 26"), "I": ("A", "appai", "appai"),
-    "J": ("A", "esc", "escolas"), "K": ("A", "rec", "receita 26"),
-    "M": ("P", "trade", "trade 26"), "O": ("P", "parque", "parque 26"), "S": ("P", "rec", "receita 26"),
+    "C": ("A", "trade", "trade {aa}"), "E": ("A", "parque", "parque {aa}"), "I": ("A", "appai", "appai"),
+    "J": ("A", "esc", "escolas"), "K": ("A", "rec", "receita {aa}"),
+    "M": ("P", "trade", "trade {aa}"), "O": ("P", "parque", "parque {aa}"), "S": ("P", "rec", "receita {aa}"),
 }
 
 
@@ -437,7 +439,7 @@ def main():
         "dias_faltando": faltando, "dias_sem_visitacao": sem_parque, "protegidos": protegidos,
         "aba_diario": f"Diário {ABREV[mes - 1]}{str(ano)[2:]}",
         "aba_top": f"Top Clientes-{ABREV[mes - 1]}",
-        "cabecalhos": {k: v[2] for k, v in COLUNAS.items()},
+        "cabecalhos": {k: v[2].format(aa=str(ano)[2:]) for k, v in COLUNAS.items()},
         "diario": diario,
         "top": {"subtitulo": f"AquaRio · Paineiras Corcovado | {ABREV[mes - 1]}/{ano} (01 a {ate:02d}/{mes:02d})" if ate else "",
                 "linhas": ranking},
