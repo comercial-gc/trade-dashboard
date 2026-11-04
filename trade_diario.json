@@ -1,10 +1,12 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-03T13:46:48Z",
+ "gerado_em": "2026-11-04T12:11:40Z",
  "mes": "2026-11",
  "ate": 2,
- "limite": 2,
- "dias_faltando": [],
+ "limite": 3,
+ "dias_faltando": [
+  3
+ ],
  "dias_sem_visitacao": [],
  "protegidos": [],
  "aba_diario": "Diário Nov26",
