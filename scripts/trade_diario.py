@@ -107,7 +107,7 @@ def para_data(v):
     if isinstance(v, (int, float)) and 20000 < v < 80000:
         return datetime.date(1899, 12, 30) + datetime.timedelta(days=int(v))
     s = str(v or "").strip()[:10]
-    for f in ("%d/%m/%Y", "%Y-%m-%d"):
+    for f in ("%d/%m/%Y", "%Y-%m-%d", "%d.%m.%Y"):  # dd.mm.aaaa: PAI de nov/26
         try:
             return datetime.datetime.strptime(s, f).date()
         except ValueError:
