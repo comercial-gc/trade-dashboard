@@ -195,7 +195,7 @@ def _listar(drive, pai):
 
 # ---------------------------------------------------------------- pasta do Flux
 
-def ler_brutos_mes(drive, ano, mes):
+def ler_brutos_mes(drive, ano, mes, pai_arquivo=None):
     """Brutos mensais da pasta 2026 do Drive: para cada parque, o arquivo <PREFIXO>_<MÊS>_<ANO> de maior
     tamanho (mesma regra do Dash de Performance; ignora planilha "TRATADA").
     -> ({("A"|"P", dia): {...agregados..., "ag": Counter, "arq", "mod"}}, avisos)"""
@@ -203,6 +203,17 @@ def ler_brutos_mes(drive, ano, mes):
     avisos, por_dia = [], {}
     alvo = {MES_ARQ[mes - 1]} | ({"MAIO"} if mes == 5 else set()) | ({"MARCO"} if mes == 3 else set())
     for parque, pasta in PASTAS_BRUTO.items():
+        # 05/11/2026 (Paulo): o PAI do Drive veio incompleto em out/26 (faltavam ~3,4 mil bilhetes do Portal de
+        # Agentes/E-commerce). A extração completa (paineiras_AAAA-MM-DD_HHMMSS.csv, a mesma da base tratada da
+        # Bia) pode ser passada com --pai-arquivo e substitui o arquivo do Drive do Paineiras.
+        if parque == "P" and pai_arquivo:
+            raw = open(pai_arquivo, "rb").read()
+            h, rows = _tabela("csv", raw)
+            nome = os.path.basename(pai_arquivo)
+            mod = datetime.datetime.fromtimestamp(os.path.getmtime(pai_arquivo), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            for d, x in processar(parque, h, rows, ano, mes, nome, avisos).items():
+                por_dia[(parque, d)] = dict(x, arq=nome, mod=mod)
+            continue
         cands = []
         for f in _listar(drive, pasta):
             if f["mimeType"].endswith("folder") or "TRATAD" in n(f["name"]):
@@ -401,6 +412,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mes", help="AAAA-MM (padrão: mês de ontem)")
     ap.add_argument("--out", default=os.path.join(AQUI, "..", "trade_diario.json"))
+    ap.add_argument("--pai-arquivo", help="CSV completo do Paineiras (substitui o PAI do Drive)")
     a = ap.parse_args()
     hoje = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-3))).date()
     ontem = hoje - datetime.timedelta(days=1)
@@ -409,7 +421,7 @@ def main():
     limite = min(ult, ontem.day) if (ontem.year, ontem.month) == (ano, mes) else ult
 
     drive = drive_service()
-    dados, avisos = ler_brutos_mes(drive, ano, mes)
+    dados, avisos = ler_brutos_mes(drive, ano, mes, a.pai_arquivo)
     vis = ler_visitacao(drive, ano, mes)
     ate = 0
     for d in range(1, limite + 1):  # último dia com os dois parques, sem buraco desde o dia 1
