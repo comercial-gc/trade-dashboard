@@ -1,10 +1,12 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-04T14:46:57Z",
+ "gerado_em": "2026-11-05T12:11:45Z",
  "mes": "2026-11",
  "ate": 3,
- "limite": 3,
- "dias_faltando": [],
+ "limite": 4,
+ "dias_faltando": [
+  4
+ ],
  "dias_sem_visitacao": [],
  "protegidos": [],
  "aba_diario": "Diário Nov26",
@@ -50,7 +52,7 @@
    "J": 123.0,
    "K": 31382.0,
    "M": 2553.0,
-   "O": 4143.0,
+   "O": 4223.0,
    "S": 208145.5
   }
  ],
