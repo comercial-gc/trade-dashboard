@@ -35,6 +35,11 @@ function tradeAutoAtualizar(forcar) {
 
   var ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById('1mUWZypuE6G-T35i7eDwRlU0d9dzqdUCxTgtm5ZmV4XY');
   var mudDiario = _tradeAutoDiario(ss, dados);
+  // 06/11/2026 (Paulo): meses fechados com a base da Bia ("outros") também são regravados na aba do mês
+  (dados.outros || []).forEach(function (o) {
+    try { mudDiario = mudDiario.concat(_tradeAutoDiario(ss, o).map(function (c) { return o.aba_diario + '!' + c; })); }
+    catch (e) { mudDiario.push(o.aba_diario + ': ' + e.message); }
+  });
   // 16/10/2026: se o Paulo publicou à mão dias que o Drive ainda não tem, o Top Clientes manual
   // (que já inclui esses dias) não é sobrescrito pelo cálculo mais curto. Quando o Drive alcançar,
   // a trava sai sozinha e a automação volta a escrever o Top Clientes.
