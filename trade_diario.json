@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-06T12:11:57Z",
+ "gerado_em": "2026-11-06T13:46:54Z",
  "mes": "2026-11",
  "ate": 5,
  "limite": 5,
@@ -71,9 +71,9 @@
    "I": 11.0,
    "J": 0.0,
    "K": 33919.7,
-   "M": 1881.0,
+   "M": 2292.0,
    "O": 3531.0,
-   "S": 146863.5
+   "S": 181380.0
   }
  ],
  "top": {
@@ -105,6 +105,11 @@
     338
    ],
    [
+    "GETYOURGUIDE DEUTSCHLAND GMBH",
+    0,
+    377
+   ],
+   [
     "APPAI",
     350,
     0
@@ -118,11 +123,6 @@
     "FERNANDO R FERNANDES TRANSPORTE LTDA",
     0,
     297
-   ],
-   [
-    "GETYOURGUIDE DEUTSCHLAND GMBH",
-    0,
-    296
    ],
    [
     "FERIAS RIO VIAGENS E TURISMO LTDA",
