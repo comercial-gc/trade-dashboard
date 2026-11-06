@@ -408,6 +408,31 @@ def montar_ranking(dados, ate, resolver=lambda x: x):
 
 # ---------------------------------------------------------------- principal
 
+def outros_bia(ESP, ano, mes):
+    """Meses anteriores (out/26 em diante) com a base da Bia no trade_espelho.json -> linhas para a aba do mês."""
+    out = []
+    for ym, m in sorted(ESP.items()):
+        if ym >= f"{ano}-{mes:02d}" or ym < "2026-10" or "Bia" not in str(m.get("fonte", "")):
+            continue
+        a2, m2 = int(ym[:4]), int(ym[5:])
+        dias = sorted({int(d[8:10]) for letra in ("A", "P") for d in (m.get(letra) or {})})
+        diario = []
+        for d in range(1, calendar.monthrange(a2, m2)[1] + 1):
+            iso = f"{ym}-{d:02d}"
+            A = (m.get("A") or {}).get(iso, [0, 0, 0, 0]); P = (m.get("P") or {}).get(iso, [0, 0, 0, 0])
+            linha = {"dia": d}
+            if m.get("A"):
+                linha.update({"C": round(A[0], 2), "I": round(A[2], 2), "J": round(A[3], 2), "K": round(A[1], 2)})
+            if m.get("P"):
+                linha.update({"M": round(P[0], 2), "S": round(P[1], 2)})
+            diario.append(linha)
+        if dias:
+            out.append({"mes": ym, "aba_diario": f"Diário {ABREV[m2 - 1]}{str(a2)[2:]}", "protegidos": [],
+                        "cabecalhos": {k: v[2].format(aa=str(a2)[2:]) for k, v in COLUNAS.items() if k in "CIJKMS"},
+                        "diario": diario, "fonte": m.get("fonte")})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mes", help="AAAA-MM (padrão: mês de ontem)")
@@ -422,6 +447,22 @@ def main():
 
     drive = drive_service()
     dados, avisos = ler_brutos_mes(drive, ano, mes, a.pai_arquivo)
+    # 06/11/2026 (Paulo): Trade, receita, APPAI e escolas pela regra da Bia. O robô do CARD grava trade_espelho.json
+    # (espelho no mês aberto, base tratada da Bia no mês fechado); o ranking de agências continua pelo bruto.
+    esp_path = os.path.join(AQUI, "..", "trade_espelho.json")
+    ESP = json.load(open(esp_path, encoding="utf-8")).get("meses", {}) if os.path.exists(esp_path) else {}
+    esp_mes = ESP.get(f"{ano}-{mes:02d}") or {}
+    trocados = 0
+    for letra in ("A", "P"):
+        for dia_iso, (tq, rv, ap, es) in (esp_mes.get(letra) or {}).items():
+            k = (letra, int(dia_iso[8:10]))
+            if k in dados:
+                dados[k]["trade"], dados[k]["rec"] = tq, rv
+                if letra == "A":
+                    dados[k]["appai"], dados[k]["esc"] = ap, es
+                trocados += 1
+    if esp_mes and not trocados:
+        avisos.append("trade_espelho.json sem dias do mês: Trade pela regra antiga do bruto")
     vis = ler_visitacao(drive, ano, mes)
     ate = 0
     for d in range(1, limite + 1):  # último dia com os dois parques, sem buraco desde o dia 1
@@ -457,6 +498,9 @@ def main():
                 "linhas": ranking},
         "arquivos": {f"{p}{d:02d}": x["arq"] for (p, d), x in sorted(dados.items())},
         "avisos": avisos,
+        "fonteTrade": esp_mes.get("fonte") or "regra antiga do bruto",
+        # 06/11/2026: meses fechados com a base da Bia, para o Trade_Auto.gs regravar a aba do mês (Trade dia a dia dela)
+        "outros": outros_bia(ESP, ano, mes),
     }
     # só regrava se o conteúdo mudou (gerado_em fica igual), para o Apps Script não republicar à toa
     antigo = json.load(open(a.out, encoding="utf-8")) if os.path.exists(a.out) else {}
