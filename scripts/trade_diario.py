@@ -408,7 +408,17 @@ def montar_ranking(dados, ate, resolver=lambda x: x):
 
 # ---------------------------------------------------------------- principal
 
-def outros_bia(ESP, ano, mes):
+def contar_agencias(ags):
+    """{agência crua: bilhetes} do trade_espelho.json -> Counter com as mesmas exclusões e normalização do processar()."""
+    c = collections.Counter()
+    for ag, q in (ags or {}).items():
+        if ag != "APPAI" and (regras.deve_excluir(ag) or n(ag) in EXCLUIR_EXTRA):
+            continue
+        c[ag if ag == "APPAI" else regras.normalizar(ag)] += q
+    return c
+
+
+def outros_bia(ESP, ano, mes, resolver=lambda x: x):
     """Meses anteriores (out/26 em diante) com a base da Bia no trade_espelho.json -> linhas para a aba do mês."""
     out = []
     for ym, m in sorted(ESP.items()):
@@ -426,8 +436,15 @@ def outros_bia(ESP, ano, mes):
             if m.get("P"):
                 linha.update({"M": round(P[0], 2), "S": round(P[1], 2)})
             diario.append(linha)
+        top = None
+        if m.get("agA") or m.get("agP"):  # Top Clientes do mês fechado com os bilhetes de Trade da Bia
+            dd = {(letra, int(d[8:10])): {"ag": contar_agencias(v)} for letra in ("A", "P") for d, v in (m.get("ag" + letra) or {}).items()}
+            ult = calendar.monthrange(a2, m2)[1]
+            top = {"subtitulo": f"AquaRio · Paineiras Corcovado | {ABREV[m2 - 1]}/{a2} (01 a {ult:02d}/{m2:02d})",
+                   "linhas": montar_ranking(dd, ult, resolver)}
         if dias:
             out.append({"mes": ym, "aba_diario": f"Diário {ABREV[m2 - 1]}{str(a2)[2:]}", "protegidos": [],
+                        "aba_top": f"Top Clientes-{ABREV[m2 - 1]}", "top": top,
                         "cabecalhos": {k: v[2].format(aa=str(a2)[2:]) for k, v in COLUNAS.items() if k in "CIJKMS"},
                         "diario": diario, "fonte": m.get("fonte")})
     return out
@@ -448,7 +465,8 @@ def main():
     drive = drive_service()
     dados, avisos = ler_brutos_mes(drive, ano, mes, a.pai_arquivo)
     # 06/11/2026 (Paulo): Trade, receita, APPAI e escolas pela regra da Bia. O robô do CARD grava trade_espelho.json
-    # (espelho no mês aberto, base tratada da Bia no mês fechado); o ranking de agências continua pelo bruto.
+    # (espelho no mês aberto, base tratada da Bia no mês fechado). Mesma coisa no ranking de agências (Top Clientes):
+    # bilhetes de Trade da Bia, com as nossas unificações de nome (Paulo, 06/11/2026).
     esp_path = os.path.join(AQUI, "..", "trade_espelho.json")
     ESP = json.load(open(esp_path, encoding="utf-8")).get("meses", {}) if os.path.exists(esp_path) else {}
     esp_mes = ESP.get(f"{ano}-{mes:02d}") or {}
@@ -461,6 +479,10 @@ def main():
                 if letra == "A":
                     dados[k]["appai"], dados[k]["esc"] = ap, es
                 trocados += 1
+        for dia_iso, ags in (esp_mes.get("ag" + letra) or {}).items():
+            k = (letra, int(dia_iso[8:10]))
+            if k in dados:
+                dados[k]["ag"] = contar_agencias(ags)
     if esp_mes and not trocados:
         avisos.append("trade_espelho.json sem dias do mês: Trade pela regra antiga do bruto")
     vis = ler_visitacao(drive, ano, mes)
@@ -474,7 +496,8 @@ def main():
     sem_parque = [d for d in range(1, ate + 1) if ("A", d) not in vis or ("P", d) not in vis]
 
     conhecidos = set(json.load(open(GRAFIAS_JSON, encoding="utf-8"))) if os.path.exists(GRAFIAS_JSON) else set()
-    ranking = montar_ranking(dados, ate, resolvedor_grafia(conhecidos))
+    resolver = resolvedor_grafia(conhecidos)
+    ranking = montar_ranking(dados, ate, resolver)
     protegidos = PROTEGIDOS.get((ano, mes), [])
     diario = []
     for d in range(1, ate + 1):
@@ -500,7 +523,7 @@ def main():
         "avisos": avisos,
         "fonteTrade": esp_mes.get("fonte") or "regra antiga do bruto",
         # 06/11/2026: meses fechados com a base da Bia, para o Trade_Auto.gs regravar a aba do mês (Trade dia a dia dela)
-        "outros": outros_bia(ESP, ano, mes),
+        "outros": outros_bia(ESP, ano, mes, resolver),
     }
     # só regrava se o conteúdo mudou (gerado_em fica igual), para o Apps Script não republicar à toa
     antigo = json.load(open(a.out, encoding="utf-8")) if os.path.exists(a.out) else {}

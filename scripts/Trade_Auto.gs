@@ -39,6 +39,11 @@ function tradeAutoAtualizar(forcar) {
   (dados.outros || []).forEach(function (o) {
     try { mudDiario = mudDiario.concat(_tradeAutoDiario(ss, o).map(function (c) { return o.aba_diario + '!' + c; })); }
     catch (e) { mudDiario.push(o.aba_diario + ': ' + e.message); }
+    // 06/11/2026 (Paulo): Top Clientes do mês fechado com os bilhetes de Trade da Bia (unificações nossas)
+    if (o.top && o.aba_top) {
+      try { if (_tradeAutoTop(ss, o)) mudDiario.push(o.aba_top + ' reescrito com ' + o.top.linhas.length + ' agências'); }
+      catch (e) { mudDiario.push(o.aba_top + ': ' + e.message); }
+    }
   });
   // 16/10/2026: se o Paulo publicou à mão dias que o Drive ainda não tem, o Top Clientes manual
   // (que já inclui esses dias) não é sobrescrito pelo cálculo mais curto. Quando o Drive alcançar,
