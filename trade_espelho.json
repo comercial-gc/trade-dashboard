@@ -3,7 +3,7 @@
  "meses": {
   "2026-11": {
    "fonte": "regra espelho (regra da Bia: bruto do Drive + CARD)",
-   "ate": "2026-11-06",
+   "ate": "2026-11-07",
    "A": {
     "2026-11-01": [
      696.0,
@@ -4423,5 +4423,5 @@
    }
   }
  },
- "gerado_em": "2026-11-07T13:15:59Z"
+ "gerado_em": "2026-11-08T13:16:01Z"
 }
