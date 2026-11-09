@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Garante que o index.html do Trade Dashboard carregue o trade_patch.js (13/10/2026) e o
-trade_v2.js (26/10/2026, abas OBZ / Indicadores Parques / Origem / Oportunidades e subaba Carteira).
+trade_v2.js (26/10/2026, abas OBZ / Indicadores Parques / Origem / Oportunidades e subaba Carteira) e o
+trade_frescor.js (09/11/2026, faixa "Atualizado até" no topo de cada aba).
 
 O index.html é regerado pelo Apps Script (Trade Dashboard.gs) todo dia às 18h e a cada
 atualização manual; se os carregadores não estiverem no HTML gerado, as correções da aba
@@ -8,7 +9,7 @@ Top Clientes e as abas novas somem. Este script (rodado pelo workflow injetar-pa
 push no index.html) coloca antes do </body> o carregador que estiver faltando."""
 import sys
 
-SCRIPTS = ["trade_patch.js", "trade_v2.js"]
+SCRIPTS = ["trade_patch.js", "trade_v2.js", "trade_frescor.js"]
 
 
 def loader(nome):
