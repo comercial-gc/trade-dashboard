@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-09T12:11:53Z",
+ "gerado_em": "2026-11-09T12:46:54Z",
  "mes": "2026-11",
  "ate": 8,
  "limite": 8,
@@ -104,9 +104,9 @@
    "I": 103.0,
    "J": 0.0,
    "K": 91345.0,
-   "M": 1026.0,
+   "M": 1164.0,
    "O": 1665.0,
-   "S": 81267.0
+   "S": 93411.5
   }
  ],
  "top": {
@@ -150,7 +150,7 @@
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
     0,
-    437
+    444
    ],
    [
     "FERNANDO R FERNANDES TRANSPORTE LTDA",
