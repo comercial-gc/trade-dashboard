@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-09T12:46:54Z",
+ "gerado_em": "2026-11-09T13:46:51Z",
  "mes": "2026-11",
  "ate": 8,
  "limite": 8,
@@ -27,9 +27,9 @@
    "I": 164.0,
    "J": 0.0,
    "K": 53567.4,
-   "M": 2923.0,
+   "M": 2880.0,
    "O": 4389.0,
-   "S": 237513.5
+   "S": 233686.5
   },
   {
    "dia": 2,
@@ -38,9 +38,9 @@
    "I": 167.0,
    "J": 0.0,
    "K": 47589.0,
-   "M": 2481.0,
+   "M": 2460.0,
    "O": 4101.0,
-   "S": 204445.0
+   "S": 202576.0
   },
   {
    "dia": 3,
@@ -49,9 +49,9 @@
    "I": 3.0,
    "J": 123.0,
    "K": 29071.0,
-   "M": 2605.0,
+   "M": 2554.0,
    "O": 4223.0,
-   "S": 212328.5
+   "S": 208145.5
   },
   {
    "dia": 4,
@@ -60,9 +60,9 @@
    "I": 5.0,
    "J": 105.0,
    "K": 31869.5,
-   "M": 2180.0,
+   "M": 2169.0,
    "O": 3630.0,
-   "S": 176207.5
+   "S": 175167.0
   },
   {
    "dia": 5,
@@ -71,40 +71,40 @@
    "I": 11.0,
    "J": 0.0,
    "K": 30489.5,
-   "M": 2292.0,
+   "M": 2231.0,
    "O": 3531.0,
-   "S": 181380.0
+   "S": 176396.0
   },
   {
    "dia": 6,
-   "C": 745.0,
+   "C": 705.0,
    "E": 2847.0,
    "I": 7.0,
    "J": 202.0,
-   "K": 60382.5,
-   "M": 1758.0,
+   "K": 56686.5,
+   "M": 1759.0,
    "O": 2828.0,
    "S": 136956.0
   },
   {
    "dia": 7,
-   "C": 575.0,
+   "C": 513.0,
    "E": 2637.0,
    "I": 90.0,
    "J": 41.0,
-   "K": 43443.2,
-   "M": 2759.0,
+   "K": 38555.0,
+   "M": 2760.0,
    "O": 3541.0,
    "S": 230041.5
   },
   {
    "dia": 8,
-   "C": 1081.0,
+   "C": 984.0,
    "E": 6175.0,
    "I": 103.0,
    "J": 0.0,
-   "K": 91345.0,
-   "M": 1164.0,
+   "K": 81149.0,
+   "M": 1165.0,
    "O": 1665.0,
    "S": 93411.5
   }
@@ -115,7 +115,7 @@
    [
     "C2 RIO VIAGENS E TURISMO S.A.",
     365,
-    723
+    670
    ],
    [
     "ONERIO PASS INGRESSOS E ACESSOS",
@@ -150,7 +150,7 @@
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
     0,
-    444
+    442
    ],
    [
     "FERNANDO R FERNANDES TRANSPORTE LTDA",
@@ -238,11 +238,6 @@
     171
    ],
    [
-    "CARIOCA TROPICAL TURISMO LTDA",
-    0,
-    170
-   ],
-   [
     "GALLERY VIAGENS E TURISMO LTDA",
     0,
     162
@@ -256,6 +251,11 @@
     "VICTOR HUGO VALERIANO",
     0,
     158
+   ],
+   [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    151
    ],
    [
     "LEANDRO AUGUSTO REGIS NEVES",
@@ -333,14 +333,9 @@
     90
    ],
    [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
-    0,
-    84
-   ],
-   [
     "HEADOUT EXPERIENCES",
     0,
-    84
+    81
    ],
    [
     "CLUB WEB SERVIÇOS DIGITAIS LTDA",
@@ -350,7 +345,7 @@
    [
     "ANDREWS MARQUES DE SOUZA",
     0,
-    78
+    76
    ],
    [
     "OTON TURISMO SIMPLES PURA",
@@ -428,11 +423,6 @@
     45
    ],
    [
-    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
-    0,
-    44
-   ],
-   [
     "VIRGILIO OLIVEIRA PAPA",
     0,
     44
@@ -454,6 +444,11 @@
    ],
    [
     "ANTONIO CARLOS GOMES",
+    0,
+    40
+   ],
+   [
+    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
     0,
     40
    ],
@@ -838,11 +833,6 @@
     13
    ],
    [
-    "WALTER MACHADO JUNIOR",
-    0,
-    13
-   ],
-   [
     "DIEGO MUNIZ DOS SANTOS",
     0,
     12
@@ -858,11 +848,6 @@
     12
    ],
    [
-    "JUAN SALVADOR ECHEVERRIA MARZAN",
-    0,
-    12
-   ],
-   [
     "MATHEUS WAGNER DOS SANTOS",
     0,
     12
@@ -874,6 +859,11 @@
    ],
    [
     "THIAGO ALVES DA SILVA",
+    0,
+    12
+   ],
+   [
+    "WALTER MACHADO JUNIOR",
     0,
     12
    ],
@@ -981,6 +971,11 @@
     "WESLEY RIBEIRO AGENCIA DE TURISMOS LTDA",
     0,
     10
+   ],
+   [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    9
    ],
    [
     "CARLOS ALBERTO FIRMO ALVES",
@@ -1103,17 +1098,17 @@
     0
    ],
    [
+    "JUAN SALVADOR ECHEVERRIA MARZAN",
+    0,
+    6
+   ],
+   [
     "M. G. DE LIMA TURISMO",
     0,
     6
    ],
    [
     "PEDRO LEO TOUR SERVICOS LTDA",
-    0,
-    6
-   ],
-   [
-    "PEDRO LIBER ECHEVERRIA MARZAN",
     0,
     6
    ],
@@ -1233,6 +1228,11 @@
     4
    ],
    [
+    "PEDRO LIBER ECHEVERRIA MARZAN",
+    0,
+    4
+   ],
+   [
     "RAPHAEL SOUSA CORREA",
     0,
     4
@@ -1256,11 +1256,6 @@
     "LEANDRO JOSE MEGA AGUILAR",
     3,
     0
-   ],
-   [
-    "LEONARDO ROBERTO DE GOIS PINHEIRO",
-    0,
-    3
    ],
    [
     "MARIANA PILLER CARVALHO DE OLIVEIRA",
