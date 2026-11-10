@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-10T12:46:57Z",
+ "gerado_em": "2026-11-10T13:46:55Z",
  "mes": "2026-11",
  "ate": 9,
  "limite": 9,
@@ -110,12 +110,12 @@
   },
   {
    "dia": 9,
-   "C": 551.0,
+   "C": 511.0,
    "E": 2610.0,
    "I": 12.0,
    "J": 110.0,
-   "K": 44073.3,
-   "M": 2076.0,
+   "K": 40260.5,
+   "M": 2077.0,
    "O": 3292.0,
    "S": 166686.5
   }
@@ -964,6 +964,11 @@
     10
    ],
    [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    10
+   ],
+   [
     "CLEUBER DA SILVA SANTOS",
     0,
     10
@@ -1027,11 +1032,6 @@
     "WESLEY RIBEIRO AGENCIA DE TURISMOS LTDA",
     0,
     10
-   ],
-   [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
-    0,
-    9
    ],
    [
     "JONAS JORGE MARINHO BEZERRA",
