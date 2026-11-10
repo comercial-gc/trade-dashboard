@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-10T12:11:52Z",
+ "gerado_em": "2026-11-10T12:46:57Z",
  "mes": "2026-11",
  "ate": 9,
  "limite": 9,
@@ -115,9 +115,9 @@
    "I": 12.0,
    "J": 110.0,
    "K": 44073.3,
-   "M": 1723.0,
+   "M": 2076.0,
    "O": 3292.0,
-   "S": 136397.0
+   "S": 166686.5
   }
  ],
  "top": {
@@ -164,14 +164,14 @@
     513
    ],
    [
+    "GETYOURGUIDE DEUTSCHLAND GMBH",
+    0,
+    474
+   ],
+   [
     "FERIAS RIO VIAGENS E TURISMO LTDA",
     0,
     454
-   ],
-   [
-    "GETYOURGUIDE DEUTSCHLAND GMBH",
-    0,
-    442
    ],
    [
     "HYD BRAZILIAN TOURS / IN BUZIOS",
