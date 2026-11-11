@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-11T12:46:59Z",
+ "gerado_em": "2026-11-11T14:13:20Z",
  "mes": "2026-11",
  "ate": 10,
  "limite": 10,
@@ -121,14 +121,14 @@
   },
   {
    "dia": 10,
-   "C": 528.0,
+   "C": 489.0,
    "E": 1891.0,
    "I": 17.0,
    "J": 215.0,
-   "K": 40402.4,
-   "M": 2003.0,
+   "K": 36358.0,
+   "M": 2287.0,
    "O": 3837.0,
-   "S": 160755.5
+   "S": 185887.5
   }
  ],
  "top": {
@@ -175,14 +175,14 @@
     539
    ],
    [
+    "GETYOURGUIDE DEUTSCHLAND GMBH",
+    0,
+    527
+   ],
+   [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
     523
-   ],
-   [
-    "GETYOURGUIDE DEUTSCHLAND GMBH",
-    0,
-    474
    ],
    [
     "HYD BRAZILIAN TOURS / IN BUZIOS",
@@ -1000,6 +1000,11 @@
     11
    ],
    [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    11
+   ],
+   [
     "ELIAS VIEIRA DA SILVA",
     11,
     0
@@ -1026,11 +1031,6 @@
    ],
    [
     "ALEANDRO LUCIO DA SILVA",
-    0,
-    10
-   ],
-   [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
     0,
     10
    ],
