@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-12T12:46:59Z",
+ "gerado_em": "2026-11-12T13:19:39Z",
  "mes": "2026-11",
  "ate": 11,
  "limite": 11,
@@ -27,9 +27,9 @@
    "I": 164.0,
    "J": 0.0,
    "K": 53567.4,
-   "M": 2880.0,
+   "M": 2923.0,
    "O": 4389.0,
-   "S": 233686.5
+   "S": 237513.5
   },
   {
    "dia": 2,
@@ -38,9 +38,9 @@
    "I": 167.0,
    "J": 0.0,
    "K": 47589.0,
-   "M": 2460.0,
+   "M": 2481.0,
    "O": 4101.0,
-   "S": 202576.0
+   "S": 204445.0
   },
   {
    "dia": 3,
@@ -49,9 +49,9 @@
    "I": 3.0,
    "J": 123.0,
    "K": 29071.0,
-   "M": 2554.0,
+   "M": 2605.0,
    "O": 4223.0,
-   "S": 208145.5
+   "S": 212328.5
   },
   {
    "dia": 4,
@@ -60,9 +60,9 @@
    "I": 5.0,
    "J": 105.0,
    "K": 31869.5,
-   "M": 2169.0,
+   "M": 2180.0,
    "O": 3630.0,
-   "S": 175167.0
+   "S": 176207.5
   },
   {
    "dia": 5,
@@ -71,9 +71,9 @@
    "I": 11.0,
    "J": 0.0,
    "K": 30489.5,
-   "M": 2231.0,
+   "M": 2292.0,
    "O": 3531.0,
-   "S": 176396.0
+   "S": 181380.0
   },
   {
    "dia": 6,
@@ -82,9 +82,9 @@
    "I": 7.0,
    "J": 202.0,
    "K": 56686.5,
-   "M": 1759.0,
+   "M": 1808.0,
    "O": 2828.0,
-   "S": 136956.0
+   "S": 141139.0
   },
   {
    "dia": 7,
@@ -93,9 +93,9 @@
    "I": 90.0,
    "J": 41.0,
    "K": 38555.0,
-   "M": 2760.0,
+   "M": 2780.0,
    "O": 3541.0,
-   "S": 230041.5
+   "S": 231438.0
   },
   {
    "dia": 8,
@@ -104,9 +104,9 @@
    "I": 103.0,
    "J": 0.0,
    "K": 81149.0,
-   "M": 1165.0,
+   "M": 1228.0,
    "O": 1665.0,
-   "S": 93411.5
+   "S": 98751.5
   },
   {
    "dia": 9,
@@ -115,9 +115,9 @@
    "I": 12.0,
    "J": 110.0,
    "K": 40260.5,
-   "M": 2077.0,
+   "M": 2124.0,
    "O": 3292.0,
-   "S": 166686.5
+   "S": 170424.5
   },
   {
    "dia": 10,
@@ -126,17 +126,17 @@
    "I": 17.0,
    "J": 215.0,
    "K": 36358.0,
-   "M": 2287.0,
+   "M": 2333.0,
    "O": 3837.0,
-   "S": 185887.5
+   "S": 189837.5
   },
   {
    "dia": 11,
-   "C": 351.0,
+   "C": 315.0,
    "E": 1267.0,
    "I": 14.0,
    "J": 30.0,
-   "K": 29285.9,
+   "K": 26365.5,
    "M": 3321.0,
    "O": 4915.0,
    "S": 271696.5
@@ -148,7 +148,7 @@
    [
     "C2 RIO VIAGENS E TURISMO S.A.",
     381,
-    1013
+    1114
    ],
    [
     "ONERIO PASS INGRESSOS E ACESSOS",
@@ -168,7 +168,7 @@
    [
     "HIGH CLASS TAXI AEREO LTDA",
     192,
-    489
+    491
    ],
    [
     "FERIAS RIO VIAGENS E TURISMO LTDA",
@@ -183,12 +183,12 @@
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
     0,
-    630
+    639
    ],
    [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
-    601
+    603
    ],
    [
     "APPAI",
@@ -203,7 +203,7 @@
    [
     "ETOURSBRAZIL DMC OPERADORA DE TURISMO LTDA",
     0,
-    508
+    509
    ],
    [
     "BRAZIL OFFICIAL DMC TOURS AND EVENTS LTDA-ME",
@@ -266,6 +266,11 @@
     236
    ],
    [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    232
+   ],
+   [
     "MARKTOUR",
     3,
     225
@@ -301,9 +306,9 @@
     209
    ],
    [
-    "CARIOCA TROPICAL TURISMO LTDA",
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
     0,
-    205
+    204
    ],
    [
     "VICTOR HUGO VALERIANO",
@@ -343,7 +348,7 @@
    [
     "THE SINGULAR CLUB LTDA",
     0,
-    160
+    162
    ],
    [
     "ICD - INGRESSO COM DESCONTO",
@@ -378,12 +383,12 @@
    [
     "HEADOUT EXPERIENCES",
     0,
-    105
+    108
    ],
    [
     "ANDREWS MARQUES DE SOUZA",
     0,
-    104
+    106
    ],
    [
     "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
@@ -501,6 +506,11 @@
     62
    ],
    [
+    "RHUANN RODRIGUES",
+    0,
+    61
+   ],
+   [
     "VIRGILIO OLIVEIRA PAPA",
     0,
     60
@@ -516,6 +526,11 @@
     56
    ],
    [
+    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
+    0,
+    55
+   ],
+   [
     "LUIZ CLAUDIO SILVA DOS SANTOS",
     0,
     55
@@ -526,19 +541,9 @@
     54
    ],
    [
-    "RHUANN RODRIGUES",
-    0,
-    54
-   ],
-   [
     "CREW ONLY LTDA",
     0,
     52
-   ],
-   [
-    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
-    0,
-    51
    ],
    [
     "PAULO EDUARDO BERNARDES DE OLIVEIRA",
@@ -596,12 +601,12 @@
     42
    ],
    [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    "ALMIR DOS SANTOS FERREIRA",
     0,
-    41
+    40
    ],
    [
-    "ALMIR DOS SANTOS FERREIRA",
+    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
     0,
     40
    ],
@@ -636,6 +641,11 @@
     36
    ],
    [
+    "FABIO SILVA RIBEIRO",
+    24,
+    12
+   ],
+   [
     "NILSON ROSA JUNIOR",
     0,
     36
@@ -666,19 +676,9 @@
     33
    ],
    [
-    "FABIO SILVA RIBEIRO",
-    24,
-    8
-   ],
-   [
     "GUIA RIO DE JANEIRO 021 LTDA",
     0,
     32
-   ],
-   [
-    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
-    0,
-    31
    ],
    [
     "LEANDRO DOS SANTOS GALDINO",
@@ -751,6 +751,11 @@
     25
    ],
    [
+    "WALTER MACHADO JUNIOR",
+    0,
+    25
+   ],
+   [
     "LUCIO FLAVIO PEREIRA MARTINS",
     0,
     24
@@ -782,11 +787,6 @@
    ],
    [
     "THIAGO ALVES DA SILVA",
-    0,
-    23
-   ],
-   [
-    "WALTER MACHADO JUNIOR",
     0,
     23
    ],
@@ -867,6 +867,11 @@
    ],
    [
     "JOAO LUIS CAMARGO BORREGO",
+    0,
+    19
+   ],
+   [
+    "JUAN SALVADOR ECHEVERRIA MARZAN",
     0,
     19
    ],
@@ -1046,12 +1051,12 @@
     13
    ],
    [
-    "JUAN SALVADOR ECHEVERRIA MARZAN",
+    "LUCIANA ALVES DO NASCIMENTO",
     0,
     13
    ],
    [
-    "LUCIANA ALVES DO NASCIMENTO",
+    "MARCOS SEQUEIRA",
     0,
     13
    ],
@@ -1097,11 +1102,6 @@
    ],
    [
     "LUIZ FLAVIO AGENCIA",
-    0,
-    11
-   ],
-   [
-    "MARCOS SEQUEIRA",
     0,
     11
    ],
@@ -1261,6 +1261,11 @@
     0
    ],
    [
+    "DOUGLAS FERNANDES DE CARVALHO",
+    0,
+    6
+   ],
+   [
     "FRANK HOPFE",
     0,
     6
@@ -1272,6 +1277,11 @@
    ],
    [
     "MARCELO DA SILVA MACEDO",
+    0,
+    6
+   ],
+   [
+    "PEDRO LIBER ECHEVERRIA MARZAN",
     0,
     6
    ],
@@ -1356,11 +1366,6 @@
     4
    ],
    [
-    "DOUGLAS FERNANDES DE CARVALHO",
-    0,
-    4
-   ],
-   [
     "EDMAR SOUZA SOARES FILHO",
     4,
     0
@@ -1407,11 +1412,6 @@
    ],
    [
     "PAULO WAGNER",
-    0,
-    4
-   ],
-   [
-    "PEDRO LIBER ECHEVERRIA MARZAN",
     0,
     4
    ],
@@ -1474,6 +1474,11 @@
     "LEANDRO JOSE MEGA AGUILAR",
     3,
     0
+   ],
+   [
+    "LEONARDO ROBERTO DE GOIS PINHEIRO",
+    0,
+    3
    ],
    [
     "LUIZ AUGUSTO ANDRADE",
