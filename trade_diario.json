@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-12T12:12:16Z",
+ "gerado_em": "2026-11-12T12:46:59Z",
  "mes": "2026-11",
  "ate": 11,
  "limite": 11,
@@ -137,9 +137,9 @@
    "I": 14.0,
    "J": 30.0,
    "K": 29285.9,
-   "M": 2898.0,
+   "M": 3321.0,
    "O": 4915.0,
-   "S": 234187.0
+   "S": 271696.5
   }
  ],
  "top": {
@@ -181,6 +181,11 @@
     639
    ],
    [
+    "GETYOURGUIDE DEUTSCHLAND GMBH",
+    0,
+    630
+   ],
+   [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
     601
@@ -194,11 +199,6 @@
     "HYD BRAZILIAN TOURS / IN BUZIOS",
     13,
     517
-   ],
-   [
-    "GETYOURGUIDE DEUTSCHLAND GMBH",
-    0,
-    527
    ],
    [
     "ETOURSBRAZIL DMC OPERADORA DE TURISMO LTDA",
