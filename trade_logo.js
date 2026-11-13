@@ -4,9 +4,9 @@
 
    A logo tem 3 versões, uma por tipo de fundo (o texto "TRADE" embaixo NÃO faz parte da logo; os arquivos
    trazem só o emblema, com fundo transparente):
-     logo-trade-claro.png   fundo claro/branco (ícones do app: icon-192/512, apple-touch-icon, favicon)
+     logo-trade-claro.png   fundo claro/branco (ícones do app sem fundo: icon-192/512, favicon-64; apple-touch-icon com fundo branco)
      logo-trade-preto.png   fundo preto e escuros como o azul-marinho: cabeçalho do Dash (desktop e mobile)
-     logo-trade-cinza.png   fundo cinza escuro (reserva, para fundos cinza)
+     logo-trade-cinza.png   fundo cinza escuro (favicon-64-escuro, para aba escura do navegador)
    Os cabeçalhos do Dash são sempre azul-marinho (var(--navy)) nos temas claro e escuro, por isso usam a versão preto.
    Substitui o pontinho (.brand-dot / .mob-dot) que ficava no lugar da logo. */
 (function () {
@@ -38,4 +38,20 @@
   }
   montar();
   window.addEventListener('load', montar);
+
+  // Favicon sem fundo que acompanha o tema do navegador: emblema para aba clara e para aba escura.
+  // O apple-touch-icon continua com fundo branco (o iOS exige ícone opaco).
+  // Um único link que o JS troca conforme o tema (mais confiável que "media" no link, que nem todo navegador respeita).
+  function favicons() {
+    var v = '?v=20261113b';
+    Array.prototype.slice.call(document.querySelectorAll('link[rel~="icon"]')).forEach(function (l) { l.parentNode.removeChild(l); });
+    var l = document.createElement('link');
+    l.rel = 'icon'; l.type = 'image/png'; l.sizes = '64x64';
+    document.head.appendChild(l);
+    var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    function aplicar() { l.href = BASE + (mq && mq.matches ? 'favicon-64-escuro.png' : 'favicon-64.png') + v; }
+    aplicar();
+    if (mq) { if (mq.addEventListener) mq.addEventListener('change', aplicar); else if (mq.addListener) mq.addListener(aplicar); }
+  }
+  favicons();
 })();

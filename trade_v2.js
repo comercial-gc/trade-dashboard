@@ -1101,6 +1101,23 @@
       kpi('B2B (Trade)', nf(X.b2b) + asc, cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'b2b') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'b2b'), null, COR_3P.b2b) +
       kpi('B2C', nf(X.b2c), cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'b2c') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'b2c'), null, COR_3P.b2c) +
       kpi('Share B2B', pf(X.b2b / X.total) + asc, A ? 'mesmo mês de 2025: ' + pf(A.b2b / A.total) + (A.b2bIncompleto ? '*' : '') : 'sem base em 2025') + '</div>';
+    // acumulado do ano até o mês em foco (jan até o mês), contra o mesmo período do ano anterior (só 2026 tem base)
+    var anoF = Number(m0.slice(0, 4)), mesF = Number(m0.slice(5, 7)), AC = { t: 0, b: 0, c: 0, t0: 0, b0: 0, c0: 0, inc: false, inc0: false, base: anoF === 2026 };
+    for (var im = 0; im < mesF; im++) {
+      var y1 = M[ym(anoF, im)], y0 = M[ym(anoF - 1, im)];
+      if (y1) { AC.t += y1.total; AC.b += y1.b2b; AC.c += y1.b2c; if (y1.b2bIncompleto) AC.inc = true; }
+      if (y0) { AC.t0 += y0.total; AC.b0 += y0.b2b; AC.c0 += y0.b2c; if (y0.b2bIncompleto) AC.inc0 = true; } else AC.base = false;
+    }
+    var lblAc = 'Jan-' + MES[mesF - 1] + '/' + String(anoF).slice(2), lblAc0 = 'Jan-' + MES[mesF - 1] + '/' + String(anoF - 1).slice(2);
+    function cmpAc(campo) {
+      if (!AC.base) return 'sem base em ' + (anoF - 1);
+      if (campo === 'b' && (AC.inc || AC.inc0)) return 'vs ' + lblAc0 + ': base incompleta (jan no bruto)';
+      return 'vs ' + lblAc0 + ' (' + nf(AC[campo + '0']) + '): ' + pill(varPct(AC[campo], AC[campo + '0']));
+    }
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ACUMULADO ' + lblAc.toUpperCase() + '</div><div class="sec-s">Soma dos meses fechados de janeiro até ' + mesLbl(m0) + ' contra o mesmo período do ano anterior</div></div></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Visitação total', nf(AC.t), cmpAc('t')) +
+      kpi('B2B (Trade)', nf(AC.b) + (AC.inc ? '*' : ''), cmpAc('b'), null, COR_3P.b2b) + kpi('B2C', nf(AC.c), cmpAc('c'), null, COR_3P.b2c) +
+      kpi('Share B2B', pf(AC.t ? AC.b / AC.t : null) + (AC.inc ? '*' : ''), AC.base && AC.t0 ? lblAc0 + ': ' + pf(AC.b0 / AC.t0) + (AC.inc0 ? '*' : '') : 'sem base em ' + (anoF - 1)) + '</div>';
     // gráfico 1: composição mensal B2C + B2B = total; gráfico 2: share B2B
     html += '<div class="row2"><div class="cc"><div class="cc-h"><div class="cc-t">Visitação mensal · B2B e B2C</div><div class="cc-s">Barras empilhadas somam o total do parque' +
       (meses.some(function (m) { return M[m].parcial; }) ? ' · ' + mesLbl(todos[todos.length - 1]) + ' parcial até ' + dataBR(T.ate).slice(0, 5) + ' (barra clara)' : '') + '</div></div><div style="height:280px"><canvas id="tv2-c-3p"></canvas></div></div>' +
@@ -1570,7 +1587,7 @@
       ['res', 'Resultado', [['mar', '📅 Mês'], ['acum', '📊 Acumulado'], ['obz', '🎯 OBZ'], ['hist', '📈 Histórico']]],
       ['cli', 'Clientes', [['cli', '🏆 Top Clientes'], ['op', '💡 Oportunidades'], ['canc', '🚫 Cancelamento']]],
       ['mer', 'Mercado', [['share', '🔄 Share Trade'], ['imm', '🗻 Intel. Mercado'], ['ori', '🌎 Origem']]],
-      ['par', 'Parques', [['ind', '🏞️ Indicadores Parques']]]
+      ['par', 'Parques', [['ind', '🏞️ Indicadores Parques'], ['tres', '⛵ Três Pescadores']]]
     ];
     var topo = document.querySelector('.topbar');
     var orig = function (id) { return document.querySelector('.topbar .np[onclick*="\'' + id + '\'"]:not(.tv2-sec)'); };
