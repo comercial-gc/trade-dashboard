@@ -9,8 +9,11 @@
                          antecedência de compra.
      Origem              share e antecedência por país do visitante e feriados dos mercados principais.
      Oportunidades       agências que já compraram e estão há mais de 6 meses sem comprar.
+     Três Pescadores     B2B (Trade) x B2C do parque de Aparecida, trade_3p.json (13/11/2026).
    Top Clientes ganha a subaba "Carteira": segmentação do Mapa de Canal 2026 (mesmos 4 grupos) com
-   cidade e flags de Portal do Agente / Portal do Guia quando o cadastro existir.
+   cidade e flags de Portal do Agente / Portal do Guia quando o cadastro existir. Desde 13/11/2026 ela é a
+   primeira subaba (aberta por padrão), com filtro de mês (contra o mesmo mês de 2025 ou o mês anterior) e de
+   parque; as subabas Ranking + Delta e Por Agência saíram (pedido da Paula Bottino).
 
    Fontes
      D (embutido no index.html pelo Apps Script): Trade oficial (linha "Parcial:" da planilha TRADE),
@@ -784,52 +787,86 @@
   }
 
   // ================================================================ CLIENTES > CARTEIRA (Mapa de Canal)
-  var carEstado = { grupo: '', busca: '', loc: '0' };
-  var GRUPOS = [['Defender e acelerar', 'Volume alto + crescimento', 'var(--up)', '#e3f5eb'], ['Recuperar volume', 'Volume alto + queda ou estável', 'var(--dn)', '#fff0ee'],
-    ['Desenvolver potencial', 'Volume menor + crescimento', 'var(--aqua)', '#e8f2fb'], ['Reavaliar esforço', 'Volume menor + queda ou estável', '#B45309', '#fff4d9']];
+  // 13/11/2026 (e-mail da Paula Bottino): a Carteira virou a visão principal de Clientes. Ela absorveu o Ranking + Delta
+  // (filtro de mês, com comparativo contra o mês anterior além do ano contra ano) e o filtro de parque; a subaba
+  // "Por Agência" saiu. Sem filtro de mês, a visão é a de sempre: acumulado jan até o último mês fechado x mesmo período de 2025.
+  var carEstado = { grupo: '', busca: '', loc: '0', k: 't', mes: '', comp: 'ano' };
+  var GRUPOS = [['Defender e acelerar', 'Volume alto + crescimento', 'color-mix(in srgb, var(--up) 62%, var(--text))', 'color-mix(in srgb, var(--up) 13%, var(--white))'], ['Recuperar volume', 'Volume alto + queda ou estável', 'color-mix(in srgb, var(--dn) 62%, var(--text))', 'color-mix(in srgb, var(--dn) 11%, var(--white))'],
+    ['Desenvolver potencial', 'Volume menor + crescimento', 'color-mix(in srgb, var(--aqua) 62%, var(--text))', 'color-mix(in srgb, var(--aqua) 11%, var(--white))'], ['Reavaliar esforço', 'Volume menor + queda ou estável', 'color-mix(in srgb, #B45309 45%, var(--text))', 'color-mix(in srgb, #E8A820 17%, var(--white))']];
+  // só meses fechados: o mês em andamento entra quando fechar (parcial nunca é comparado com mês inteiro)
+  function carUltFechado() { return MA.isFechado ? IDX : IDX - 1; }
+  // período atual (índices de 2026) e período de comparação (pares [ano, índice]) conforme o filtro
+  function carPeriodo() {
+    var ultF = carUltFechado(), m = carEstado.mes === '' ? -1 : Number(carEstado.mes);
+    if (m > ultF) m = -1;
+    var comp = m < 0 ? 'ano' : carEstado.comp, atual = [], base = [], i;
+    if (m < 0) { for (i = 0; i <= ultF; i++) atual.push(i); } else atual.push(m);
+    if (comp === 'ano') atual.forEach(function (j) { base.push([2025, j]); });
+    else base.push(m > 0 ? [2026, m - 1] : [2025, 11]);
+    var acum = ultF >= 0 ? 'Jan-' + MES[ultF] : '';
+    return { m: m, comp: comp, atual: atual, base: base, ultF: ultF, acum: acum,
+      lblAtual: m < 0 ? acum + '/26' : MES[m] + '/26',
+      lblBase: comp === 'ano' ? (m < 0 ? acum + '/25' : MES[m] + '/25') : (m > 0 ? MES[m - 1] + '/26' : 'Dez/25') };
+  }
   function carteira() {
-    // Mesmo período nos dois anos: jan até o último mês fechado de 2026 (mapa da Paula: jan–set)
-    var ultF = MA.isFechado ? IDX : IDX - 1, A = {};
+    var P = carPeriodo(), k = carEstado.k, A = {};
     function soma(lista, campo) {
       (lista || []).forEach(function (c) {
         var nome = alias(c.n), kk = chave(nome); if (!kk || INTERNOS.test(kk)) return;
-        var a = A[kk] = A[kk] || { n: nome, v25: 0, v26: 0 };
-        a[campo] += (c.a || 0) + (c.p || 0);
+        var a = A[kk] = A[kk] || { n: nome, vb: 0, va: 0 };
+        a[campo] += (k !== 'p' ? (c.a || 0) : 0) + (k !== 'a' ? (c.p || 0) : 0);
       });
     }
-    for (var i = 0; i <= ultF; i++) { soma((D.meses[i] || {}).clientes, 'v26'); soma((D.meses2025[i] || {}).clientes, 'v25'); }
-    var arr = Object.values(A).filter(function (a) { return a.v25 + a.v26 > 0; });
-    var vols = arr.map(function (a) { return a.v26; }).sort(function (a, b) { return a - b; });
+    P.atual.forEach(function (i) { soma((D.meses[i] || {}).clientes, 'va'); });
+    P.base.forEach(function (b) { soma(((b[0] === 2026 ? D.meses : D.meses2025)[b[1]] || {}).clientes, 'vb'); });
+    var arr = Object.values(A).filter(function (a) { return a.vb + a.va > 0; });
+    var vols = arr.map(function (a) { return a.va; }).sort(function (a, b) { return a - b; });
     // mesma regra do Mapa de Canal 2026 anexado pela Paula (conferida: as 536 agências caem no mesmo grupo):
-    // volume alto = 2026 >= mediana; crescimento = variação % positiva, o que exige base em 2025
-    // (agência nova, sem 2025, não conta como crescimento)
+    // volume alto = período atual >= mediana; crescimento = variação % positiva, o que exige base no período de comparação
+    // (agência nova, sem compra na base, não conta como crescimento)
     var meio = Math.floor(vols.length / 2);
     var mediana = !vols.length ? 0 : vols.length % 2 ? vols[meio] : (vols[meio - 1] + vols[meio]) / 2;
     arr.forEach(function (a) {
-      a.diff = a.v26 - a.v25; a.pct = a.v25 ? a.v26 / a.v25 - 1 : null;
-      var alto = a.v26 >= mediana, cresce = a.pct != null && a.pct > 0;
+      a.diff = a.va - a.vb; a.pct = a.vb ? a.va / a.vb - 1 : null;
+      var alto = a.va >= mediana, cresce = a.pct != null && a.pct > 0;
       a.g = alto ? (cresce ? GRUPOS[0][0] : GRUPOS[1][0]) : (cresce ? GRUPOS[2][0] : GRUPOS[3][0]);
       a.cad = cadastro(null, a.n);
     });
-    return { arr: arr, mediana: mediana, ate: ultF };
+    return { arr: arr, mediana: mediana, P: P };
+  }
+  // Trade oficial (planilha TRADE) do período atual, no parque do filtro
+  function carOficial(P, k) {
+    var s = 0;
+    P.atual.forEach(function (i) { if (k !== 'p') s += (D.hist26.aqua || [])[i] || 0; if (k !== 'a') s += (D.hist26.pai || [])[i] || 0; });
+    return s;
   }
   function renderCarteira() {
     var box = el('cli-panel-carteira');
     if (!box) return;
-    var c = carteira(), arr = c.arr;
-    var t25 = arr.reduce(function (s, a) { return s + a.v25; }, 0), t26 = arr.reduce(function (s, a) { return s + a.v26; }, 0);
-    var per = 'Jan–' + MES[c.ate] + ' 2026 x Jan–' + MES[c.ate] + ' 2025';
-    var html = '<div class="cli-period-info tot">Mapa de Canal · ' + per + ' · AquaRio + Paineiras · Trade por agência (Top Clientes da planilha TRADE). Volume alto/baixo pela mediana de 2026 (' + nf(c.mediana) + ' bilhetes).</div>';
-    var of26 = 0; for (var i = 0; i <= c.ate; i++) of26 += ((D.hist26.aqua || [])[i] || 0) + ((D.hist26.pai || [])[i] || 0);
-    html += '<div class="cli-kpis-ag">' + kpi('Volume 2026 (agências identificadas)', nf(t26), per.split(' x ')[0] + ' · ' + pf(of26 ? t26 / of26 : null) + ' do Trade oficial (' + nf(of26) + ')') +
-      kpi('Volume 2025', nf(t25), 'mesmo período') +
-      kpi('Variação', pf(varPct(t26, t25)), sinal(t26 - t25, nf) + ' bilhetes') + kpi('Compradores', nf(arr.length), 'com venda em algum dos 2 anos') + '</div>';
+    if (carUltFechado() < 0) { box.innerHTML = aviso('Ainda não há mês fechado em 2026 para montar a Carteira.'); return; }
+    var c = carteira(), arr = c.arr, P = c.P, k = carEstado.k;
+    var tb = arr.reduce(function (s, a) { return s + a.vb; }, 0), ta = arr.reduce(function (s, a) { return s + a.va; }, 0);
+    var html = '<div class="cc" style="padding:12px 14px;margin-bottom:14px"><div class="tv2-car-bar" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">' +
+      controle('Período', '<select class="cli-select" id="tv2-car-mes"><option value=""' + (P.m < 0 ? ' selected' : '') + '>Acumulado ' + P.acum + '/26</option>' +
+        (function () { var o = ''; for (var i = P.ultF; i >= 0; i--) o += '<option value="' + i + '"' + (P.m === i ? ' selected' : '') + '>' + MES[i] + '/26</option>'; return o; })() + '</select>') +
+      controle('Comparar com', seg('tv2-car-comp', [['ano', 'Mesmo período de 2025'], ['mes', 'Mês anterior']], P.comp, function (v) {
+        carEstado.comp = v; if (v === 'mes' && carEstado.mes === '') carEstado.mes = String(P.ultF); renderCarteira();
+      })) +
+      controle('Parque', seg('tv2-car-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], k, function (v) { carEstado.k = v; renderCarteira(); })) +
+      '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);margin-left:auto;min-height:32px;padding:6px 14px" id="tv2-car-xls">⬇️ Excel</button></div>' +
+      '<div class="cc-s" style="margin-top:8px">' + (P.m < 0 ? 'Acumulado de janeiro até o último mês fechado. Escolha um mês para ver só ele, contra o mesmo mês de 2025 ou contra o mês anterior (janeiro compara com dezembro/25).'
+        : 'Mês escolhido contra ' + (P.comp === 'ano' ? 'o mesmo mês de 2025' : 'o mês anterior (' + P.lblBase + ')') + '. Meses em andamento entram quando fecharem.') + '</div></div>';
+    html += '<div class="cli-period-info tot">Mapa de Canal · ' + P.lblAtual + ' x ' + P.lblBase + ' · ' + NOME[k] + ' · Trade por agência (Top Clientes da planilha TRADE). Volume alto/baixo pela mediana de ' + P.lblAtual + ' (' + nf(c.mediana) + ' bilhetes por agência).</div>';
+    var of26 = carOficial(P, k);
+    html += '<div class="cli-kpis-ag">' + kpi('Volume ' + P.lblAtual + ' (agências identificadas)', nf(ta), pf(of26 ? ta / of26 : null) + ' do Trade oficial (' + nf(of26) + ')') +
+      kpi('Volume ' + P.lblBase, nf(tb), P.comp === 'ano' ? 'mesmo período do ano anterior' : 'mês imediatamente anterior') +
+      kpi('Variação', pf(varPct(ta, tb)), sinal(ta - tb, nf) + ' bilhetes') + kpi('Compradores', nf(arr.length), 'com venda em ' + P.lblAtual + ' ou ' + P.lblBase) + '</div>';
     html += '<div class="row4" style="margin-bottom:14px">' + GRUPOS.map(function (g) {
-      var ls = arr.filter(function (a) { return a.g === g[0]; }).sort(function (a, b) { return b.v26 - a.v26; });
-      return '<div class="cc" style="background:' + g[3] + ';border-color:transparent;cursor:pointer" data-g="' + esc(g[0]) + '"><div class="cc-t" style="color:' + g[2] + '">' + g[0] + '</div><div class="cc-s">' + g[1] + '</div>' +
-        '<div style="font-family:Bebas Neue,sans-serif;font-size:26px;color:#0D1B2A;margin-top:6px">' + ls.length + ' agências</div><div class="cc-s" style="color:#3b4a55">' + nf(ls.reduce(function (s, a) { return s + a.v26; }, 0)) + ' bilhetes em 2026</div></div>';
+      var ls = arr.filter(function (a) { return a.g === g[0]; }).sort(function (a, b) { return b.va - a.va; });
+      return '<div class="cc" style="background:' + g[3] + ';border-color:' + (carEstado.grupo === g[0] ? g[2] : 'transparent') + ';border-width:2px;cursor:pointer" title="Clique para filtrar a tabela por este grupo (clique de novo para limpar)" data-g="' + esc(g[0]) + '"><div class="cc-t" style="color:' + g[2] + '">' + g[0] + '</div><div class="cc-s">' + g[1] + '</div>' +
+        '<div style="font-family:Bebas Neue,sans-serif;font-size:26px;color:var(--text);margin-top:6px">' + ls.length + ' agências</div><div class="cc-s" style="color:var(--text);opacity:.8">' + nf(ls.reduce(function (s, a) { return s + a.va; }, 0)) + ' bilhetes em ' + P.lblAtual + '</div></div>';
     }).join('') + '</div>';
-    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
+    html += '<div class="tv2-car-bar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
       controle('Buscar', '<input id="tv2-car-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome da agência" value="' + esc(carEstado.busca) + '">') +
       controle('Grupo', '<select class="cli-select" id="tv2-car-grupo"><option value="">Todos</option>' + GRUPOS.map(function (g) { return '<option' + (g[0] === carEstado.grupo ? ' selected' : '') + '>' + g[0] + '</option>'; }).join('') + '</select>') +
       (DADOS.cad ? controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') : '') + '</div>';
@@ -837,35 +874,51 @@
     var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
     if (carEstado.loc === '1') {
       var L = {};
-      ls.forEach(function (a) { var kk = a.cad ? (a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-') : 'sem cadastro'; var l = L[kk] = L[kk] || { n: kk, v25: 0, v26: 0, ag: 0 }; l.v25 += a.v25; l.v26 += a.v26; l.ag++; });
-      var ll = Object.values(L).sort(function (a, b) { return (a.v26 - a.v25) - (b.v26 - b.v25); });
-      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Cidade / UF</th><th style="text-align:right">Agências</th><th style="text-align:right">2025</th><th style="text-align:right">2026</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th></tr></thead><tbody>' +
-        ll.map(function (l) { return '<tr><td><strong>' + esc(l.n) + '</strong></td><td style="text-align:right">' + l.ag + '</td><td style="text-align:right">' + nf(l.v25) + '</td><td style="text-align:right"><strong>' + nf(l.v26) + '</strong></td><td style="text-align:right" class="' + cls(l.v26 - l.v25) + '">' + sinal(l.v26 - l.v25, nf) + '</td><td style="text-align:right">' + pill(varPct(l.v26, l.v25)) + '</td></tr>'; }).join('') +
-        '</tbody></table><div class="cc-s" style="margin-top:6px">Ordenado pela maior queda absoluta. Mesmo período nos dois anos, o que já tira o efeito de sazonalidade do mês.</div></div>';
+      ls.forEach(function (a) { var kk = a.cad ? (a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-') : 'sem cadastro'; var l = L[kk] = L[kk] || { n: kk, vb: 0, va: 0, ag: 0 }; l.vb += a.vb; l.va += a.va; l.ag++; });
+      var ll = Object.values(L).sort(function (a, b) { return (a.va - a.vb) - (b.va - b.vb); });
+      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Cidade / UF</th><th style="text-align:right">Agências</th><th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th></tr></thead><tbody>' +
+        (ll.length ? ll : [null]).map(function (l) { if (!l) return '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>'; return '<tr><td><strong>' + esc(l.n) + '</strong></td><td style="text-align:right">' + l.ag + '</td><td style="text-align:right">' + nf(l.vb) + '</td><td style="text-align:right"><strong>' + nf(l.va) + '</strong></td><td style="text-align:right" class="' + cls(l.va - l.vb) + '">' + sinal(l.va - l.vb, nf) + '</td><td style="text-align:right">' + pill(varPct(l.va, l.vb)) + '</td></tr>'; }).join('') +
+        '</tbody></table><div class="cc-s" style="margin-top:6px">Ordenado pela maior queda absoluta. ' + (P.comp === 'ano' ? 'Mesmo período nos dois anos, o que já tira o efeito de sazonalidade do mês.' : 'Mês contra mês anterior: o resultado inclui sazonalidade (dias úteis, feriados, férias).') + '</div></div>';
     } else {
-      ls.sort(function (a, b) { return b.v26 - a.v26; });
+      ls.sort(function (a, b) { return b.va - a.va; });
       var flag = function (v) { return v == null ? '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>' : v === true || v === 'sim' ? '✔' : v === false || v === 'não' ? '-' : esc(v); };
       var cad = !!DADOS.cad;
-      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">2025</th><th style="text-align:right">2026</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
-        ls.slice(0, 300).map(function (a) {
+      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
+        (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 9 : 6) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
           var g = GRUPOS.filter(function (x) { return x[0] === a.g; })[0];
           return '<tr><td><strong>' + esc(a.n) + '</strong></td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
             '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' : '') +
-            '<td style="text-align:right">' + nf(a.v25) + '</td><td style="text-align:right"><strong>' + nf(a.v26) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
+            '<td style="text-align:right">' + nf(a.vb) + '</td><td style="text-align:right"><strong>' + nf(a.va) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
-        }).join('') + '</tbody></table>' + (ls.length > 300 ? '<div class="cc-s" style="margin-top:6px">Mostrando 300 de ' + ls.length + '.</div>' : '') + '</div>';
+        }).join('') + '</tbody></table>' + (ls.length > 300 ? '<div class="cc-s" style="margin-top:6px">Mostrando 300 de ' + ls.length + '. O Excel traz todas.</div>' : '') + '</div>';
     }
     if (!DADOS.cad) html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia</strong> entram aqui quando o cadastro oficial de agências for carregado ' +
       '(código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso). Nenhuma base do Dash traz esses campos: a UF/PAIS do bruto é do visitante, não da agência.');
-    html += aviso('ℹ️ <strong>Sobre o Mapa de Canal anexado:</strong> o arquivo classifica <em>compradores</em> em 4 grupos de ação (volume x crescimento), não traz uma taxonomia de canais. ' +
-      'A segmentação acima usa exatamente a mesma regra (mediana de volume de 2026 e variação % vs 2025, mesmo período) sobre os números oficiais do Top Clientes; os canais continuam os da planilha TRADE. ' +
-      'Pela regra do mapa, agência nova (sem compra em 2025) não conta como crescimento e cai em "Recuperar volume" ou "Reavaliar esforço"; ela aparece com a etiqueta "novo" na coluna Δ %.');
+    // a lista de agências do Paineiras mudou de método em ago/26 (índice 7): avisa só se o período atual ou o de comparação cruza essa data
+    var lados = {}; P.atual.forEach(function (i) { lados[i >= 7 ? 'novo' : 'antigo'] = 1; }); P.base.forEach(function (b) { lados[b[0] === 2026 && b[1] >= 7 ? 'novo' : 'antigo'] = 1; });
+    if (k !== 'a' && Object.keys(lados).length > 1) html += aviso('⚠️ <strong>Paineiras, mudança de método em ago/26:</strong> a partir de ago/26 a lista de agências do parque vem do ranking consolidado (cobertura do Trade do parque de cerca de 40% para 88%). ' +
+      'Comparativos que cruzam jul/26 e ago/26, ou que põem meses de ago/26 em diante contra 2025, mostram como "novo" ou "crescimento" agências que só passaram a ser identificadas pelo nome.');
+    html += aviso('<details><summary style="cursor:pointer;font-weight:700">ℹ️ Como os grupos são calculados</summary><div style="margin-top:6px">O arquivo classifica <em>compradores</em> em 4 grupos de ação (volume x crescimento), não traz uma taxonomia de canais. ' +
+      'A segmentação acima usa a mesma regra (mediana de volume do período atual e variação % contra o período de comparação) sobre os números oficiais do Top Clientes; os canais continuam os da planilha TRADE. ' +
+      'Pela regra do mapa, agência nova (sem compra no período de comparação) não conta como crescimento e cai em "Recuperar volume" ou "Reavaliar esforço"; ela aparece com a etiqueta "novo" na coluna Δ %.</div></details>');
     box.innerHTML = html;
     box.querySelectorAll('[data-g]').forEach(function (d) { d.onclick = function () { carEstado.grupo = carEstado.grupo === d.getAttribute('data-g') ? '' : d.getAttribute('data-g'); renderCarteira(); }; });
     var t;
     el('tv2-car-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { carEstado.busca = v; renderCarteira(); var b = el('tv2-car-busca'); b.focus(); b.setSelectionRange(v.length, v.length); }, 300); };
     el('tv2-car-grupo').onchange = function () { carEstado.grupo = this.value; renderCarteira(); };
+    el('tv2-car-mes').onchange = function () { carEstado.mes = this.value; if (this.value === '') carEstado.comp = 'ano'; renderCarteira(); };
     if (el('tv2-car-loc')) el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
+    el('tv2-car-xls').onclick = function () {
+      if (typeof XLSX === 'undefined') return;
+      var cadX = !!DADOS.cad;
+      var rows = [['Agência'].concat(cadX ? ['Cidade', 'UF'] : []).concat([P.lblBase, P.lblAtual, 'Δ volume', 'Δ %', 'Prioridade sugerida'])];
+      ls.slice().sort(function (a, b) { return b.va - a.va; }).forEach(function (a) {
+        rows.push([a.n].concat(cadX ? [a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : ''] : []).concat([Math.round(a.vb), Math.round(a.va), Math.round(a.diff), a.pct == null ? 'novo' : Math.round(a.pct * 1000) / 10, a.g]));
+      });
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Carteira');
+      XLSX.writeFile(wb, 'carteira_' + P.lblAtual.replace('/', '-') + '_vs_' + P.lblBase.replace('/', '-') + '_' + (k === 't' ? 'todos' : NOME[k]) + '.xlsx');
+    };
   }
 
   // ================================================================ Cancelamento (28/10/2026)
@@ -1010,22 +1063,133 @@
     el('tv2-canc-clima').innerHTML = h;
   }
 
+  // ================================================================ TRÊS PESCADORES (13/11/2026)
+  // Pedido da Paula Bottino: visão do Três Pescadores (3P, Aparecida) com B2B e B2C. B2B = Trade (agências e Portal de
+  // Agentes); B2C = total do parque menos B2B (Bilheteria + E-commerce + Cross). Total = visitação da planilha Visitação
+  // Parques. Fonte: trade_3p.json (levantamento do agente de dados, 13/11/2026). A fonte do B2B muda ao longo da série:
+  // bruto (jan/25 a jun/26), tratado da Bia/Niko (jul a out/26) e regra espelho do bruto no mês corrente (parcial).
+  var tresEstado = { per: '12m', mes: '' };
+  DADOS.t3p = null;
+  getJSON('trade_3p.json', true).then(function (j) { DADOS.t3p = j; if (window.__tv2Pagina === 'tres') renderTres(); });
+  window.__tv2TresMes = function (v) { tresEstado.mes = v; renderTres(); };
+  var COR_3P = { b2b: '#1F7A8C', b2c: '#E8A820', Trade: '#1F7A8C', Bilheteria: '#9AA9B4', Ecommerce: '#E8A820', Cross: '#6A4C93' };
+  var NOME_CANAL = { Trade: 'Trade (B2B)', Bilheteria: 'Bilheteria', Ecommerce: 'E-commerce', Cross: 'Cross' };
+  function mesAnt(k) { var a = Number(k.slice(0, 4)), m = Number(k.slice(5, 7)) - 1; return m ? ym(a, m - 1) : ym(a - 1, 11); }
+  function mesAnoAnt(k) { return ym(Number(k.slice(0, 4)) - 1, Number(k.slice(5, 7)) - 1); }
+  // variação contra um mês de base; mês parcial ou B2B incompleto (piso) não entram como base de comparação
+  function cmp3p(atual, base, lbl, campo) {
+    if (!base || base.parcial || (campo === 'b2b' && (base.b2bIncompleto || atual.b2bIncompleto))) {
+      return 'vs ' + lbl + ': ' + (base && base.parcial ? 'mês parcial' : base ? 'base incompleta' : 'sem base');
+    }
+    return 'vs ' + lbl + ' (' + nf(base[campo]) + '): ' + pill(varPct(atual[campo], base[campo]));
+  }
+  function renderTres() {
+    var pg = el('tv2-tres-corpo');
+    if (!DADOS.t3p) { carregando('tv2-tres-corpo', 'trade_3p.json'); return; }
+    var T = DADOS.t3p, M = T.meses, todos = Object.keys(M).sort();
+    var fechados = todos.filter(function (m) { return !M[m].parcial; });
+    var meses = periodoMeses(tresEstado.per).filter(function (m) { return M[m]; });
+    if (!tresEstado.mes || !M[tresEstado.mes] || M[tresEstado.mes].parcial) tresEstado.mes = fechados[fechados.length - 1];
+    var sel = el('tv2-tres-mes');
+    if (sel) sel.innerHTML = fechados.slice().reverse().map(function (m) { return '<option value="' + m + '"' + (m === tresEstado.mes ? ' selected' : '') + '>' + mesLbl(m) + '</option>'; }).join('');
+    var m0 = tresEstado.mes, X = M[m0], A = M[mesAnoAnt(m0)], P = M[mesAnt(m0)];
+    var asc = X.b2bIncompleto ? '*' : '';
+    var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">' + mesLbl(m0).toUpperCase() + ' · TRÊS PESCADORES</div>' +
+      '<div class="sec-s">B2B = Trade (agências e Portal de Agentes) · B2C = total do parque menos B2B (Bilheteria, E-commerce e Cross) · Total = visitação da planilha Visitação Parques</div></div><span class="badge">Aparecida</span></div>';
+    html += '<div class="cli-kpis-ag">' +
+      kpi('Visitação total', nf(X.total), cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'total') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'total')) +
+      kpi('B2B (Trade)', nf(X.b2b) + asc, cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'b2b') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'b2b'), null, COR_3P.b2b) +
+      kpi('B2C', nf(X.b2c), cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'b2c') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'b2c'), null, COR_3P.b2c) +
+      kpi('Share B2B', pf(X.b2b / X.total) + asc, A ? 'mesmo mês de 2025: ' + pf(A.b2b / A.total) + (A.b2bIncompleto ? '*' : '') : 'sem base em 2025') + '</div>';
+    // gráfico 1: composição mensal B2C + B2B = total; gráfico 2: share B2B
+    html += '<div class="row2"><div class="cc"><div class="cc-h"><div class="cc-t">Visitação mensal · B2B e B2C</div><div class="cc-s">Barras empilhadas somam o total do parque' +
+      (meses.some(function (m) { return M[m].parcial; }) ? ' · ' + mesLbl(todos[todos.length - 1]) + ' parcial até ' + dataBR(T.ate).slice(0, 5) + ' (barra clara)' : '') + '</div></div><div style="height:280px"><canvas id="tv2-c-3p"></canvas></div></div>' +
+      '<div class="cc"><div class="cc-h"><div class="cc-t">Share B2B no total do parque</div><div class="cc-s">% da visitação que veio do Trade' + (meses.some(function (m) { return M[m].b2bIncompleto; }) ? ' · ponto vazado = B2B incompleto no bruto (piso)' : '') + '</div></div><div style="height:280px"><canvas id="tv2-c-3p-sh"></canvas></div></div></div>';
+    // composição por canal (só onde a Bia classificou)
+    var comCanal = meses.filter(function (m) { return M[m].canal; });
+    if (comCanal.length) {
+      html += '<div class="cc" style="margin:14px 0"><div class="cc-h"><div class="cc-t">Composição por canal · ' + mesLbl(comCanal[0]) + ' a ' + mesLbl(comCanal[comCanal.length - 1]) + '</div>' +
+        '<div class="cc-s">Canais da planilha Share Canal de Venda (aba Soul Parques): tratado da Bia/Niko nos meses fechados e regra espelho no mês corrente. Cross = Time Cross, vendas por Tick. Antes de jul/26 não há canal por parque no Dash.</div></div>' +
+        '<div style="height:260px"><canvas id="tv2-c-3p-can"></canvas></div></div>';
+    }
+    // tabela mensal
+    html += '<div class="cc" style="margin:14px 0;overflow-x:auto"><div class="cc-h" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><div class="cc-t">Detalhe mensal</div>' +
+      '<div class="cc-s">Variação de 2026 contra o mesmo mês de 2025; mês parcial e B2B incompleto ficam sem variação</div></div><button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" id="tv2-tres-xls">⬇️ Excel</button></div>' +
+      '<table class="cli-tbl"><thead><tr><th>Mês</th><th style="text-align:right">Total</th><th style="text-align:right">B2B</th><th style="text-align:right">B2C</th><th style="text-align:right">% B2B</th>' +
+      '<th style="text-align:right">Δ B2B vs 2025</th><th style="text-align:right">Δ B2C vs 2025</th><th>Origem do B2B</th></tr></thead><tbody>';
+    var FONTE = { bruto: 'Bruto (agência)', bia: 'Tratado Bia/Niko', espelho: 'Regra espelho' };
+    function dlt(x, campo) {
+      var b = M[mesAnoAnt(x)];
+      if (Number(x.slice(0, 4)) < 2026 || !b || M[x].parcial || b.parcial || (campo === 'b2b' && (M[x].b2bIncompleto || b.b2bIncompleto))) return '<span style="color:var(--muted)">-</span>';
+      return pill(varPct(M[x][campo], b[campo]));
+    }
+    meses.slice().reverse().forEach(function (m) {
+      var o = M[m];
+      html += '<tr><td><strong>' + mesLbl(m) + '</strong>' + (o.parcial ? ' <span class="cli-pill zero">parcial até ' + dataBR(T.ate).slice(0, 5) + '</span>' : '') + '</td><td style="text-align:right">' + nf(o.total) + '</td>' +
+        '<td style="text-align:right"><strong>' + nf(o.b2b) + '</strong>' + (o.b2bIncompleto ? '*' : '') + '</td><td style="text-align:right">' + nf(o.b2c) + '</td><td style="text-align:right">' + pf(o.b2b / o.total) + (o.b2bIncompleto ? '*' : '') + '</td>' +
+        '<td style="text-align:right">' + dlt(m, 'b2b') + '</td><td style="text-align:right">' + dlt(m, 'b2c') + '</td><td style="font-size:11px;color:var(--muted)">' + FONTE[o.fonte] + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    var shs = todos.filter(function (m) { return !M[m].b2bIncompleto; }).map(function (m) { return M[m].b2b / M[m].total; });
+    var ultCan = fechados.filter(function (m) { return M[m].canal; }).pop(), cr = ultCan ? M[ultCan] : null;
+    html += aviso('ℹ️ <strong>Como ler:</strong> o B2B do 3P é pequeno (de ' + pf(Math.min.apply(null, shs)) + ' a ' + pf(Math.max.apply(null, shs)) + ' da visitação nos meses com B2B completo) e o B2C domina. ' +
+      (cr ? 'O Cross (Time Cross, desde jul/26) fica dentro do B2C: em ' + mesLbl(ultCan) + ' foram ' + nf(cr.canal.Cross) + ' bilhetes, ' + pf(cr.canal.Cross / cr.total, 0) + ' do parque. ' : '') +
+      '2025 e jan a jun/26 não separam o Cross (não há Time Cross no período), então o B2C desses meses é Bilheteria + E-commerce.');
+    html += aviso('⚠️ <strong>A origem do B2B muda na série:</strong> jan/25 a jun/26 pelo bruto de bilheteria (agência no bruto, sem CARD), jul a out/26 pelo tratado da Bia/Niko e o mês corrente pela regra espelho do bruto. ' +
+      'A diferença é de dezenas de bilhetes por mês, mas a série não é 100% homogênea. ' +
+      '<strong>* Jan/25, jun/25 e jan/26:</strong> o arquivo bruto do mês está incompleto (parou entre os dias 21 e 24), então o B2B é um piso e esses meses não entram nas variações de B2B. O total sempre vem da planilha de visitação. ' +
+      'O total de abr/26 e o do mês corrente podem mudar com o fechamento da Controladoria.');
+    pg.innerHTML = html;
+    var lbl = meses.map(mesLbl);
+    var par = meses.map(function (m) { return !!M[m].parcial; });
+    grafico('tv2-c-3p', { type: 'bar', data: { labels: lbl, datasets: [
+      { label: 'B2C', data: meses.map(function (m) { return M[m].b2c; }), backgroundColor: meses.map(function (m, i) { return par[i] ? 'rgba(232,168,32,.45)' : COR_3P.b2c; }), stack: 's' },
+      { label: 'B2B (Trade)', data: meses.map(function (m) { return M[m].b2b; }), backgroundColor: meses.map(function (m, i) { return par[i] ? 'rgba(31,122,140,.45)' : COR_3P.b2b; }), stack: 's' }] },
+      options: { scales: eixos({ x: { stacked: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return nf(v); } } } }),
+        plugins: { tooltip: { callbacks: { afterBody: function (it) { var o = M[meses[it[0].dataIndex]]; return 'Total: ' + nf(o.total) + ' · Share B2B: ' + pf(o.b2b / o.total) + (o.b2bIncompleto ? ' (B2B incompleto)' : '') + (o.parcial ? ' · parcial' : ''); } } } } } });
+    grafico('tv2-c-3p-sh', { type: 'line', data: { labels: lbl, datasets: [{ label: 'Share B2B', data: meses.map(function (m) { return +(M[m].b2b / M[m].total * 100).toFixed(2); }), borderColor: COR_3P.b2b, backgroundColor: COR_3P.b2b, borderWidth: 2, tension: .25,
+      pointRadius: meses.map(function (m) { return M[m].parcial || M[m].b2bIncompleto ? 5 : 2.5; }), pointBackgroundColor: meses.map(function (m) { return M[m].parcial || M[m].b2bIncompleto ? 'transparent' : COR_3P.b2b; }) }] },
+      options: { scales: eixos({ y: { beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return v + '%'; } } } }),
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return 'Share B2B: ' + c.raw.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%'; } } } } } });
+    if (comCanal.length) {
+      var canais = ['Trade', 'Bilheteria', 'Ecommerce', 'Cross'];
+      grafico('tv2-c-3p-can', { type: 'bar', data: { labels: comCanal.map(mesLbl), datasets: canais.map(function (c) {
+        return { label: NOME_CANAL[c], data: comCanal.map(function (m) { return M[m].canal[c]; }), backgroundColor: COR_3P[c], stack: 's' };
+      }) }, options: { scales: eixos({ x: { stacked: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return nf(v); } } } }),
+        plugins: { tooltip: { callbacks: { afterBody: function (it) { var o = M[comCanal[it[0].dataIndex]], t = o.canal.Trade + o.canal.Bilheteria + o.canal.Ecommerce + o.canal.Cross; return 'Total dos canais: ' + nf(t) + (o.parcial ? ' · parcial' : ''); } } } } } });
+    }
+    el('tv2-tres-xls').onclick = function () {
+      if (typeof XLSX === 'undefined') return;
+      var rows = [['Mês', 'Total', 'B2B (Trade)', 'B2C', '% B2B', 'B2B incompleto', 'Parcial', 'Origem do B2B', 'Bilheteria', 'E-commerce', 'Cross']];
+      meses.forEach(function (m) {
+        var o = M[m], c = o.canal || {};
+        rows.push([mesLbl(m), o.total, o.b2b, o.b2c, Math.round(o.b2b / o.total * 1000) / 10, o.b2bIncompleto ? 'sim' : '', o.parcial ? 'sim' : '', FONTE[o.fonte], c.Bilheteria != null ? c.Bilheteria : '', c.Ecommerce != null ? c.Ecommerce : '', c.Cross != null ? c.Cross : '']);
+      });
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Três Pescadores');
+      XLSX.writeFile(wb, 'tres_pescadores_b2b_b2c.xlsx');
+    };
+  }
+
   // ================================================================ páginas e navegação
   var PAGINAS = [
     ['obz', '🎯 OBZ', '🎯 OBZ', 'OBZ · TRADE E ESCOLAR', 'Realizado x meta OBZ, comparativos e quanto falta para a meta do mês'],
     ['ind', '🏞️ Indicadores Parques', '🏞️ Indic.', 'INDICADORES PARQUES', 'B2B x B2C, tipo de dia, eventos e antecedência de compra'],
     ['ori', '🌎 Origem', '🌎 Origem', 'ORIGEM DOS VISITANTES', 'Share e antecedência por país e feriados dos mercados principais'],
     ['op', '💡 Oportunidades', '💡 Oport.', 'OPORTUNIDADES', 'Agências que já compraram e estão paradas há mais de 6 meses'],
-    ['canc', '🚫 Cancelamento', '🚫 Cancel.', 'CANCELAMENTO E NO-SHOW · TRADE', '% de bilhetes Trade cancelados e não utilizados, por mês, agência e clima']
+    ['canc', '🚫 Cancelamento', '🚫 Cancel.', 'CANCELAMENTO E NO-SHOW · TRADE', '% de bilhetes Trade cancelados e não utilizados, por mês, agência e clima'],
+    ['tres', '⛵ Três Pescadores', '⛵ 3P', 'TRÊS PESCADORES · B2B E B2C', 'Visitação do parque de Aparecida separada em Trade (B2B) e demais canais (B2C)']
   ];
   window.__tv2CancMes = function (v) { cancEstado.mes = v; renderCanc(); };
-  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp, canc: renderCanc };
+  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp, canc: renderCanc, tres: renderTres };
   function filtros(id) {
     if (id === 'obz') return controle('Parque do gráfico', seg('tv2-obz-k', [['t', 'AquaRio + Paineiras'], ['a', 'AquaRio'], ['p', 'Paineiras']], obzEstado.k, function (v) { obzEstado.k = v; renderOBZ(); }));
     if (id === 'ind') return controle('Parque', seg('tv2-ind-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], indEstado.k, function (v) { indEstado.k = v; renderInd(); })) +
       controle('Período', seg('tv2-ind-per', PERIODOS, indEstado.per, function (v) { indEstado.per = v; renderInd(); }));
     if (id === 'canc') return controle('Parque', seg('tv2-canc-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], cancEstado.k, function (v) { cancEstado.k = v; renderCanc(); })) +
       controle('Mês dos indicadores', '<select class="cli-select" id="tv2-canc-mes" onchange="window.__tv2CancMes(this.value)"></select>');
+    if (id === 'tres') return controle('Período', seg('tv2-tres-per', PERIODOS, tresEstado.per, function (v) { tresEstado.per = v; renderTres(); })) +
+      controle('Mês em foco', '<select class="cli-select" id="tv2-tres-mes" onchange="window.__tv2TresMes(this.value)"></select>');
     if (id === 'ori') return controle('Parque', seg('tv2-ori-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], oriEstado.k, function (v) { oriEstado.k = v; renderOri(); })) +
       controle('Período', seg('tv2-ori-per', PERIODOS, oriEstado.per, function (v) { oriEstado.per = v; renderOri(); })) +
       controle('Canal', seg('tv2-ori-seg', [['tot', 'Total'], ['b2b', 'B2B'], ['b2c', 'B2C']], oriEstado.seg, function (v) { oriEstado.seg = v; renderOri(); })) +
@@ -1039,7 +1203,7 @@
     // o bloco das abas novas precisa de especificidade maior para aparecer
     var css = document.createElement('style');
     css.textContent = '@media (max-width:860px){' + PAGINAS.map(function (p) { return 'body #pg-' + p[0] + ':not(#tv2-x):not(#tv2-y) > .tv2-wrap'; }).join(',') +
-      '{display:block!important}.tv2-wrap .cli-hdr{flex-direction:column;align-items:stretch}.tv2-wrap .cli-controls{gap:10px}.tv2-wrap .cli-seg{flex-wrap:wrap}.tv2-wrap .row2{grid-template-columns:1fr}}';
+      '{display:block!important}.tv2-wrap .cli-hdr{flex-direction:column;align-items:stretch}.tv2-wrap .cli-controls{gap:10px}.tv2-wrap .cli-seg{flex-wrap:wrap}.tv2-wrap .row2{grid-template-columns:1fr}.tv2-car-bar>*{flex:1 1 100%}.tv2-car-bar .cli-seg-btn{min-height:44px;flex:1 1 auto}.tv2-car-bar #tv2-car-xls{margin-left:0!important;min-height:44px!important}}';
     document.head.appendChild(css);
     PAGINAS.forEach(function (p) {
       if (el('pg-' + p[0])) return;
@@ -1067,16 +1231,22 @@
         antM.parentNode.insertBefore(m, antM.nextSibling); antM = m;
       }
     });
-    // subaba Carteira no Top Clientes
+    // subabas do Top Clientes (13/11/2026, pedido da Paula): a Carteira vira a primeira e a aberta por padrão (absorveu o
+    // Ranking + Delta) e a Por Agência sai. Os painéis antigos ficam no HTML, ocultos: o script principal ainda referencia
+    // os elementos deles (cliRenderRanking, cliRenderAgencia, exportação) e o index.html é regerado todo dia pelo Apps Script.
     var barra = document.querySelector('#pg-cli .cli-tab-bar');
     var painelIns = el('cli-panel-insights');
     if (barra && painelIns && !el('cli-panel-carteira')) {
+      Array.prototype.slice.call(barra.querySelectorAll('.cli-tab')).forEach(function (b) {
+        if (/cliSetTab\('(ranking|agencia)'/.test(b.getAttribute('onclick') || '')) barra.removeChild(b); else b.classList.remove('on');
+      });
       var bt = document.createElement('button');
-      bt.className = 'cli-tab'; bt.textContent = '🗺️ Carteira'; bt.setAttribute('onclick', "cliSetTab('carteira',this)");
-      barra.appendChild(bt);
+      bt.className = 'cli-tab on'; bt.textContent = '🗺️ Carteira'; bt.setAttribute('onclick', "cliSetTab('carteira',this)");
+      barra.insertBefore(bt, barra.firstChild);
       var pn = document.createElement('div');
-      pn.id = 'cli-panel-carteira'; pn.style.display = 'none';
+      pn.id = 'cli-panel-carteira';
       painelIns.parentNode.insertBefore(pn, painelIns.nextSibling);
+      ['ranking', 'agencia', 'share', 'insights'].forEach(function (x) { var p = el('cli-panel-' + x); if (p) p.style.display = 'none'; });
     }
     return true;
   }
@@ -1120,6 +1290,17 @@
       controlesCli(true);
       return setTabOrig(tab, btn);
     };
+  }
+  // Carteira é a subaba aberta por padrão: com ela aberta, todo re-render do Top Clientes (abrir a página, filtro de parque,
+  // Bio, tema) redesenha a Carteira em vez do Ranking/Por Agência que o script principal chamaria
+  var ativoOrig = window.cliRenderAtivo;
+  if (typeof ativoOrig === 'function') {
+    window.cliRenderAtivo = function () {
+      var on = document.querySelector('#pg-cli .cli-tab.on');
+      if (on && /cliSetTab\('carteira'/.test(on.getAttribute('onclick') || '')) { controlesCli(false); return renderCarteira(); }
+      return ativoOrig.apply(this, arguments);
+    };
+    if (window.curPage === 'cli') window.cliRenderAtivo();
   }
   // ================================================================ base única do Trade (26/10/2026)
   // O painel APPAI/Escolar usava como "Trade" a soma dos dias sem a linha Extras (ex.: jan/26 18.475), enquanto

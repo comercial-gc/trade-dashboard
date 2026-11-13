@@ -18,6 +18,7 @@
      compras   trade_indicadores.json: maior uv/uu (última compra/uso) das agências por parque
      escolar   trade_extra.json: último dia de aquario.dias (Escolar e receita, só AquaRio)
      canc      trade_cancelamento.json: campo "ate" (CARD, por período de visita)
+     t3p       trade_3p.json: campo "ate" (Três Pescadores, B2B e B2C)
    Sem data confiável (não entram na faixa): metas OBZ (anuais), eventosRio, feriados_mercados.json
    (calendário fixo), cadastro de agências (arquivo opcional). */
 (function () {
@@ -39,7 +40,7 @@
   function maxIso(a) { var u = null; a.forEach(function (x) { if (x && (!u || x > u)) u = x; }); return u; }
 
   // ---------------------------------------------------------------- carga dos JSONs (todos opcionais)
-  var JS = { trade_diario: null, trade_indicadores: null, trade_extra: null, trade_cancelamento: null };
+  var JS = { trade_diario: null, trade_indicadores: null, trade_extra: null, trade_cancelamento: null, trade_3p: null };
   var carregadoEm = 0, carregando = null;
   function getJSON(nome) {
     return fetch(BASE + nome + '.json?v=' + Date.now()).then(function (r) {
@@ -146,11 +147,16 @@
       return { tipo: 'dia', ate: j && j.ate ? String(j.ate).slice(0, 10) : null, nota: 'Por período de visita. Lido em ' + (j && j.gerado_em ? String(j.gerado_em).slice(8, 10) + '/' + String(j.gerado_em).slice(5, 7) + ' ' + String(j.gerado_em).slice(11, 16) : 'sem leitura') + '.' };
     } }
   };
+  // Três Pescadores (13/11/2026): trade_3p.json, campo "ate" = último dia do mês corrente já incluído
+  FONTES.t3p = { label: 'Três Pescadores (B2B e B2C)', get: function () {
+    var j = JS.trade_3p;
+    return { tipo: 'dia', ate: j && j.ate ? String(j.ate).slice(0, 10) : null, nota: 'Total pela planilha de visitação e canal pelo bruto/tratado. Lido em ' + (j && j.geradoEm ? dm(String(j.geradoEm).slice(0, 10)) : 'sem leitura') + '.' };
+  } };
   // cada aba: fontes que ela realmente usa
   var ABAS = {
     mar: ['trade'], acum: ['trade'], hist: ['trade'], share: ['trade'],
     cli: ['topcli'], imm: ['intel', 'tradePai'],
-    obz: ['trade', 'escolar'], ind: ['brutos'], ori: ['brutos'], op: ['compras'], canc: ['canc']
+    obz: ['trade', 'escolar'], ind: ['brutos'], ori: ['brutos'], op: ['compras'], canc: ['canc'], tres: ['t3p']
   };
   FONTES.tradePai = { label: 'Paineiras (Trade e visitação)', get: function () { return FONTES.trade.get(['Paineiras']); } };
 
