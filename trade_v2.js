@@ -1068,7 +1068,7 @@
   // Agentes); B2C = total do parque menos B2B (Bilheteria + E-commerce + Cross). Total = visitação da planilha Visitação
   // Parques. Fonte: trade_3p.json (levantamento do agente de dados, 13/11/2026). A fonte do B2B muda ao longo da série:
   // bruto (jan/25 a jun/26), tratado da Bia/Niko (jul a out/26) e regra espelho do bruto no mês corrente (parcial).
-  var tresEstado = { per: '12m', mes: '' };
+  var tresEstado = { per: '12m', mes: '', sub: 'geral' };
   DADOS.t3p = null;
   getJSON('trade_3p.json', true).then(function (j) { DADOS.t3p = j; if (window.__tv2Pagina === 'tres') renderTres(); });
   window.__tv2TresMes = function (v) { tresEstado.mes = v; renderTres(); };
@@ -1083,6 +1083,7 @@
     }
     return 'vs ' + lbl + ' (' + nf(base[campo]) + '): ' + pill(varPct(atual[campo], base[campo]));
   }
+  var tresSubs = [['geral', '📊 Visão geral'], ['cli', '🏆 Clientes'], ['rec', '💰 Receita'], ['esc', '🎒 Escolar e produtos'], ['dia', '📅 Dias e origem']];
   function renderTres() {
     var pg = el('tv2-tres-corpo');
     if (!DADOS.t3p) { carregando('tv2-tres-corpo', 'trade_3p.json'); return; }
@@ -1092,7 +1093,16 @@
     if (!tresEstado.mes || !M[tresEstado.mes] || M[tresEstado.mes].parcial) tresEstado.mes = fechados[fechados.length - 1];
     var sel = el('tv2-tres-mes');
     if (sel) sel.innerHTML = fechados.slice().reverse().map(function (m) { return '<option value="' + m + '"' + (m === tresEstado.mes ? ' selected' : '') + '>' + mesLbl(m) + '</option>'; }).join('');
-    var m0 = tresEstado.mes, X = M[m0], A = M[mesAnoAnt(m0)], P = M[mesAnt(m0)];
+    killTres();
+    pg.innerHTML = '<div class="tv2-subbar">' + tresSubs.map(function (x) { return '<button type="button" class="tv2-subtab' + (x[0] === tresEstado.sub ? ' on' : '') + '" data-sub="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div><div id="tv2-tres-sub"></div>';
+    pg.querySelectorAll('[data-sub]').forEach(function (b) { b.onclick = function () { tresEstado.sub = b.getAttribute('data-sub'); renderTres(); }; });
+    var box = el('tv2-tres-sub'), m0 = tresEstado.mes, sub = tresEstado.sub;
+    if (sub === 'geral') return renderTresGeral(box, T, M, todos, fechados, meses, m0);
+    if (!DADOS.t3pd) { carregando('tv2-tres-sub', 'trade_3p_detalhe.json'); return; }
+    ({ cli: renderTresCli, rec: renderTresRec, esc: renderTresEsc, dia: renderTresDia })[sub](box, DADOS.t3pd, T, m0);
+  }
+  function renderTresGeral(pg, T, M, todos, fechados, meses, m0) {
+    var X = M[m0], A = M[mesAnoAnt(m0)], P = M[mesAnt(m0)];
     var asc = X.b2bIncompleto ? '*' : '';
     var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">' + mesLbl(m0).toUpperCase() + ' · TRÊS PESCADORES</div>' +
       '<div class="sec-s">B2B = Trade (agências e Portal de Agentes) · B2C = total do parque menos B2B (Bilheteria, E-commerce e Cross) · Total = visitação da planilha Visitação Parques</div></div><span class="badge">Aparecida</span></div>';
@@ -1102,22 +1112,25 @@
       kpi('B2C', nf(X.b2c), cmp3p(X, A, mesLbl(mesAnoAnt(m0)), 'b2c') + '<br>' + cmp3p(X, P, mesLbl(mesAnt(m0)), 'b2c'), null, COR_3P.b2c) +
       kpi('Share B2B', pf(X.b2b / X.total) + asc, A ? 'mesmo mês de 2025: ' + pf(A.b2b / A.total) + (A.b2bIncompleto ? '*' : '') : 'sem base em 2025') + '</div>';
     // acumulado do ano até o mês em foco (jan até o mês), contra o mesmo período do ano anterior (só 2026 tem base)
-    var anoF = Number(m0.slice(0, 4)), mesF = Number(m0.slice(5, 7)), AC = { t: 0, b: 0, c: 0, t0: 0, b0: 0, c0: 0, inc: false, inc0: false, base: anoF === 2026 };
-    for (var im = 0; im < mesF; im++) {
-      var y1 = M[ym(anoF, im)], y0 = M[ym(anoF - 1, im)];
-      if (y1) { AC.t += y1.total; AC.b += y1.b2b; AC.c += y1.b2c; if (y1.b2bIncompleto) AC.inc = true; }
-      if (y0) { AC.t0 += y0.total; AC.b0 += y0.b2b; AC.c0 += y0.b2c; if (y0.b2bIncompleto) AC.inc0 = true; } else AC.base = false;
-    }
-    var lblAc = 'Jan-' + MES[mesF - 1] + '/' + String(anoF).slice(2), lblAc0 = 'Jan-' + MES[mesF - 1] + '/' + String(anoF - 1).slice(2);
+    // Acumulado do ano até o mês em foco. O total mostrado soma todos os meses; a comparação com o ano anterior usa só os meses
+    // fechados com base (para o B2B, só os meses em que os dois lados têm arquivo completo no bruto: jan/25, jun/25 e jan/26 são piso)
+    var anoF = Number(m0.slice(0, 4)), mesF = Number(m0.slice(5, 7)), AC = { t: 0, b: 0, c: 0, inc: false }, msAc = [];
+    for (var im = 0; im < mesF; im++) { var k1 = ym(anoF, im); if (M[k1]) { msAc.push(k1); AC.t += M[k1].total; AC.b += M[k1].b2b; AC.c += M[k1].b2c; if (M[k1].b2bIncompleto) AC.inc = true; } }
+    var parTodos = anoF === 2026 ? msAc.filter(function (m) { return !M[m].parcial; }).map(function (m) { return [m, mesAnoAnt(m)]; }).filter(function (x) { return M[x[1]] && !M[x[1]].parcial; }) : [];
+    var parB2B = anoF === 2026 ? t3pPares(M, msAc) : [];
+    function somaPar(par, campo, i) { return par.reduce(function (s, x) { return s + M[x[i]][campo]; }, 0); }
+    var lblAc = 'Jan-' + MES[mesF - 1] + '/' + String(anoF).slice(2);
     function cmpAc(campo) {
-      if (!AC.base) return 'sem base em ' + (anoF - 1);
-      if (campo === 'b' && (AC.inc || AC.inc0)) return 'vs ' + lblAc0 + ': base incompleta (jan no bruto)';
-      return 'vs ' + lblAc0 + ' (' + nf(AC[campo + '0']) + '): ' + pill(varPct(AC[campo], AC[campo + '0']));
+      var par = campo === 'b2b' ? parB2B : parTodos;
+      if (!par.length) return 'sem meses comparáveis com o ano anterior';
+      var a1 = somaPar(par, campo, 0), a0 = somaPar(par, campo, 1);
+      return par.length + ' meses comparáveis: ' + nf(a1) + ' x ' + nf(a0) + ' do ano anterior ' + pill(varPct(a1, a0));
     }
-    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ACUMULADO ' + lblAc.toUpperCase() + '</div><div class="sec-s">Soma dos meses fechados de janeiro até ' + mesLbl(m0) + ' contra o mesmo período do ano anterior</div></div></div>';
-    html += '<div class="cli-kpis-ag">' + kpi('Visitação total', nf(AC.t), cmpAc('t')) +
-      kpi('B2B (Trade)', nf(AC.b) + (AC.inc ? '*' : ''), cmpAc('b'), null, COR_3P.b2b) + kpi('B2C', nf(AC.c), cmpAc('c'), null, COR_3P.b2c) +
-      kpi('Share B2B', pf(AC.t ? AC.b / AC.t : null) + (AC.inc ? '*' : ''), AC.base && AC.t0 ? lblAc0 + ': ' + pf(AC.b0 / AC.t0) + (AC.inc0 ? '*' : '') : 'sem base em ' + (anoF - 1)) + '</div>';
+    var shAtual = parB2B.length ? somaPar(parB2B, 'b2b', 0) / somaPar(parB2B, 'total', 0) : null, shBase = parB2B.length ? somaPar(parB2B, 'b2b', 1) / somaPar(parB2B, 'total', 1) : null;
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ACUMULADO ' + lblAc.toUpperCase() + '</div><div class="sec-s">Soma dos meses de janeiro até ' + mesLbl(m0) + '; a comparação com o ano anterior usa só os meses fechados e com arquivo completo nos dois lados' + (AC.inc ? ' (* = o total inclui meses com B2B incompleto no bruto)' : '') + '</div></div></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Visitação total', nf(AC.t), cmpAc('total')) +
+      kpi('B2B (Trade)', nf(AC.b) + (AC.inc ? '*' : ''), cmpAc('b2b'), null, COR_3P.b2b) + kpi('B2C', nf(AC.c), cmpAc('b2c'), null, COR_3P.b2c) +
+      kpi('Share B2B', pf(AC.t ? AC.b / AC.t : null) + (AC.inc ? '*' : ''), parB2B.length ? 'meses comparáveis: ' + pf(shAtual) + ' x ' + pf(shBase) + ' do ano anterior' : 'sem meses comparáveis com o ano anterior') + '</div>';
     // gráfico 1: composição mensal B2C + B2B = total; gráfico 2: share B2B
     html += '<div class="row2"><div class="cc"><div class="cc-h"><div class="cc-t">Visitação mensal · B2B e B2C</div><div class="cc-s">Barras empilhadas somam o total do parque' +
       (meses.some(function (m) { return M[m].parcial; }) ? ' · ' + mesLbl(todos[todos.length - 1]) + ' parcial até ' + dataBR(T.ate).slice(0, 5) + ' (barra clara)' : '') + '</div></div><div style="height:280px"><canvas id="tv2-c-3p"></canvas></div></div>' +
@@ -1186,6 +1199,298 @@
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Três Pescadores');
       XLSX.writeFile(wb, 'tres_pescadores_b2b_b2c.xlsx');
     };
+  }
+
+  // ---------------------------------------------------------------- 3P como parque do Trade: subseções (13/11/2026)
+  // Pedido do Paulo: o Três Pescadores entra como um parque novo do Trade, com todos os acompanhamentos que os dados permitem
+  // (Clientes, Receita, Escolar e produtos, Dias e origem), sem meta e sem entrar nos totais de AquaRio + Paineiras.
+  // Fonte: trade_3p_detalhe.json (bruto 3P: acesso = ENTRADA AVULSA + VISITANTES; Trade = agência não numérica ou PORTAL DE AGENTES;
+  // Time Cross fica fora). Não existem no 3P: cancelamento/no-show (o bruto só tem bilhete utilizado) e APPAI.
+  DADOS.t3pd = null;
+  getJSON('trade_3p_detalhe.json', true).then(function (j) { DADOS.t3pd = j; if (window.__tv2Pagina === 'tres') renderTres(); });
+  (function () {
+    var c = document.createElement('style');
+    c.textContent = '.tv2-subbar{display:flex;border-bottom:2px solid var(--border);margin:4px 0 16px;overflow-x:auto;scrollbar-width:none}.tv2-subbar::-webkit-scrollbar{display:none}' +
+      '.tv2-subtab{flex:0 0 auto;background:none;border:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);padding:11px 18px;min-height:44px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}' +
+      '.tv2-subtab:hover{color:var(--text)}.tv2-subtab.on{color:var(--aqua);border-bottom-color:var(--aqua)}.tv2-subtab:focus-visible{outline:2px solid var(--aqua);outline-offset:-2px}' +
+      '#tv2-tres-corpo canvas{max-height:none}#tv2-tres-corpo .cli-tbl td[style*="text-align:right"]{white-space:nowrap}' +
+      '@media(max-width:640px){#tv2-tres-corpo .cc div[style*="height:270px"],#tv2-tres-corpo .cc div[style*="height:280px"]{height:330px!important}#tv2-tres-corpo .cc div[style*="height:260px"]{height:300px!important}' +
+      '#tv2-tres-corpo .cli-seg-btn{min-height:44px}#tv2-tres-corpo .cli-select{min-height:44px;font-size:16px}#tv2-tres-corpo .cli-tbl th,#tv2-tres-corpo .cli-tbl td{padding:8px 7px}#tv2-tres-corpo .cli-tbl td:not([style*="text-align:right"]){min-width:120px}}';
+    document.head.appendChild(c);
+  })();
+  // O bruto do 3P traz acentos quebrados (U+FFFD), como o do AquaRio. Reparo palavra a palavra; o que não estiver no
+  // dicionário perde só o caractere quebrado (nunca aparece o losango).
+  var REP3P = {};
+  (function () {
+    var cru = { 'ag#ncia': 'agência', 'andr#ia': 'andréia', 'arac#': 'arac', 'associa#ao': 'associação', 'arauc#ria': 'araucária', 'ara#jo': 'araújo', 'cart#o': 'cartão', 'col#gio': 'colégio',
+      'concei#ao': 'conceição', 'concei##o': 'conceição', 'cora##o': 'coração', 'cr#dito': 'crédito', 'crian#as': 'crianças', 'd#bito': 'débito', 'f#': 'fé', 'f#tima': 'fátima', 'gon#alves': 'gonçalves',
+      'guaratinguet#': 'guaratinguetá', 'institui##o': 'instituição', 'institui##es': 'instituições', 'ita#': 'itaú', 'jos#': 'josé', 'louren#o': 'lourenço', 'par#quia': 'paróquia',
+      'ribeir#o': 'ribeirão', 'servi#os': 'serviços', 'sim#es': 'simões', 's#o': 'são', 'tr#s': 'três', 'tur#stico': 'turístico', 'p#blicas': 'públicas', '#gua': 'água' };
+    REP3P = {};
+    Object.keys(cru).forEach(function (k) { REP3P[k.replace(/#/g, '�')] = cru[k]; });
+  })();
+  function rep3p(s) {
+    return String(s == null ? '' : s).replace(/[^\s,()+\-\/]*�[^\s,()+\-\/]*/g, function (t) {
+      var r = REP3P[t.toLowerCase()];
+      if (r == null) return t.replace(/�/g, '');
+      return t === t.toUpperCase() ? r.toUpperCase() : /^[A-Z]/.test(t) ? r.charAt(0).toUpperCase() + r.slice(1) : r;
+    });
+  }
+  var PAL3P = ['#1F7A8C', '#E8A820', '#6A4C93', '#2D6A2B', '#C0392B', '#005F8E', '#B45309', '#7A8B99'];
+  // meses comparáveis com o ano anterior: o mês e o mesmo mês do ano anterior fechados e com arquivo completo no bruto
+  // (jan/25, jun/25 e jan/26 vêm truncados). Devolve pares [mês, mês do ano anterior].
+  function t3pPares(M, ms) {
+    return ms.filter(function (m) { return !M[m].parcial && !M[m].b2bIncompleto; }).map(function (m) { return [m, mesAnoAnt(m)]; })
+      .filter(function (x) { return M[x[1]] && !M[x[1]].parcial && !M[x[1]].b2bIncompleto; });
+  }
+  // período escolhido: meses com dado; mês parcial fica fora (parcial nunca contra mês inteiro)
+  function t3pPeriodo(T) {
+    var M = T.meses, ms = periodoMeses(tresEstado.per).filter(function (m) { return M[m]; });
+    var fech = ms.filter(function (m) { return !M[m].parcial; }), pares = t3pPares(M, fech);
+    return { ms: ms, fech: fech, pares: pares, baseOk: pares.length > 0, parcial: ms.filter(function (m) { return M[m].parcial; }),
+      trunc: fech.filter(function (m) { return M[m].b2bIncompleto; }),
+      fora: fech.filter(function (m) { return !pares.some(function (x) { return x[0] === m; }); }) };
+  }
+  // junta grafias que só diferem pelo acento quebrado (ex.: COLÉGIO x COL?GIO): a chave do arquivo descarta o caractere quebrado
+  // e a da tela repara o acento, então o mesmo nome podia aparecer duas vezes. O nome exibido é o da grafia com mais bilhetes.
+  function juntaAg(lista) {
+    var o = {};
+    lista.forEach(function (a) {
+      var n = rep3p(a.n), k = chave(n), x = o[k], tot = Object.keys(a.v).reduce(function (s, m) { return s + a.v[m]; }, 0);
+      if (!x) x = o[k] = { n: n, v: {}, mx: -1 };
+      Object.keys(a.v).forEach(function (m) { x.v[m] = (x.v[m] || 0) + a.v[m]; });
+      if (tot > x.mx) { x.mx = tot; x.n = n; }
+    });
+    return Object.keys(o).map(function (k) { return o[k]; });
+  }
+  function t3pSoma(v, ms) { return ms.reduce(function (s, m) { return s + (v[m] || 0); }, 0); }
+  function somaDic(lista, campo, ms) {
+    var o = {};
+    ms.forEach(function (m) { var d = (lista[m] || {})[campo] || {}; Object.keys(d).forEach(function (k) { o[k] = (o[k] || 0) + d[k]; }); });
+    return o;
+  }
+  function topDic(o, n, excl) {
+    return Object.keys(o).filter(function (k) { return !(excl && excl.test(k)); }).sort(function (a, b) { return o[b] - o[a]; }).slice(0, n).map(function (k) { return [k, o[k]]; });
+  }
+  function nota3p(P, comp) {
+    var h = '';
+    if (P.parcial.length) h += 'O mês parcial (' + P.parcial.map(mesLbl).join(', ') + ') fica fora desta tela e entra quando fechar. ';
+    if (P.trunc.length) h += '<strong>Arquivo incompleto no bruto</strong> (' + P.trunc.map(mesLbl).join(', ') + '): os valores desses meses são piso. ';
+    if (comp && P.baseOk && P.fora.length) h += 'A comparação com o ano anterior usa só os ' + P.pares.length + ' meses em que os dois lados têm arquivo completo (ficam fora: ' + P.fora.map(mesLbl).join(', ') + '). ';
+    if (comp && !P.baseOk) h += 'Não há meses comparáveis com o ano anterior no período escolhido. ';
+    return h ? aviso('ℹ️ ' + h) : '';
+  }
+  function moeda(v) { return v == null ? '-' : 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+  function moeda2(v) { return v == null ? '-' : 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function killTres() { Object.keys(charts).forEach(function (id) { if (/^tv2-c-3p/.test(id)) kill(id); }); }
+
+  // ================================================================ 3P > CLIENTES
+  var tresCli = { busca: '' };
+  function renderTresCli(box, D3, T) {
+    var M = T.meses, P = t3pPeriodo(T);
+    if (!P.fech.length) { box.innerHTML = aviso('Sem mês fechado no período escolhido.'); return; }
+    var linhas = juntaAg(D3.agencias).map(function (a) {
+      var ult = Object.keys(a.v).sort().pop();
+      return { n: a.n, va: t3pSoma(a.v, P.fech), vap: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[0]; })) : null, vbp: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[1]; })) : null, ativos: P.fech.filter(function (m) { return (a.v[m] || 0) > 0; }).length, ult: ult, v: a.v };
+    }).filter(function (l) { return l.va > 0 || (l.vbp || 0) > 0; });
+    var totA = linhas.reduce(function (s, l) { return s + l.va; }, 0), totAp = P.baseOk ? linhas.reduce(function (s, l) { return s + l.vap; }, 0) : null, totBp = P.baseOk ? linhas.reduce(function (s, l) { return s + l.vbp; }, 0) : null;
+    linhas.sort(function (a, b) { return b.va - a.va || a.n.localeCompare(b.n); });
+    var ativas = linhas.filter(function (l) { return l.va > 0; });
+    var top5 = ativas.slice(0, 5).reduce(function (s, l) { return s + l.va; }, 0);
+    var recorrentes = ativas.filter(function (l) { return l.ativos >= 3; });
+    var opM = {};
+    (D3.oportunidades || []).forEach(function (x) {
+      var n = rep3p(x.n), k = chave(n), y = opM[k];
+      if (!y) opM[k] = { n: n, ultimo: x.ultimo, total: x.total, mesesAtivos: x.mesesAtivos };
+      else { y.total += x.total; if (x.ultimo > y.ultimo) y.ultimo = x.ultimo; if (x.mesesAtivos > y.mesesAtivos) y.mesesAtivos = x.mesesAtivos; }
+    });
+    var opTodas = Object.keys(opM).map(function (k) { return opM[k]; }).sort(function (a, b) { return b.total - a.total; });
+    var lblP = P.fech.length === 1 ? mesLbl(P.fech[0]) : mesLbl(P.fech[0]) + ' a ' + mesLbl(P.fech[P.fech.length - 1]);
+    var ast = P.trunc.length ? '*' : '';
+    var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">RANKING DE AGÊNCIAS · TRÊS PESCADORES</div><div class="sec-s">Bilhetes Trade de acesso por agência, ' + lblP +
+      ' · agência = nome no bruto (ver observações) · comparação contra o mesmo período do ano anterior</div></div><span class="badge">' + ativas.length + ' agências</span></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Bilhetes Trade (agências)', nf(totA) + ast, P.baseOk ? P.pares.length + ' meses comparáveis: ' + nf(totAp) + ' x ' + nf(totBp) + ' do ano anterior ' + pill(varPct(totAp, totBp)) : 'sem meses comparáveis com o ano anterior') +
+      kpi('Agências ativas', nf(ativas.length), recorrentes.length + ' recorrentes (3+ meses com compra)') +
+      kpi('Concentração top 5', pf(totA ? top5 / totA : null), 'das ' + nf(totA) + ' bilhetes do período') + kpi('Paradas há 6+ meses', nf(opTodas.length), 'sem compra há 6 meses ou mais (lista no fim da tela)') + '</div>';
+    // evolução das 8 maiores
+    html += '<div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Evolução mensal · 8 maiores agências do período</div><div class="cc-s">Bilhetes Trade por mês, meses fechados</div></div><div style="height:270px"><canvas id="tv2-c-3p-cli"></canvas></div></div>';
+    html += '<div class="cc" style="overflow-x:auto"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
+      controle('Buscar', '<input id="tv2-tres-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome da agência" value="' + esc(tresCli.busca) + '">') +
+      '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);margin-left:auto" id="tv2-tres-cli-xls">⬇️ Excel</button></div>';
+    var ls = linhas.filter(function (l) { return !tresCli.busca || chave(l.n).indexOf(chave(tresCli.busca)) >= 0; });
+    html += '<table class="cli-tbl"><thead><tr><th>#</th><th>Agência</th><th style="text-align:right">' + lblP + '</th><th style="text-align:right">Part.</th>' +
+      '<th style="text-align:right" title="Soma só dos meses comparáveis (arquivo completo nos dois anos)">Comparável ano ant.</th><th style="text-align:right" title="Mesmos meses do período atual">Comparável atual</th><th style="text-align:right">Δ %</th>' +
+      '<th style="text-align:right">Meses ativos</th><th>Última compra</th></tr></thead><tbody>';
+    if (!ls.length) html += '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + lblP + '. Limpe a busca ou escolha outro período.</td></tr>';
+    ls.slice(0, 50).forEach(function (l, i) {
+      html += '<tr><td style="color:var(--muted)">' + (i + 1) + '</td><td><strong>' + esc(l.n) + '</strong></td><td style="text-align:right"><strong>' + nf(l.va) + '</strong></td><td style="text-align:right">' + pf(totA ? l.va / totA : null) + '</td>' +
+        '<td style="text-align:right">' + (P.baseOk ? nf(l.vbp) : '-') + '</td><td style="text-align:right">' + (P.baseOk ? nf(l.vap) : '-') + '</td>' +
+        '<td style="text-align:right">' + (!P.baseOk ? '-' : l.vbp ? pill(varPct(l.vap, l.vbp)) : l.vap ? '<span class="cli-pill novo">novo</span>' : '-') + '</td>' +
+        '<td style="text-align:right">' + l.ativos + '</td><td style="white-space:nowrap">' + mesLbl(l.ult) + '</td></tr>';
+    });
+    html += '</tbody></table>' + (ls.length > 50 ? '<div class="cc-s" style="margin-top:6px">Mostrando 50 de ' + ls.length + '. O Excel traz todas.</div>' : '') + '</div>';
+    // oportunidades
+    var op = opTodas.slice(0, 30);
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">AGÊNCIAS PARADAS HÁ MAIS DE 6 MESES</div><div class="sec-s">Já compraram Trade no 3P (jan/25 em diante) e não compram desde ' + mesLbl(op.length ? op.reduce(function (m, x) { return x.ultimo > m ? x.ultimo : m; }, '2000-01') : '2026-05') + ' ou antes</div></div><span class="badge">' + opTodas.length + ' agências</span></div>';
+    html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Última compra</th><th style="text-align:right">Bilhetes no histórico</th><th style="text-align:right">Meses com compra</th></tr></thead><tbody>' +
+      op.map(function (x) { return '<tr><td><strong>' + esc(x.n) + '</strong></td><td>' + mesLbl(x.ultimo) + '</td><td style="text-align:right">' + nf(x.total) + '</td><td style="text-align:right">' + x.mesesAtivos + '</td></tr>'; }).join('') +
+      '</tbody></table>' + (opTodas.length > 30 ? '<div class="cc-s" style="margin-top:6px">Mostrando 30 de ' + opTodas.length + ' (ordenadas pelo histórico).</div>' : '') + '</div>';
+    // observações
+    var dif = Object.keys(D3.cobertura || {}).filter(function (m) { return D3.cobertura[m].dif; }).sort();
+    html += nota3p(P, true);
+    html += aviso('ℹ️ <strong>Como ler:</strong> o ranking do 3P é pulverizado. Só poucas agências compram todo mês; o resto são grupos, paróquias, associações, escolas e pessoas físicas que aparecem em 1 a 3 meses. ' +
+      'O Trade do 3P é pago por adiantamento e lançado no dia da visita. A agência é o nome do bruto (o código varia de formato); as variações de grafia foram unificadas e os acentos quebrados do bruto foram reparados na tela.');
+    if (dif.length) html += aviso('⚠️ <strong>Jul a out/26 (tratado da Bia x bruto):</strong> o total do Trade nessas telas de Visão geral vem do tratado da Bia/Niko, e a lista de agências vem sempre do bruto. Diferença da soma das agências contra o Trade da Visão geral: ' +
+      dif.map(function (m) { var c = D3.cobertura[m]; return mesLbl(m) + ' ' + sinal(c.dif, nf) + ' (' + nf(c.soma) + ' x ' + nf(c.b2b) + ')'; }).join(', ') + '.');
+    box.innerHTML = html;
+    // gráfico
+    var top8 = ativas.slice(0, 8), lbl = P.fech.map(mesLbl);
+    grafico('tv2-c-3p-cli', { type: 'line', data: { labels: lbl, datasets: top8.map(function (l, i) {
+      return { label: l.n.length > 28 ? l.n.slice(0, 27) + '…' : l.n, data: P.fech.map(function (m) { return l.v[m] || 0; }), borderColor: PAL3P[i], backgroundColor: PAL3P[i], borderWidth: 2, tension: .25, pointRadius: 2 };
+    }) }, options: { scales: eixos(), plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10.5 }, color: grade().txt } } } } });
+    var t;
+    el('tv2-tres-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { tresCli.busca = v; renderTres(); var b = el('tv2-tres-busca'); if (b) { b.focus(); b.setSelectionRange(v.length, v.length); } }, 300); };
+    el('tv2-tres-cli-xls').onclick = function () {
+      if (typeof XLSX === 'undefined') return;
+      var rows = [['Agência', lblP, 'Participação %', 'Comparável ano anterior', 'Comparável atual', 'Δ %', 'Meses ativos', 'Última compra']];
+      ls.forEach(function (l) { rows.push([l.n, l.va, totA ? Math.round(l.va / totA * 1000) / 10 : '', P.baseOk ? l.vbp : '', P.baseOk ? l.vap : '', P.baseOk && l.vbp ? Math.round((l.vap / l.vbp - 1) * 1000) / 10 : P.baseOk && l.vap ? 'novo' : '', l.ativos, mesLbl(l.ult)]); });
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Agências 3P');
+      XLSX.writeFile(wb, 'tres_pescadores_agencias_' + lblP.replace(/[\/ ]/g, '') + '.xlsx');
+    };
+  }
+
+  // ================================================================ 3P > RECEITA
+  function renderTresRec(box, D3, T, m0) {
+    var M = T.meses, R = D3.receita, P = t3pPeriodo(T);
+    var X = R[m0], A = R[mesAnoAnt(m0)], Pr = R[mesAnt(m0)];
+    var bad = function (m) { return !m || !R[m] || (M[m] && (M[m].b2bIncompleto || M[m].parcial)); }; // arquivo incompleto ou parcial: sem comparação
+    function cmpR(campo, f) {
+      var sA = !bad(mesAnoAnt(m0)) && !bad(m0) ? 'vs ' + mesLbl(mesAnoAnt(m0)) + ' (' + f(A[campo]) + '): ' + pill(varPct(X[campo], A[campo])) : 'vs ' + mesLbl(mesAnoAnt(m0)) + ': base incompleta ou sem dado';
+      var sP = !bad(mesAnt(m0)) && !bad(m0) ? 'vs ' + mesLbl(mesAnt(m0)) + ' (' + f(Pr[campo]) + '): ' + pill(varPct(X[campo], Pr[campo])) : 'vs ' + mesLbl(mesAnt(m0)) + ': base incompleta ou sem dado';
+      return sA + '<br>' + sP;
+    }
+    var anoF = Number(m0.slice(0, 4)), mesF = Number(m0.slice(5, 7)), ac = { a: 0, t: 0, ap: 0, tp: 0, abp: 0, tbp: 0, inc: false }, msAc = [];
+    for (var i = 0; i < mesF; i++) { var k1 = ym(anoF, i); if (R[k1]) { msAc.push(k1); ac.a += R[k1].acesso; ac.t += R[k1].trade; if (M[k1].b2bIncompleto) ac.inc = true; } }
+    var parAc = anoF === 2026 ? t3pPares(M, msAc).filter(function (x) { return R[x[0]] && R[x[1]]; }) : [];
+    parAc.forEach(function (x) { ac.ap += R[x[0]].acesso; ac.tp += R[x[0]].trade; ac.abp += R[x[1]].acesso; ac.tbp += R[x[1]].trade; });
+    var lblAc = 'Jan-' + MES[mesF - 1] + '/' + String(anoF).slice(2), lblAc0 = 'Jan-' + MES[mesF - 1] + '/' + String(anoF - 1).slice(2);
+    function cmpAcR(atual, base) { return parAc.length ? parAc.length + ' meses comparáveis: ' + moeda(atual) + ' x ' + moeda(base) + ' do ano anterior ' + pill(varPct(atual, base)) : 'sem meses comparáveis com o ano anterior'; }
+    var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">RECEITA · ' + mesLbl(m0).toUpperCase() + ' · TRÊS PESCADORES</div><div class="sec-s">Receita de acesso (Entrada Avulsa + Visitantes) do bruto, em R$. Balsa e alimentos ficam fora, como na visitação</div></div><span class="badge">Aparecida</span></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Receita de acesso (parque)', moeda(X.acesso), cmpR('acesso', moeda)) + kpi('Receita Trade', moeda(X.trade), cmpR('trade', moeda), null, COR_3P.b2b) +
+      kpi('Ticket médio Trade', moeda2(X.tq ? X.trade / X.tq : null), X.tq ? nf(X.tq) + ' bilhetes Trade no mês' : 'sem Trade no mês') +
+      kpi('Trade na receita do parque', pf(X.acesso ? X.trade / X.acesso : null), 'ticket médio do parque: ' + moeda2(M[m0] && M[m0].total ? X.acesso / M[m0].total : null)) + '</div>';
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ACUMULADO ' + lblAc.toUpperCase() + '</div><div class="sec-s">Soma dos meses de janeiro até ' + mesLbl(m0) + ' contra o mesmo período do ano anterior</div></div></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Receita de acesso (parque)', moeda(ac.a) + (ac.inc ? '*' : ''), cmpAcR(ac.ap, ac.abp)) +
+      kpi('Receita Trade', moeda(ac.t) + (ac.inc ? '*' : ''), cmpAcR(ac.tp, ac.tbp), null, COR_3P.b2b) + '</div>';
+    html += '<div class="row2"><div class="cc"><div class="cc-h"><div class="cc-t">Receita Trade por mês</div><div class="cc-s">R$ de acesso dos bilhetes Trade · linha = ticket médio</div></div><div style="height:280px"><canvas id="tv2-c-3p-rec"></canvas></div></div>' +
+      '<div class="cc"><div class="cc-h"><div class="cc-t">Receita de acesso do parque por mês</div><div class="cc-s">Total e parte do Trade</div></div><div style="height:280px"><canvas id="tv2-c-3p-rec2"></canvas></div></div></div>';
+    html += '<div class="cc" style="margin:14px 0;overflow-x:auto"><div class="cc-h"><div class="cc-t">Detalhe mensal</div></div><table class="cli-tbl"><thead><tr><th>Mês</th><th style="text-align:right">Receita parque</th><th style="text-align:right">Receita Trade</th>' +
+      '<th style="text-align:right">% Trade</th><th style="text-align:right">Bilhetes Trade</th><th style="text-align:right">Ticket médio Trade</th><th style="text-align:right">Balsa (fora do acesso)</th></tr></thead><tbody>' +
+      P.ms.slice().reverse().filter(function (m) { return R[m]; }).map(function (m) {
+        var r = R[m], fl = M[m].parcial ? ' <span class="cli-pill zero">parcial</span>' : '', as = M[m].b2bIncompleto ? '*' : '';
+        return '<tr><td><strong>' + mesLbl(m) + '</strong>' + fl + '</td><td style="text-align:right">' + moeda(r.acesso) + as + '</td><td style="text-align:right"><strong>' + moeda(r.trade) + '</strong>' + as + '</td><td style="text-align:right">' + pf(r.acesso ? r.trade / r.acesso : null) + '</td>' +
+          '<td style="text-align:right">' + nf(r.tq) + as + '</td><td style="text-align:right">' + moeda2(r.tq ? r.trade / r.tq : null) + '</td><td style="text-align:right;color:var(--muted)">' + moeda(r.balsa) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    html += nota3p(P);
+    html += aviso('ℹ️ <strong>Como ler:</strong> o acumulado compara só os meses em que os dois anos têm arquivo completo (o total mostrado soma todos, e * indica piso). A receita vem do valor realizado de cada bilhete de acesso no bruto do parque, e a visitação é a da planilha. Meses marcados com * têm o arquivo do bruto incompleto, então a receita é piso e não entra nas comparações. ' +
+      'O Trade do 3P tem ticket baixo (de R$ 14 a R$ 19) e a receita do parque inclui todos os canais, inclusive o Cross.');
+    box.innerHTML = html;
+    var ms = P.ms.filter(function (m) { return R[m]; }), lbl = ms.map(mesLbl), par = ms.map(function (m) { return !!M[m].parcial || !!M[m].b2bIncompleto; });
+    grafico('tv2-c-3p-rec', { type: 'bar', data: { labels: lbl, datasets: [
+      { type: 'line', label: 'Ticket médio Trade (R$)', data: ms.map(function (m) { return R[m].tq ? +(R[m].trade / R[m].tq).toFixed(2) : null; }), borderColor: tinta(), backgroundColor: tinta(), yAxisID: 'y2', borderWidth: 2, tension: .25, pointRadius: 2.5, order: 0 },
+      { label: 'Receita Trade (R$)', data: ms.map(function (m) { return R[m].trade; }), backgroundColor: ms.map(function (m, i) { return par[i] ? 'rgba(31,122,140,.45)' : COR_3P.b2b; }), order: 1 }] },
+      options: { scales: eixos({ y2: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return 'R$ ' + v; } } } }),
+        plugins: { tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + (c.dataset.yAxisID === 'y2' ? moeda2(c.raw) : moeda(c.raw)); } } } } } });
+    grafico('tv2-c-3p-rec2', { type: 'bar', data: { labels: lbl, datasets: [
+      { label: 'Demais canais (B2C)', data: ms.map(function (m) { return Math.round(R[m].acesso - R[m].trade); }), backgroundColor: ms.map(function (m, i) { return par[i] ? 'rgba(232,168,32,.45)' : COR_3P.b2c; }), stack: 's' },
+      { label: 'Trade', data: ms.map(function (m) { return Math.round(R[m].trade); }), backgroundColor: ms.map(function (m, i) { return par[i] ? 'rgba(31,122,140,.45)' : COR_3P.b2b; }), stack: 's' }] },
+      options: { scales: eixos({ x: { stacked: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return 'R$ ' + nf(v / 1000) + ' mil'; } } } }),
+        plugins: { tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + moeda(c.raw); } } } } } });
+  }
+
+  // ================================================================ 3P > ESCOLAR E PRODUTOS
+  function renderTresEsc(box, D3, T) {
+    var M = T.meses, P = t3pPeriodo(T), E = D3.escolar, ms = P.fech.filter(function (m) { return E.meses[m]; });
+    var tot = function (c) { return ms.reduce(function (s, m) { return s + (E.meses[m][c] || 0); }, 0); };
+    var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">ESCOLAR · TRÊS PESCADORES</div><div class="sec-s">O 3P não tem a categoria ESCOLAR do AquaRio. Três leituras possíveis, mostradas lado a lado</div></div><span class="badge">com ressalva</span></div>';
+    html += '<div class="cli-kpis-ag">' + kpi('Bilhete "Trade Escolar"', nf(tot('bil')), 'vendido na bilheteria, não no canal Trade (ago/26 em diante)') +
+      kpi('Estudante, professor ou monitor no Trade', nf(tot('est')), 'categoria do bilhete, canal Trade') +
+      kpi('Agências com nome de escola (Trade)', nf(tot('ag')), moeda(ms.reduce(function (s, m) { return s + (E.meses[m].agRS || 0); }, 0)) + ' em receita · pelo nome da agência (estimativa)') + '</div>';
+    html += '<div class="cc" style="margin:14px 0;overflow-x:auto"><div class="cc-h"><div class="cc-t">Escolar por mês</div><div class="cc-s">Mostra só os meses do período com algum registro</div></div><table class="cli-tbl"><thead><tr><th>Mês</th><th style="text-align:right">Bilhete Trade Escolar</th>' +
+      '<th style="text-align:right">Estudante/professor no Trade</th><th style="text-align:right">Agências de escola (bilhetes)</th><th style="text-align:right">Agências de escola (R$)</th></tr></thead><tbody>' +
+      (function () {
+        var linhas = ms.slice().reverse().filter(function (m) { var x = E.meses[m]; return x.bil || x.est || x.ag; });
+        return linhas.length ? linhas.map(function (m) { var x = E.meses[m]; return '<tr><td><strong>' + mesLbl(m) + '</strong></td><td style="text-align:right">' + nf(x.bil) + '</td><td style="text-align:right">' + nf(x.est) + '</td><td style="text-align:right">' + nf(x.ag) + '</td><td style="text-align:right">' + moeda(x.agRS) + '</td></tr>'; }).join('')
+          : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">Nenhum registro escolar no período escolhido.</td></tr>';
+      })() + '</tbody></table></div>';
+    var escM = {};
+    Object.keys(E.agencias || {}).forEach(function (n0) {
+      var n = rep3p(n0), k = chave(n), y = escM[k];
+      if (!y) escM[k] = { n: n, q: E.agencias[n0], mx: E.agencias[n0] };
+      else { y.q += E.agencias[n0]; if (E.agencias[n0] > y.mx) { y.mx = E.agencias[n0]; y.n = n; } }
+    });
+    var escolas = Object.keys(escM).sort(function (a, b) { return escM[b].q - escM[a].q; });
+    if (escolas.length) html += '<div class="cc" style="margin-bottom:14px;overflow-x:auto"><div class="cc-h"><div class="cc-t">Agências com nome de escola, colégio ou estudos do meio</div><div class="cc-s">Bilhetes Trade em todo o histórico (jan/25 em diante) · critério pelo nome da agência</div></div><table class="cli-tbl"><thead><tr><th>Agência</th><th style="text-align:right">Bilhetes</th></tr></thead><tbody>' +
+      escolas.map(function (k) { return '<tr><td><strong>' + esc(escM[k].n) + '</strong></td><td style="text-align:right">' + nf(escM[k].q) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    // produtos
+    var pm = {};
+    ms.forEach(function (m) { var d = D3.produtos[m] || {}; Object.keys(d).forEach(function (k) { pm[rep3p(k)] = (pm[rep3p(k)] || 0) + d[k]; }); });
+    var ordP = Object.keys(pm).sort(function (a, b) { return pm[b] - pm[a]; });
+    var cat = {}; ms.forEach(function (m) { var d = D3.categorias[m] || {}; Object.keys(d).forEach(function (k) { cat[rep3p(k)] = (cat[rep3p(k)] || 0) + d[k]; }); });
+    var totP = ordP.reduce(function (s, k) { return s + pm[k]; }, 0);
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">PRODUTOS DO TRADE</div><div class="sec-s">Bilhetes Trade de acesso por produto e por categoria, no período escolhido</div></div></div>';
+    html += '<div class="cc" style="margin-bottom:14px"><div class="cc-h"><div class="cc-t">Produtos por mês</div><div class="cc-s">Bilhetes Trade por produto vendido</div></div><div style="height:280px"><canvas id="tv2-c-3p-prod"></canvas></div></div>';
+    html += '<div class="row2"><div class="cc" style="overflow-x:auto"><div class="cc-h"><div class="cc-t">Produto</div></div><table class="cli-tbl"><thead><tr><th>Produto</th><th style="text-align:right">Bilhetes</th><th style="text-align:right">%</th></tr></thead><tbody>' +
+      ordP.map(function (k) { return '<tr><td>' + esc(k) + '</td><td style="text-align:right">' + nf(pm[k]) + '</td><td style="text-align:right">' + pf(totP ? pm[k] / totP : null) + '</td></tr>'; }).join('') + '</tbody></table></div>' +
+      '<div class="cc" style="overflow-x:auto"><div class="cc-h"><div class="cc-t">Categoria do bilhete</div></div><table class="cli-tbl"><thead><tr><th>Categoria</th><th style="text-align:right">Bilhetes</th></tr></thead><tbody>' +
+      Object.keys(cat).sort(function (a, b) { return cat[b] - cat[a]; }).map(function (k) { return '<tr><td>' + esc(k) + '</td><td style="text-align:right">' + nf(cat[k]) + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    var fp = D3.formaPagto || {}, totF = Object.keys(fp).reduce(function (s, k) { return s + fp[k]; }, 0);
+    html += '<div class="cc" style="margin:14px 0;overflow-x:auto"><div class="cc-h"><div class="cc-t">Forma de pagamento do Trade</div><div class="cc-s">Todo o histórico (jan/25 em diante). Adiantamento = a agência paga antes e o bilhete é lançado no dia</div></div><table class="cli-tbl"><thead><tr><th>Forma</th><th style="text-align:right">Bilhetes</th><th style="text-align:right">%</th></tr></thead><tbody>' +
+      Object.keys(fp).sort(function (a, b) { return fp[b] - fp[a]; }).map(function (k) { return '<tr><td>' + esc(rep3p(k) || 'não informada') + '</td><td style="text-align:right">' + nf(fp[k]) + '</td><td style="text-align:right">' + pf(totF ? fp[k] / totF : null) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    html += nota3p(P);
+    html += aviso('⚠️ <strong>Escolar no 3P tem ressalva:</strong> não existe categoria ESCOLAR como no AquaRio. O bilhete "Passeio no Parque + Balsa - Trade Escolar" existe só em ago/26 e out/26 e foi vendido na bilheteria (nenhum no canal Trade). ' +
+      'A leitura por categoria (estudante, professor, monitor) e a por nome da agência (escola, colégio, instituição, estudos do meio) são aproximações. Quando houver uma definição oficial de escolar para o parque, é só trocar a regra.');
+    box.innerHTML = html;
+    var top = ordP.slice(0, 6), outros = ordP.slice(6), lbl = ms.map(mesLbl);
+    var ds = top.map(function (k, i) {
+      return { label: k, data: ms.map(function (m) { var d = D3.produtos[m] || {}, s = 0; Object.keys(d).forEach(function (x) { if (rep3p(x) === k) s += d[x]; }); return s; }), backgroundColor: PAL3P[i], stack: 's' };
+    });
+    if (outros.length) ds.push({ label: 'Outros', data: ms.map(function (m) { var d = D3.produtos[m] || {}, s = 0; Object.keys(d).forEach(function (x) { if (outros.indexOf(rep3p(x)) >= 0) s += d[x]; }); return s; }), backgroundColor: '#B8C4CC', stack: 's' });
+    grafico('tv2-c-3p-prod', { type: 'bar', data: { labels: lbl, datasets: ds }, options: { scales: eixos({ x: { stacked: true, grid: { display: false }, ticks: { color: grade().txt, font: { size: 10 } } }, y: { stacked: true, beginAtZero: true, grid: { color: grade().grid }, ticks: { color: grade().txt, font: { size: 10 }, callback: function (v) { return nf(v); } } } }), plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10.5 }, color: grade().txt } } } } });
+  }
+
+  // ================================================================ 3P > DIAS E ORIGEM
+  function renderTresDia(box, D3, T) {
+    var M = T.meses, P = t3pPeriodo(T), ms = P.fech.filter(function (m) { return D3.tipoDia[m]; });
+    var G = { du: { n: 0, tot: 0, tr: 0 }, fds: { n: 0, tot: 0, tr: 0 }, fer: { n: 0, tot: 0, tr: 0 } };
+    ms.forEach(function (m) { Object.keys(G).forEach(function (t) { var x = (D3.tipoDia[m] || {})[t]; if (x) { G[t].n += x.dias; G[t].tot += x.total; G[t].tr += x.trade; } }); });
+    var NOM = { du: 'Dia útil', fds: 'Fim de semana', fer: 'Feriado prolongado' }, totG = G.du.tot + G.fds.tot + G.fer.tot, mdDu = G.du.n ? G.du.tot / G.du.n : null;
+    var html = '<div class="sec" style="margin-top:6px"><div><div class="sec-t">DIA ÚTIL X FIM DE SEMANA X FERIADO · TRÊS PESCADORES</div><div class="sec-s">Média diária (cada grupo tem um número de dias diferente). Calendário de Aparecida e SP: feriados nacionais, São Benedito, aniversário de Aparecida e 9 de julho. Acesso do bruto, meses fechados</div></div></div>';
+    html += '<div class="cc" style="margin-bottom:14px;overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Tipo de dia</th><th style="text-align:right">Dias</th><th style="text-align:right">Média diária total</th><th style="text-align:right">Média diária Trade</th><th style="text-align:right">Share Trade</th>' +
+      '<th style="text-align:right">Volume total</th><th style="text-align:right">% do volume</th><th style="text-align:right">Índice vs dia útil</th></tr></thead><tbody>' +
+      ['du', 'fds', 'fer'].map(function (t) {
+        var g = G[t], md = g.n ? g.tot / g.n : null;
+        return '<tr><td><strong>' + NOM[t] + '</strong></td><td style="text-align:right">' + g.n + '</td><td style="text-align:right"><strong>' + nf(md) + '</strong></td><td style="text-align:right">' + (g.n ? (g.tr / g.n).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '-') + '</td><td style="text-align:right">' + pf(g.tot ? g.tr / g.tot : null) + '</td>' +
+          '<td style="text-align:right">' + nf(g.tot) + '</td><td style="text-align:right">' + pf(totG ? g.tot / totG : null) + '</td><td style="text-align:right">' + (md && mdDu ? (md / mdDu).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + 'x' : '-') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    // origem
+    var uf = topDic(somaDic(D3.origem, 'uf', ms), 10), ufT = topDic(somaDic(D3.origem, 'ufTrade', ms), 10), pais = somaDic(D3.origem, 'pais', ms);
+    var ufAll = somaDic(D3.origem, 'uf', ms), ufTAll = somaDic(D3.origem, 'ufTrade', ms);
+    var totUfA = Object.keys(ufAll).reduce(function (s, k) { return s + ufAll[k]; }, 0), totUfT = Object.keys(ufTAll).reduce(function (s, k) { return s + ufTAll[k]; }, 0);
+    var totPais = Object.keys(pais).reduce(function (s, k) { return s + pais[k]; }, 0), br = pais['BRASIL'] || 0;
+    var estr = topDic(pais, 8, /^(BRASIL|\(vazio\))$|afeganist|alb[aâ]nia|[aá]frica do sul/i);
+    var msMun = ms.filter(function (m) { return (D3.origem[m] || {}).cobMun > 0; }), mun = somaDic(D3.origem, 'mun', msMun), vazio = mun['(vazio)'] || 0, totMun = Object.keys(mun).reduce(function (s, k) { return s + mun[k]; }, 0);
+    var lin = function (lista, tot) { return lista.map(function (x) { return '<tr><td>' + esc(rep3p(x[0]).replace('(vazio)', 'sem informação')) + '</td><td style="text-align:right">' + nf(x[1]) + '</td><td style="text-align:right">' + pf(tot ? x[1] / tot : null) + '</td></tr>'; }).join(''); };
+    var tab = function (tit, sub, corpo) { return '<div class="cc" style="overflow-x:auto"><div class="cc-h"><div class="cc-t">' + tit + '</div><div class="cc-s">' + sub + '</div></div><table class="cli-tbl"><thead><tr><th></th><th style="text-align:right">Bilhetes</th><th style="text-align:right">%</th></tr></thead><tbody>' + corpo + '</tbody></table></div>'; };
+    html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">ORIGEM DOS VISITANTES · TRÊS PESCADORES</div><div class="sec-s">UF, país e município do bilhete no bruto, no período escolhido</div></div></div>';
+    html += '<div class="row2">' + tab('Estado (UF) · parque', 'Top 10 do total de acessos', lin(uf, totUfA)) + tab('Estado (UF) · Trade', 'Top 10 dos bilhetes Trade', lin(ufT, totUfT)) + '</div>';
+    html += '<div class="row2" style="margin-top:14px">' + tab('Estrangeiros por país', 'Brasil: ' + pf(totPais ? br / totPais : null) + ' dos acessos. Top estrangeiros (países que são erro de cadastro do PDV ficam de fora)', estr.length ? lin(estr, totPais) : '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:14px">Sem estrangeiros no período.</td></tr>') +
+      tab('Município · parque', msMun.length ? 'Só a partir de ' + mesLbl(msMun[0]) + ' (' + pf(totMun ? 1 - vazio / totMun : null) + ' preenchido)' : 'O bruto só traz município a partir de jun/26', msMun.length ? lin(topDic(mun, 10, /^\(vazio\)$/), totMun) : '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:14px">Sem município no período.</td></tr>') + '</div>';
+    html += nota3p(P);
+    html += aviso('ℹ️ <strong>Como ler:</strong> a UF vem preenchida em quase todos os bilhetes; o país é quase sempre Brasil (estrangeiros abaixo de 2%) e o município só existe a partir de jun/26. ' +
+      '<strong>Antecedência de compra não é mostrada:</strong> o Trade do 3P é pago por adiantamento e lançado no dia da visita (média de menos de 1 dia), então o indicador não diferencia nada. Para estrangeiros, a fonte mais completa continua sendo o Visitantes por País GC.');
+    box.innerHTML = html;
   }
 
   // ================================================================ páginas e navegação
