@@ -53,6 +53,9 @@
     return '<span class="cli-pill ' + (v == null || ehZero(t) ? 'zero' : v > 0 ? 'up' : 'dn') + '">' + t + '</span>';
   }
   function el(id) { return document.getElementById(id); }
+  // balão com os nomes que compõem a agência (trade_agtip.js): atributo data-agtip do nome
+  function tipAg(titulo, sub, comps, unid) { return window.__tvAgTip ? window.__tvAgTip.attr(titulo, sub, comps, unid) : ''; }
+  function dicComps(o) { return Object.keys(o || {}).map(function (n) { return { n: n, v: o[n] }; }); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function chave(n) {
     return String(n || '').replace(/�/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
@@ -699,7 +702,8 @@
         var g = DADOS.ind.agencias[pq][cod0];
         var cod = /^\d{1,3}(\.\d{3})+$/.test(cod0) ? cod0.replace(/\./g, '') : cod0; // alguns arquivos gravam "6.031.763"
         if (INTERNOS.test(chave(g.n))) return;
-        var a = A[cod] = A[cod] || { cod: cod, n: g.n, q: 0, pv: g.pv, uv: g.uv, pq: {}, m: {} };
+        var a = A[cod] = A[cod] || { cod: cod, n: g.n, q: 0, pv: g.pv, uv: g.uv, pq: {}, m: {}, nm: {} };
+        a.nm[g.n] = (a.nm[g.n] || 0) + g.q;
         a.q += g.q; a.pv = a.pv < g.pv ? a.pv : g.pv; a.uv = a.uv > g.uv ? a.uv : g.uv;
         a.pq[x] = (a.pq[x] || 0) + g.q;
         Object.keys(g.m).forEach(function (mm) { a.m[mm] = (a.m[mm] || 0) + g.m[mm]; });
@@ -715,6 +719,7 @@
       var b = B[kk];
       if (!b) { B[kk] = a; a.cods = /^\d+$/.test(a.cod) ? [a.cod] : []; return; }
       if (/^\d+$/.test(a.cod) && b.cods.indexOf(a.cod) < 0) b.cods.push(a.cod);
+      Object.keys(a.nm).forEach(function (nn) { b.nm[nn] = (b.nm[nn] || 0) + a.nm[nn]; });
       b.q += a.q; b.pv = b.pv < a.pv ? b.pv : a.pv; b.uv = b.uv > a.uv ? b.uv : a.uv;
       Object.keys(a.pq).forEach(function (x) { b.pq[x] = (b.pq[x] || 0) + a.pq[x]; });
       Object.keys(a.m).forEach(function (mm) { b.m[mm] = (b.m[mm] || 0) + a.m[mm]; });
@@ -761,7 +766,7 @@
     html += '<table class="cli-tbl"><thead><tr><th>Agência</th><th>Código</th>' + (cadOp ? '<th>Cidade / UF</th>' : '') + '<th>Última venda</th><th style="text-align:right">Sem vender</th><th style="text-align:right">Bilhetes (hist.)</th>' +
       '<th style="text-align:right">Média/mês ativa</th><th>Parques</th><th>Meses com venda</th></tr></thead><tbody>';
     ls.slice(0, 300).forEach(function (a) {
-      html += '<tr><td><strong>' + esc(a.n) + '</strong></td><td style="font-size:10.5px;color:var(--muted)">' + esc(/^\d/.test(a.cod) ? a.cod : '-') + '</td>' +
+      html += '<tr><td><strong' + tipAg(a.n, 'Histórico desde jan/25 · AquaRio + Paineiras', dicComps(a.nm)) + '>' + esc(a.n) + '</strong></td><td style="font-size:10.5px;color:var(--muted)">' + esc(/^\d/.test(a.cod) ? a.cod : '-') + '</td>' +
         (cadOp ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' : '') +
         '<td style="white-space:nowrap">' + dataBR(a.uv) + '</td><td style="text-align:right"><strong>' + a.mesesSem + ' meses</strong></td><td style="text-align:right">' + nf(a.q) + '</td>' +
         '<td style="text-align:right">' + nf(a.mediaAtiva) + '</td><td>' + Object.keys(a.pq).map(function (x) { return '<span class="cli-pill" style="background:' + (x === 'a' ? 'var(--aqua-pale);color:var(--aqua)' : 'var(--pai-pale);color:var(--pai)') + '">' + NOME[x] + '</span>'; }).join(' ') + '</td>' +
@@ -872,6 +877,9 @@
       (DADOS.cad ? controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') : '') + '</div>';
     if (!DADOS.cad) carEstado.loc = '0';
     var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
+    // composição de cada nome no período atual (mesmos meses e parques da tabela)
+    var CM = window.__tvAgTip ? window.__tvAgTip.compMap(P.atual.map(function (i) { return (D.meses[i] || {}).label; }), k === 'a' ? ['a'] : k === 'p' ? ['p'] : ['a', 'p']) : {};
+    var subCar = P.lblAtual + ' · ' + (k === 't' ? 'AquaRio + Paineiras' : NOME[k]);
     if (carEstado.loc === '1') {
       var L = {};
       ls.forEach(function (a) { var kk = a.cad ? (a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-') : 'sem cadastro'; var l = L[kk] = L[kk] || { n: kk, vb: 0, va: 0, ag: 0 }; l.vb += a.vb; l.va += a.va; l.ag++; });
@@ -886,7 +894,7 @@
       html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
         (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 9 : 6) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
           var g = GRUPOS.filter(function (x) { return x[0] === a.g; })[0];
-          return '<tr><td><strong>' + esc(a.n) + '</strong></td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
+          return '<tr><td><strong' + tipAg(a.n, subCar, dicComps(CM[a.n])) + '>' + esc(a.n) + '</strong></td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
             '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' : '') +
             '<td style="text-align:right">' + nf(a.vb) + '</td><td style="text-align:right"><strong>' + nf(a.va) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
@@ -994,12 +1002,13 @@
   // % por agência: mês a mês (histórico) + total do período
   function renderCancAg(ms) {
     var C = DADOS.canc, k = cancEstado.k, met = cancEstado.met, min = Number(cancEstado.min);
-    var ag = {};
+    var ag = {}, agc = {};
     cancParques(k).forEach(function (p) {
-      Object.keys((C.agencias || {})[p] || {}).forEach(function (a) {
-        var o = C.agencias[p][a];
-        ag[a] = ag[a] || {};
+      Object.keys((C.agencias || {})[p] || {}).forEach(function (a0) {
+        var o = C.agencias[p][a0], a = alias(a0); // mesmo agrupamento de agências do Top Clientes (ex.: RIO CARIOCA)
+        ag[a] = ag[a] || {}; agc[a] = agc[a] || {};
         Object.keys(o).forEach(function (m) { ag[a][m] = cancSoma([ag[a][m], o[m]]); });
+        agc[a][a0] = (agc[a][a0] || 0) + ms.reduce(function (s, m) { return s + ((o[m] || {}).ag || 0); }, 0);
       });
     });
     var linhas = Object.keys(ag).map(function (a) {
@@ -1017,7 +1026,7 @@
       '<th>Agendados</th><th>' + (met === 'canc' ? 'Cancelados' : 'No-show') + '</th><th>%</th><th>R$ perdido</th></tr></thead><tbody>';
     linhas.forEach(function (l) {
       var v = tx(l.t);
-      h += '<tr><td style="text-align:left;white-space:nowrap">' + esc(l.a) + '</td>' + ms.map(function (m) { var o = l.m[m]; var x = o ? tx(o) : null; return '<td style="text-align:right;' + cor(x) + '" title="' + (o ? nf(o.ag) + ' agendados' : '') + '">' + (o && o.ag ? pf(x) : '-') + '</td>'; }).join('') +
+      h += '<tr><td style="text-align:left;white-space:nowrap"><span' + tipAg(l.a, NOME[k] + ' · ' + mesLbl(ms[0]) + ' a ' + mesLbl(ms[ms.length - 1]), dicComps(agc[l.a]), 'agendados') + '>' + esc(l.a) + '</span></td>' + ms.map(function (m) { var o = l.m[m]; var x = o ? tx(o) : null; return '<td style="text-align:right;' + cor(x) + '" title="' + (o ? nf(o.ag) + ' agendados' : '') + '">' + (o && o.ag ? pf(x) : '-') + '</td>'; }).join('') +
         '<td style="text-align:right">' + nf(l.t.ag) + '</td><td style="text-align:right">' + nf(met === 'canc' ? l.t.canc : l.t.ns) + '</td><td style="text-align:right;font-weight:700;' + cor(v) + '">' + pf(v) + '</td><td style="text-align:right">' + rs(met === 'canc' ? l.t.rs_canc : l.t.rs_ns) + '</td></tr>';
     });
     h += '</tbody></table>';
@@ -1026,13 +1035,20 @@
     el('tv2-canc-min').onchange = function () { cancEstado.min = this.value; renderCancAg(ms); };
     el('tv2-canc-xls').onclick = function () {
       if (typeof XLSX === 'undefined') return;
-      var aoa = [['Agência'].concat(ms.map(mesLbl).map(function (x) { return x + ' agendados'; }), ms.map(mesLbl).map(function (x) { return x + ' cancelados'; }), ms.map(mesLbl).map(function (x) { return x + ' no-show'; }), ['Agendados', 'Cancelados', 'No-show', 'R$ cancelado', 'R$ no-show'])];
+      // mesma visão da tabela da tela: colunas e ordem iguais, com os filtros de parque, indicador e mínimo selecionados
+      var cabec = ['Agência'].concat(ms.map(mesLbl), ['Agendados', met === 'canc' ? 'Cancelados' : 'No-show', '%', 'R$ perdido']);
+      var aoa = [cabec];
       linhas.forEach(function (l) {
-        aoa.push([l.a].concat(ms.map(function (m) { return (l.m[m] || {}).ag || 0; }), ms.map(function (m) { return (l.m[m] || {}).canc || 0; }), ms.map(function (m) { return (l.m[m] || {}).ns || 0; }),
-          [l.t.ag, l.t.canc, l.t.ns, Math.round(l.t.rs_canc), Math.round(l.t.rs_ns)]));
+        var lin = [l.a];
+        ms.forEach(function (m) { var o = l.m[m]; lin.push(o && o.ag ? { t: 'n', v: tx(o), z: '0.0%' } : '-'); });
+        lin.push(l.t.ag, met === 'canc' ? l.t.canc : l.t.ns, { t: 'n', v: tx(l.t) == null ? 0 : tx(l.t), z: '0.0%' }, { t: 'n', v: Math.round(met === 'canc' ? l.t.rs_canc : l.t.rs_ns), z: '"R$" #,##0' });
+        aoa.push(lin);
       });
-      var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Cancelamento');
-      XLSX.writeFile(wb, 'cancelamento_trade_' + k + '.xlsx');
+      var ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws['!cols'] = [{ wch: 46 }].concat(ms.map(function () { return { wch: 9 }; }), [{ wch: 11 }, { wch: 11 }, { wch: 8 }, { wch: 14 }]);
+      ws['!freeze'] = { xSplit: 1, ySplit: 1 };
+      var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Cancelamento');
+      XLSX.writeFile(wb, 'cancelamento_trade_' + (k === 't' ? 'AquaRio_Paineiras' : NOME[k]) + '_' + (met === 'canc' ? 'cancelado' : 'no-show') + '_min' + min + '.xlsx');
     };
   }
 
@@ -1257,8 +1273,8 @@
     var o = {};
     lista.forEach(function (a) {
       var n = rep3p(a.n), k = chave(n), x = o[k], tot = Object.keys(a.v).reduce(function (s, m) { return s + a.v[m]; }, 0);
-      if (!x) x = o[k] = { n: n, v: {}, mx: -1 };
-      Object.keys(a.v).forEach(function (m) { x.v[m] = (x.v[m] || 0) + a.v[m]; });
+      if (!x) x = o[k] = { n: n, v: {}, mx: -1, gr: {} };
+      Object.keys(a.v).forEach(function (m) { x.v[m] = (x.v[m] || 0) + a.v[m]; x.gr[n] = x.gr[n] || {}; x.gr[n][m] = (x.gr[n][m] || 0) + a.v[m]; });
       if (tot > x.mx) { x.mx = tot; x.n = n; }
     });
     return Object.keys(o).map(function (k) { return o[k]; });
@@ -1291,7 +1307,7 @@
     if (!P.fech.length) { box.innerHTML = aviso('Sem mês fechado no período escolhido.'); return; }
     var linhas = juntaAg(D3.agencias).map(function (a) {
       var ult = Object.keys(a.v).sort().pop();
-      return { n: a.n, va: t3pSoma(a.v, P.fech), vap: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[0]; })) : null, vbp: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[1]; })) : null, ativos: P.fech.filter(function (m) { return (a.v[m] || 0) > 0; }).length, ult: ult, v: a.v };
+      return { n: a.n, gr: a.gr, va: t3pSoma(a.v, P.fech), vap: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[0]; })) : null, vbp: P.baseOk ? t3pSoma(a.v, P.pares.map(function (x) { return x[1]; })) : null, ativos: P.fech.filter(function (m) { return (a.v[m] || 0) > 0; }).length, ult: ult, v: a.v };
     }).filter(function (l) { return l.va > 0 || (l.vbp || 0) > 0; });
     var totA = linhas.reduce(function (s, l) { return s + l.va; }, 0), totAp = P.baseOk ? linhas.reduce(function (s, l) { return s + l.vap; }, 0) : null, totBp = P.baseOk ? linhas.reduce(function (s, l) { return s + l.vbp; }, 0) : null;
     linhas.sort(function (a, b) { return b.va - a.va || a.n.localeCompare(b.n); });
@@ -1301,8 +1317,9 @@
     var opM = {};
     (D3.oportunidades || []).forEach(function (x) {
       var n = rep3p(x.n), k = chave(n), y = opM[k];
-      if (!y) opM[k] = { n: n, ultimo: x.ultimo, total: x.total, mesesAtivos: x.mesesAtivos };
-      else { y.total += x.total; if (x.ultimo > y.ultimo) y.ultimo = x.ultimo; if (x.mesesAtivos > y.mesesAtivos) y.mesesAtivos = x.mesesAtivos; }
+      if (!y) opM[k] = { n: n, ultimo: x.ultimo, total: x.total, mesesAtivos: x.mesesAtivos, gr: {} };
+      opM[k].gr[n] = (opM[k].gr[n] || 0) + x.total;
+      if (y) { y.total += x.total; if (x.ultimo > y.ultimo) y.ultimo = x.ultimo; if (x.mesesAtivos > y.mesesAtivos) y.mesesAtivos = x.mesesAtivos; }
     });
     var opTodas = Object.keys(opM).map(function (k) { return opM[k]; }).sort(function (a, b) { return b.total - a.total; });
     var lblP = P.fech.length === 1 ? mesLbl(P.fech[0]) : mesLbl(P.fech[0]) + ' a ' + mesLbl(P.fech[P.fech.length - 1]);
@@ -1323,7 +1340,7 @@
       '<th style="text-align:right">Meses ativos</th><th>Última compra</th></tr></thead><tbody>';
     if (!ls.length) html += '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + lblP + '. Limpe a busca ou escolha outro período.</td></tr>';
     ls.slice(0, 50).forEach(function (l, i) {
-      html += '<tr><td style="color:var(--muted)">' + (i + 1) + '</td><td><strong>' + esc(l.n) + '</strong></td><td style="text-align:right"><strong>' + nf(l.va) + '</strong></td><td style="text-align:right">' + pf(totA ? l.va / totA : null) + '</td>' +
+      html += '<tr><td style="color:var(--muted)">' + (i + 1) + '</td><td><strong' + tipAg(l.n, lblP + ' · Três Pescadores', Object.keys(l.gr).map(function (nn) { return { n: nn, v: t3pSoma(l.gr[nn], P.fech) }; })) + '>' + esc(l.n) + '</strong></td><td style="text-align:right"><strong>' + nf(l.va) + '</strong></td><td style="text-align:right">' + pf(totA ? l.va / totA : null) + '</td>' +
         '<td style="text-align:right">' + (P.baseOk ? nf(l.vbp) : '-') + '</td><td style="text-align:right">' + (P.baseOk ? nf(l.vap) : '-') + '</td>' +
         '<td style="text-align:right">' + (!P.baseOk ? '-' : l.vbp ? pill(varPct(l.vap, l.vbp)) : l.vap ? '<span class="cli-pill novo">novo</span>' : '-') + '</td>' +
         '<td style="text-align:right">' + l.ativos + '</td><td style="white-space:nowrap">' + mesLbl(l.ult) + '</td></tr>';
@@ -1333,7 +1350,7 @@
     var op = opTodas.slice(0, 30);
     html += '<div class="sec" style="margin-top:18px"><div><div class="sec-t">AGÊNCIAS PARADAS HÁ MAIS DE 6 MESES</div><div class="sec-s">Já compraram Trade no 3P (jan/25 em diante) e não compram desde ' + mesLbl(op.length ? op.reduce(function (m, x) { return x.ultimo > m ? x.ultimo : m; }, '2000-01') : '2026-05') + ' ou antes</div></div><span class="badge">' + opTodas.length + ' agências</span></div>';
     html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Última compra</th><th style="text-align:right">Bilhetes no histórico</th><th style="text-align:right">Meses com compra</th></tr></thead><tbody>' +
-      op.map(function (x) { return '<tr><td><strong>' + esc(x.n) + '</strong></td><td>' + mesLbl(x.ultimo) + '</td><td style="text-align:right">' + nf(x.total) + '</td><td style="text-align:right">' + x.mesesAtivos + '</td></tr>'; }).join('') +
+      op.map(function (x) { return '<tr><td><strong' + tipAg(x.n, 'Histórico desde jan/25 · Três Pescadores', dicComps(x.gr)) + '>' + esc(x.n) + '</strong></td><td>' + mesLbl(x.ultimo) + '</td><td style="text-align:right">' + nf(x.total) + '</td><td style="text-align:right">' + x.mesesAtivos + '</td></tr>'; }).join('') +
       '</tbody></table>' + (opTodas.length > 30 ? '<div class="cc-s" style="margin-top:6px">Mostrando 30 de ' + opTodas.length + ' (ordenadas pelo histórico).</div>' : '') + '</div>';
     // observações
     var dif = Object.keys(D3.cobertura || {}).filter(function (m) { return D3.cobertura[m].dif; }).sort();
@@ -1427,12 +1444,13 @@
     var escM = {};
     Object.keys(E.agencias || {}).forEach(function (n0) {
       var n = rep3p(n0), k = chave(n), y = escM[k];
-      if (!y) escM[k] = { n: n, q: E.agencias[n0], mx: E.agencias[n0] };
-      else { y.q += E.agencias[n0]; if (E.agencias[n0] > y.mx) { y.mx = E.agencias[n0]; y.n = n; } }
+      if (!y) escM[k] = { n: n, q: E.agencias[n0], mx: E.agencias[n0], gr: {} };
+      escM[k].gr[n] = (escM[k].gr[n] || 0) + E.agencias[n0];
+      if (y) { y.q += E.agencias[n0]; if (E.agencias[n0] > y.mx) { y.mx = E.agencias[n0]; y.n = n; } }
     });
     var escolas = Object.keys(escM).sort(function (a, b) { return escM[b].q - escM[a].q; });
     if (escolas.length) html += '<div class="cc" style="margin-bottom:14px;overflow-x:auto"><div class="cc-h"><div class="cc-t">Agências com nome de escola, colégio ou estudos do meio</div><div class="cc-s">Bilhetes Trade em todo o histórico (jan/25 em diante) · critério pelo nome da agência</div></div><table class="cli-tbl"><thead><tr><th>Agência</th><th style="text-align:right">Bilhetes</th></tr></thead><tbody>' +
-      escolas.map(function (k) { return '<tr><td><strong>' + esc(escM[k].n) + '</strong></td><td style="text-align:right">' + nf(escM[k].q) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+      escolas.map(function (k) { return '<tr><td><strong' + tipAg(escM[k].n, 'Histórico desde jan/25 · Três Pescadores', dicComps(escM[k].gr)) + '>' + esc(escM[k].n) + '</strong></td><td style="text-align:right">' + nf(escM[k].q) + '</td></tr>'; }).join('') + '</tbody></table></div>';
     // produtos
     var pm = {};
     ms.forEach(function (m) { var d = D3.produtos[m] || {}; Object.keys(d).forEach(function (k) { pm[rep3p(k)] = (pm[rep3p(k)] || 0) + d[k]; }); });

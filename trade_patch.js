@@ -41,7 +41,7 @@
     'HEADOUT': 'HEADOUT EXPERIENCES',
     'VOYAGEZRIO': 'AGENCIA DE TURISMO VOYAGEZ RIO',
     'RIO RADICAL TURISMO DE AVENTURA': 'RIO RADICAL ECOTURISMO'
-    // NÃO juntar (Paulo, 13/10): RIO CARIOCA TOUR x CARIOCA TOUR; TOUR RJ x RJ TOUR; DISCOVERY RIO
+    // NÃO juntar (Paulo, 13/10): CARIOCA TOUR x RIO CARIOCA TOUR (esta agora é a RIO CARIOCA, ver grupo()); TOUR RJ x RJ TOUR; DISCOVERY RIO
     // TOUR / Rio Tour / GUANABARA RIO TOUR / RIO TOUR VIP / BY RIO TOUR TURISMO (todas separadas)
   };
   var aliasOriginal = cliNormAlias;
@@ -51,6 +51,9 @@
     // nome que é só CNPJ/número ou só pontuação ("60701521006481", "-") não tem o que unificar:
     // cada um é uma agência diferente e fica com o próprio nome
     if (k.replace(/[^A-Z]/g, '').length < 2) return '#' + String(orig).trim();
+    // 17/11/2026 (Paulo): RIO CARIOCA TOUR TURISMO e ETOURSBRAZIL DMC OPERADORA são a mesma agência: aparecem como "RIO CARIOCA".
+    // CARIOCA TOUR (sem "RIO") continua separada.
+    if (/^RIO CARIOCA\b/.test(k) || /^ETOURS ?BRAZIL\b/.test(k)) return 'RIO CARIOCA';
     return TRADE_UNIFICAR[k] || k;
   }
   // Acento quebrado na origem ("ANT?NIO CARLOS GOMES"): o caractere perdido vira qualquer letra
@@ -96,6 +99,7 @@
     // (Paulo, 13/10/2026). Só a final "?O" de palavra, que nesses nomes é sempre "ÃO".
     exibir[g] = nomes[0].split(QUEBRADO + 'O ').join('ÃO ').replace(new RegExp(QUEBRADO + 'O$'), 'ÃO');
   });
+  exibir['RIO CARIOCA'] = 'RIO CARIOCA';
   cliNormAlias = function (n) {
     var g = grupo(n);
     return exibir[g] || aliasOriginal(n);
