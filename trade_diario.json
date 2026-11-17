@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-17T13:57:16Z",
+ "gerado_em": "2026-11-17T14:46:51Z",
  "mes": "2026-11",
  "ate": 16,
  "limite": 16,
@@ -27,9 +27,9 @@
    "I": 164.0,
    "J": 0.0,
    "K": 53567.4,
-   "M": 2880.0,
+   "M": 2923.0,
    "O": 4389.0,
-   "S": 233686.5
+   "S": 237513.5
   },
   {
    "dia": 2,
@@ -38,9 +38,9 @@
    "I": 167.0,
    "J": 0.0,
    "K": 47589.0,
-   "M": 2460.0,
+   "M": 2481.0,
    "O": 4101.0,
-   "S": 202576.0
+   "S": 204445.0
   },
   {
    "dia": 3,
@@ -49,9 +49,9 @@
    "I": 3.0,
    "J": 123.0,
    "K": 29071.0,
-   "M": 2554.0,
+   "M": 2605.0,
    "O": 4223.0,
-   "S": 208145.5
+   "S": 212328.5
   },
   {
    "dia": 4,
@@ -60,9 +60,9 @@
    "I": 5.0,
    "J": 105.0,
    "K": 31869.5,
-   "M": 2169.0,
+   "M": 2180.0,
    "O": 3630.0,
-   "S": 175167.0
+   "S": 176207.5
   },
   {
    "dia": 5,
@@ -71,9 +71,9 @@
    "I": 11.0,
    "J": 0.0,
    "K": 30489.5,
-   "M": 2231.0,
+   "M": 2292.0,
    "O": 3531.0,
-   "S": 176396.0
+   "S": 181380.0
   },
   {
    "dia": 6,
@@ -82,9 +82,9 @@
    "I": 7.0,
    "J": 202.0,
    "K": 56686.5,
-   "M": 1759.0,
+   "M": 1808.0,
    "O": 2828.0,
-   "S": 136956.0
+   "S": 141139.0
   },
   {
    "dia": 7,
@@ -93,9 +93,9 @@
    "I": 90.0,
    "J": 41.0,
    "K": 38555.0,
-   "M": 2760.0,
+   "M": 2780.0,
    "O": 3541.0,
-   "S": 230041.5
+   "S": 231438.0
   },
   {
    "dia": 8,
@@ -104,9 +104,9 @@
    "I": 103.0,
    "J": 0.0,
    "K": 81149.0,
-   "M": 1165.0,
+   "M": 1228.0,
    "O": 1665.0,
-   "S": 93411.5
+   "S": 98751.5
   },
   {
    "dia": 9,
@@ -115,9 +115,9 @@
    "I": 12.0,
    "J": 110.0,
    "K": 40260.5,
-   "M": 2077.0,
+   "M": 2124.0,
    "O": 3292.0,
-   "S": 166686.5
+   "S": 170424.5
   },
   {
    "dia": 10,
@@ -126,9 +126,9 @@
    "I": 17.0,
    "J": 215.0,
    "K": 36358.0,
-   "M": 2287.0,
+   "M": 2333.0,
    "O": 3837.0,
-   "S": 185887.5
+   "S": 189837.5
   },
   {
    "dia": 11,
@@ -137,9 +137,9 @@
    "I": 14.0,
    "J": 30.0,
    "K": 26365.5,
-   "M": 3203.0,
+   "M": 3321.0,
    "O": 4915.0,
-   "S": 262440.5
+   "S": 271696.5
   },
   {
    "dia": 12,
@@ -170,9 +170,9 @@
    "I": 111.0,
    "J": 14.0,
    "K": 53136.0,
-   "M": 2661.0,
+   "M": 2707.0,
    "O": 4037.0,
-   "S": 213630.5
+   "S": 217360.5
   },
   {
    "dia": 15,
@@ -181,17 +181,17 @@
    "I": 85.0,
    "J": 0.0,
    "K": 42048.5,
-   "M": 2440.0,
+   "M": 2512.0,
    "O": 4054.0,
-   "S": 198912.5
+   "S": 205087.5
   },
   {
    "dia": 16,
-   "C": 397.0,
+   "C": 358.0,
    "E": 2496.0,
    "I": 6.0,
    "J": 0.0,
-   "K": 34930.3,
+   "K": 30374.5,
    "M": 1743.0,
    "O": 2840.0,
    "S": 138026.5
@@ -203,7 +203,7 @@
    [
     "C2 RIO VIAGENS E TURISMO S.A.",
     523,
-    1566
+    1745
    ],
    [
     "ONERIO PASS INGRESSOS E ACESSOS",
@@ -218,22 +218,22 @@
    [
     "ETOURSBRAZIL DMC OPERADORA DE TURISMO LTDA",
     0,
-    1138
+    1139
    ],
    [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
-    999
+    1007
    ],
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
     0,
-    913
+    925
    ],
    [
     "HIGH CLASS TAXI AEREO LTDA",
     294,
-    595
+    597
    ],
    [
     "RIO CARIOCA TOUR TURISMO LIMITADA",
@@ -283,7 +283,7 @@
    [
     "THE SINGULAR CLUB LTDA",
     0,
-    474
+    479
    ],
    [
     "WTT",
@@ -316,6 +316,11 @@
     378
    ],
    [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    377
+   ],
+   [
     "M A N BRITTO PASSEIOS TURISTICOS - ME",
     0,
     376
@@ -324,11 +329,6 @@
     "MLJ TRANSPORTE LTDA",
     0,
     368
-   ],
-   [
-    "CARIOCA TROPICAL TURISMO LTDA",
-    0,
-    334
    ],
    [
     "RUHM TURISMO",
@@ -386,6 +386,11 @@
     218
    ],
    [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    261
+   ],
+   [
     "KINGS / KING TURISMO",
     0,
     253
@@ -438,7 +443,7 @@
    [
     "HEADOUT EXPERIENCES",
     0,
-    172
+    175
    ],
    [
     "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
@@ -463,7 +468,7 @@
    [
     "ANDREWS MARQUES DE SOUZA",
     0,
-    141
+    143
    ],
    [
     "R.P.T. RIO PARADISE TOUR AGENCIA DE VIAGEM E TURIS",
@@ -586,6 +591,11 @@
     83
    ],
    [
+    "RHUANN RODRIGUES",
+    0,
+    83
+   ],
+   [
     "YANN NASCIMENTO DOS SANTOS",
     0,
     81
@@ -601,9 +611,9 @@
     78
    ],
    [
-    "RHUANN RODRIGUES",
+    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
     0,
-    76
+    75
    ],
    [
     "LUIZ CLAUDIO SILVA DOS SANTOS",
@@ -621,14 +631,14 @@
     72
    ],
    [
-    "YGOR DA SILVA BRAGA DE LACERDA",
+    "FABRICIO PLACIDES ARTULANO",
     0,
     71
    ],
    [
-    "FABRICIO PLACIDES ARTULANO",
+    "YGOR DA SILVA BRAGA DE LACERDA",
     0,
-    70
+    71
    ],
    [
     "CHI SIU JING",
@@ -654,11 +664,6 @@
     "THIAGO MEDEIROS VERLINGUE",
     0,
     67
-   ],
-   [
-    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
-    0,
-    65
    ],
    [
     "CREW ONLY LTDA",
@@ -766,6 +771,11 @@
     42
    ],
    [
+    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
+    0,
+    46
+   ],
+   [
     "NILSON ROSA JUNIOR",
     0,
     46
@@ -806,11 +816,6 @@
     42
    ],
    [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
-    0,
-    41
-   ],
-   [
     "CUNHA TUR EIRELI",
     8,
     32
@@ -834,6 +839,11 @@
     "FABIANO ACRIS MARTINS",
     0,
     39
+   ],
+   [
+    "FABIO SILVA RIBEIRO",
+    24,
+    15
    ],
    [
     "GGIR TURISMO RECEPTIVO LTDA",
@@ -871,11 +881,6 @@
     32
    ],
    [
-    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
-    0,
-    37
-   ],
-   [
     "JOAO VITOR CAMPOS BARBOSA",
     0,
     37
@@ -884,11 +889,6 @@
     "CAROLINE DE ALMEIDA HOPFE",
     0,
     36
-   ],
-   [
-    "FABIO SILVA RIBEIRO",
-    24,
-    11
    ],
    [
     "DIOGO SANTANNA DE SOUZA",
@@ -936,6 +936,11 @@
     32
    ],
    [
+    "WALTER MACHADO JUNIOR",
+    0,
+    32
+   ],
+   [
     "C R B AGENCIAS DE VIAGENS E TRANSPORTES TURISTICOS",
     0,
     31
@@ -961,17 +966,17 @@
     30
    ],
    [
+    "CONEXOES OPERADORA DE TURISMO LTDA",
+    0,
+    30
+   ],
+   [
     "FABIO SEBASTIAO FIGUEIREDO MELO",
     0,
     30
    ],
    [
     "PAZ MAGDALENA QUEZADA FISSORE",
-    0,
-    30
-   ],
-   [
-    "WALTER MACHADO JUNIOR",
     0,
     30
    ],
@@ -1014,6 +1019,11 @@
     "LOTUS RECEPTIVO",
     0,
     27
+   ],
+   [
+    "JUAN SALVADOR ECHEVERRIA MARZAN",
+    0,
+    26
    ],
    [
     "MARCELO CAETANO VIEIRA DA SILVA",
@@ -1106,6 +1116,11 @@
     22
    ],
    [
+    "MARCOS SEQUEIRA",
+    0,
+    22
+   ],
+   [
     "WELYSON SERPA FERREIRA",
     0,
     22
@@ -1156,11 +1171,6 @@
     20
    ],
    [
-    "MARCOS SEQUEIRA",
-    0,
-    20
-   ],
-   [
     "ROBERTA RODRIGUES LIMA MONTEIRO",
     0,
     20
@@ -1179,6 +1189,11 @@
     "RUBENS GABRIEL SOBRINHO JNIOR",
     0,
     19
+   ],
+   [
+    "DOUGLAS FERNANDES DE CARVALHO",
+    0,
+    18
    ],
    [
     "FLAVIA PELICIONI",
@@ -1246,11 +1261,6 @@
     0
    ],
    [
-    "DOUGLAS FERNANDES DE CARVALHO",
-    0,
-    16
-   ],
-   [
     "MARCIO TORRES CORREIA",
     0,
     16
@@ -1259,6 +1269,11 @@
     "VITOR HUGO PAIVA DA SILVA",
     0,
     16
+   ],
+   [
+    "BRUNO LUIZ DIAS",
+    0,
+    15
    ],
    [
     "DESCETOUR AGENCIA E TRANSPORTE TURISTICO LTDA",
@@ -1281,19 +1296,9 @@
     15
    ],
    [
-    "JUAN SALVADOR ECHEVERRIA MARZAN",
-    0,
-    15
-   ],
-   [
     "MARCELO VIEIRA MENDES",
     0,
     15
-   ],
-   [
-    "BRUNO LUIZ DIAS",
-    0,
-    14
    ],
    [
     "PEDRO LEO TOUR SERVICOS LTDA",
@@ -1446,11 +1451,6 @@
     9
    ],
    [
-    "CONEXOES OPERADORA DE TURISMO LTDA",
-    0,
-    9
-   ],
-   [
     "JUAN CARLOS BADARO DA SILVA",
     0,
     9
@@ -1556,6 +1556,11 @@
     6
    ],
    [
+    "LEONARDO ROBERTO DE GOIS PINHEIRO",
+    0,
+    6
+   ],
+   [
     "LOCADORA OTUR TRANSPORTE E TURISMO LTDA",
     0,
     6
@@ -1567,6 +1572,11 @@
    ],
    [
     "MARCELO DA SILVA MACEDO",
+    0,
+    6
+   ],
+   [
+    "PEDRO LIBER ECHEVERRIA MARZAN",
     0,
     6
    ],
@@ -1711,11 +1721,6 @@
     4
    ],
    [
-    "PEDRO LIBER ECHEVERRIA MARZAN",
-    0,
-    4
-   ],
-   [
     "ROGERIO WENDEL DA SILVA SIQUEIRA",
     4,
     0
@@ -1759,11 +1764,6 @@
     "LEANDRO JOSE MEGA AGUILAR",
     3,
     0
-   ],
-   [
-    "LEONARDO ROBERTO DE GOIS PINHEIRO",
-    0,
-    3
    ],
    [
     "MARIANA PILLER CARVALHO DE OLIVEIRA",
