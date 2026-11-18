@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-18T12:47:15Z",
+ "gerado_em": "2026-11-18T13:47:05Z",
  "mes": "2026-11",
  "ate": 17,
  "limite": 17,
@@ -198,11 +198,11 @@
   },
   {
    "dia": 17,
-   "C": 665.0,
+   "C": 648.0,
    "E": 1972.0,
    "I": 8.0,
    "J": 341.0,
-   "K": 50716.3,
+   "K": 49161.5,
    "M": 2133.0,
    "O": 3300.0,
    "S": 172215.5
@@ -1167,6 +1167,11 @@
     22
    ],
    [
+    "RUBENS GABRIEL SOBRINHO JUNIOR",
+    3,
+    19
+   ],
+   [
     "WELYSON SERPA FERREIRA",
     0,
     22
@@ -1243,11 +1248,6 @@
    ],
    [
     "JULIA DE OLIVEIRA BARBOSA",
-    0,
-    19
-   ],
-   [
-    "RUBENS GABRIEL SOBRINHO JNIOR",
     0,
     19
    ],
@@ -1863,11 +1863,6 @@
    ],
    [
     "ROSIMEIRY SOUZA PORTO",
-    3,
-    0
-   ],
-   [
-    "RUBENS GABRIEL SOBRINHO JUNIOR",
     3,
     0
    ],
