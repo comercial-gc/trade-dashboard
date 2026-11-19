@@ -22,6 +22,35 @@
   function nf(v) { return Math.round(v || 0).toLocaleString('pt-BR'); }
   function pf1(v) { return (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; }
   function alias(n) { try { return typeof window.cliNormAlias === 'function' ? window.cliNormAlias(n) : n; } catch (e) { return n; } }
+  // mesma normalização do scripts/gerar_unificadas.py: sem acento, sem pontuação, "&" = "E", sem sufixo societário
+  function chave(n) {
+    return String(n || '').replace(/�/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/&/g, ' E ')
+      .replace(/\d{8,}/g, ' ').replace(/[^A-Z0-9 ]/g, ' ').replace(/\b(LTDA|LIMITADA|ME|EPP|EIRELI|EIRELLI|SA|S A|SOCIEDADE ANONIMA)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // Agências que a regra de origem (CANONICAL do trade_regras_agencias.py) forma juntando 2+ nomes ANTES de o dado chegar ao
+  // Dash: o volume de cada nome já não existe, então o balão lista os nomes (sem divisão de volume). Arquivo: trade_unificadas.json
+  // (gerado por scripts/gerar_unificadas.py; rodar de novo quando o CANONICAL mudar). Opcional: sem ele o balão só perde essa lista.
+  var REGRA = {};
+  var BASE = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? '' : 'https://comercial-gc.github.io/trade-dashboard/';
+  fetch(BASE + 'trade_unificadas.json?v=' + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    if (!j) return;
+    (j.grupos || []).forEach(function (g) { [g.canonico].concat(g.nomes).forEach(function (n) { REGRA[chave(n)] = g; }); });
+  }).catch(function () { });
+  // nomes da regra que o balão ainda não mostra: se o título É o nome-rótulo da regra (ex.: "JEEP TUOR / SOBRE TERRA") entram todos;
+  // senão saem os que já são o próprio nome ou parte de um nome mostrado (ex.: RIO CARIOCA TOUR dentro de RIO CARIOCA TOUR TURISMO)
+  function extrasRegra(d) {
+    var g = REGRA[chave(d.t)];
+    if (!g) return [];
+    var rotulo = chave(g.canonico) === chave(d.t), mostrados = d.c.map(function (x) { return chave(x[0]); });
+    return g.nomes.filter(function (n) {
+      var k = chave(n);
+      if (mostrados.indexOf(k) >= 0) return false;
+      if (rotulo) return true;
+      var tk = k.split(' ');
+      return !mostrados.some(function (m) { var mt = m.split(' '); return tk.every(function (t) { return mt.indexOf(t) >= 0; }); });
+    });
+  }
 
   // ---------------------------------------------------------------- API
   // json: texto do atributo data-agtip. comps = [{n, v}] (nome bruto e valor no recorte da tela); u = unidade do valor.
@@ -72,7 +101,8 @@
     '.tv-agtip.on{display:block}.tv-agtip-t{display:flex;justify-content:space-between;gap:14px;font-weight:800;font-size:12.5px;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--border,#D5E8F0)}' +
     '.tv-agtip-t span{font-weight:700;color:var(--muted,#6B8A9E);white-space:nowrap}.tv-agtip-s{font-size:10.5px;color:var(--muted,#6B8A9E);margin:-3px 0 6px}' +
     '.tv-agtip-l{display:grid;grid-template-columns:1fr auto auto;gap:3px 12px;align-items:baseline}.tv-agtip-l .n{word-break:break-word}.tv-agtip-l .v{text-align:right;font-weight:700}' +
-    '.tv-agtip-l .p{text-align:right;color:var(--muted,#6B8A9E);min-width:42px}.tv-agtip-f{margin-top:6px;font-size:10.5px;color:var(--muted,#6B8A9E)}';
+    '.tv-agtip-l .p{text-align:right;color:var(--muted,#6B8A9E);min-width:42px}.tv-agtip-f{margin-top:6px;font-size:10.5px;color:var(--muted,#6B8A9E)}' +
+    '.tv-agtip-r{margin-top:8px;padding-top:6px;border-top:1px dashed var(--border,#D5E8F0);font-size:11.5px}.tv-agtip-rt{font-size:10.5px;font-weight:700;color:var(--muted,#6B8A9E);margin-bottom:2px}';
   document.head.appendChild(css);
   var tip = document.createElement('div');
   tip.className = 'tv-agtip'; tip.setAttribute('role', 'tooltip');
@@ -84,6 +114,8 @@
     var h = '<div class="tv-agtip-t"><div>' + esc(d.t) + '</div><span>' + (un === 'R$' ? 'R$ ' + nf(tot) : nf(tot) + ' ' + esc(un)) + '</span></div>' + (d.s ? '<div class="tv-agtip-s">' + esc(d.s) + '</div>' : '') + '<div class="tv-agtip-l">';
     d.c.forEach(function (x) { h += '<div class="n">' + esc(x[0]) + '</div><div class="v">' + (un === 'R$' ? 'R$ ' + nf(x[1]) : nf(x[1])) + '</div><div class="p">' + (tot ? pf1(x[1] / tot) : '-') + '</div>'; });
     h += '</div>';
+    var extras = extrasRegra(d);
+    if (extras.length) h += '<div class="tv-agtip-r"><div class="tv-agtip-rt">Unificada na origem com:</div>' + extras.map(function (n) { return '<div>' + esc(n) + '</div>'; }).join('') + '</div>';
     if (d.c.length > 1) h += '<div class="tv-agtip-f">' + d.c.length + ' nomes formam esta agência</div>';
     return h;
   }

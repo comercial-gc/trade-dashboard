@@ -5,9 +5,10 @@
    A logo tem 3 versões, uma por tipo de fundo (o texto "TRADE" embaixo NÃO faz parte da logo; os arquivos
    trazem só o emblema, com fundo transparente):
      logo-trade-claro.png   fundo claro/branco (ícones do app sem fundo: icon-192/512, favicon-64; apple-touch-icon com fundo branco)
-     logo-trade-preto.png   fundo preto e escuros como o azul-marinho: cabeçalho do Dash (desktop e mobile)
+     logo-trade-preto.png   fundo preto e escuros (reserva)
      logo-trade-cinza.png   fundo cinza escuro (favicon-64-escuro, para aba escura do navegador)
-   Os cabeçalhos do Dash são sempre azul-marinho (var(--navy)) nos temas claro e escuro, por isso usam a versão preto.
+   Desde 18/11/2026 os cabeçalhos do Dash são verde-floresta (identidade igual à dos Dashes de Performance e Conteúdo): o
+   emblema vai em um quadrado branco, com a versão clara, para o verde escuro da logo não se perder no fundo verde.
    Substitui o pontinho (.brand-dot / .mob-dot) que ficava no lugar da logo. */
 (function () {
   if (window.__tradeLogo) return;
@@ -15,12 +16,12 @@
 
   var BASE = 'https://comercial-gc.github.io/trade-dashboard/';
   if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) BASE = '';
-  var SRC = BASE + 'logo-trade-preto.png?v=20261113';
+  var SRC = BASE + 'logo-trade-claro.png?v=20261118';
 
   var css = document.createElement('style');
-  css.textContent = '.tv-logo{display:block;width:auto;flex-shrink:0;object-fit:contain}' +
-    '.brand .tv-logo{height:42px;margin-right:2px}' +
-    '.mob-title .tv-logo{height:34px}' +
+  css.textContent = '.tv-logo{display:block;width:auto;flex-shrink:0;object-fit:contain;background:#fff;border-radius:10px;padding:3px 6px;box-sizing:content-box}' +
+    '.brand .tv-logo{height:40px;margin-right:2px}' +
+    '.mob-title .tv-logo{height:30px}' +
     '.brand-dot.tv-oculto,.mob-dot.tv-oculto{display:none!important}';
   document.head.appendChild(css);
 
