@@ -1,6 +1,6 @@
 {
  "versao": 1,
- "gerado_em": "2026-11-19T12:47:17Z",
+ "gerado_em": "2026-11-19T13:46:53Z",
  "mes": "2026-11",
  "ate": 18,
  "limite": 18,
@@ -27,9 +27,9 @@
    "I": 164.0,
    "J": 0.0,
    "K": 53567.4,
-   "M": 2923.0,
+   "M": 2880.0,
    "O": 4389.0,
-   "S": 237513.5
+   "S": 233686.5
   },
   {
    "dia": 2,
@@ -38,9 +38,9 @@
    "I": 167.0,
    "J": 0.0,
    "K": 47589.0,
-   "M": 2481.0,
+   "M": 2460.0,
    "O": 4101.0,
-   "S": 204445.0
+   "S": 202576.0
   },
   {
    "dia": 3,
@@ -49,9 +49,9 @@
    "I": 3.0,
    "J": 123.0,
    "K": 29071.0,
-   "M": 2605.0,
+   "M": 2554.0,
    "O": 4223.0,
-   "S": 212328.5
+   "S": 208145.5
   },
   {
    "dia": 4,
@@ -60,9 +60,9 @@
    "I": 5.0,
    "J": 105.0,
    "K": 31869.5,
-   "M": 2180.0,
+   "M": 2169.0,
    "O": 3630.0,
-   "S": 176207.5
+   "S": 175167.0
   },
   {
    "dia": 5,
@@ -71,9 +71,9 @@
    "I": 11.0,
    "J": 0.0,
    "K": 30489.5,
-   "M": 2292.0,
+   "M": 2231.0,
    "O": 3531.0,
-   "S": 181380.0
+   "S": 176396.0
   },
   {
    "dia": 6,
@@ -82,9 +82,9 @@
    "I": 7.0,
    "J": 202.0,
    "K": 56686.5,
-   "M": 1808.0,
+   "M": 1759.0,
    "O": 2828.0,
-   "S": 141139.0
+   "S": 136956.0
   },
   {
    "dia": 7,
@@ -93,9 +93,9 @@
    "I": 90.0,
    "J": 41.0,
    "K": 38555.0,
-   "M": 2780.0,
+   "M": 2760.0,
    "O": 3541.0,
-   "S": 231438.0
+   "S": 230041.5
   },
   {
    "dia": 8,
@@ -104,9 +104,9 @@
    "I": 103.0,
    "J": 0.0,
    "K": 81149.0,
-   "M": 1228.0,
+   "M": 1165.0,
    "O": 1665.0,
-   "S": 98751.5
+   "S": 93411.5
   },
   {
    "dia": 9,
@@ -115,9 +115,9 @@
    "I": 12.0,
    "J": 110.0,
    "K": 40260.5,
-   "M": 2124.0,
+   "M": 2077.0,
    "O": 3292.0,
-   "S": 170424.5
+   "S": 166686.5
   },
   {
    "dia": 10,
@@ -126,9 +126,9 @@
    "I": 17.0,
    "J": 215.0,
    "K": 36358.0,
-   "M": 2333.0,
+   "M": 2287.0,
    "O": 3837.0,
-   "S": 189837.5
+   "S": 185887.5
   },
   {
    "dia": 11,
@@ -137,9 +137,9 @@
    "I": 14.0,
    "J": 30.0,
    "K": 26365.5,
-   "M": 3321.0,
+   "M": 3203.0,
    "O": 4915.0,
-   "S": 271696.5
+   "S": 262440.5
   },
   {
    "dia": 12,
@@ -170,9 +170,9 @@
    "I": 111.0,
    "J": 14.0,
    "K": 53136.0,
-   "M": 2707.0,
+   "M": 2661.0,
    "O": 4037.0,
-   "S": 217360.5
+   "S": 213630.5
   },
   {
    "dia": 15,
@@ -181,9 +181,9 @@
    "I": 85.0,
    "J": 0.0,
    "K": 42048.5,
-   "M": 2512.0,
+   "M": 2440.0,
    "O": 4054.0,
-   "S": 205087.5
+   "S": 198912.5
   },
   {
    "dia": 16,
@@ -192,9 +192,9 @@
    "I": 6.0,
    "J": 0.0,
    "K": 30374.5,
-   "M": 1743.0,
+   "M": 1716.0,
    "O": 2840.0,
-   "S": 138026.5
+   "S": 135534.5
   },
   {
    "dia": 17,
@@ -203,18 +203,18 @@
    "I": 8.0,
    "J": 341.0,
    "K": 49161.5,
-   "M": 2133.0,
+   "M": 1987.0,
    "O": 3300.0,
-   "S": 172215.5
+   "S": 160495.0
   },
   {
    "dia": 18,
-   "C": 304.0,
+   "C": 282.0,
    "E": 1552.0,
    "I": 11.0,
    "J": 95.0,
-   "K": 25574.9,
-   "M": 2908.0,
+   "K": 23171.5,
+   "M": 2910.0,
    "O": 4527.0,
    "S": 240150.0
   }
@@ -225,7 +225,7 @@
    [
     "C2 RIO VIAGENS E TURISMO S.A.",
     534,
-    1934
+    1700
    ],
    [
     "ONERIO PASS INGRESSOS E ACESSOS",
@@ -240,17 +240,17 @@
    [
     "ETOURSBRAZIL DMC OPERADORA DE TURISMO LTDA",
     0,
-    1319
+    1318
    ],
    [
     "RLBM TRANSPORTES E TURISMO LTDA",
     0,
-    1137
+    1129
    ],
    [
     "GETYOURGUIDE DEUTSCHLAND GMBH",
     0,
-    1095
+    1074
    ],
    [
     "HYD BRAZILIAN TOURS / IN BUZIOS",
@@ -265,7 +265,7 @@
    [
     "HIGH CLASS TAXI AEREO LTDA",
     304,
-    650
+    648
    ],
    [
     "FERNANDO R FERNANDES TRANSPORTE LTDA",
@@ -300,7 +300,7 @@
    [
     "THE SINGULAR CLUB LTDA",
     0,
-    635
+    630
    ],
    [
     "JS AGENCIAS DE VIAGENS E TURISMO LTDA",
@@ -333,11 +333,6 @@
     429
    ],
    [
-    "CARIOCA TROPICAL TURISMO LTDA",
-    0,
-    427
-   ],
-   [
     "KRIOK TURISMO LTDA",
     0,
     415
@@ -351,6 +346,11 @@
     "MLJ TRANSPORTE LTDA",
     0,
     398
+   ],
+   [
+    "CARIOCA TROPICAL TURISMO LTDA",
+    0,
+    375
    ],
    [
     "RUHM TURISMO",
@@ -408,11 +408,6 @@
     288
    ],
    [
-    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
-    0,
-    286
-   ],
-   [
     "KINGS / KING TURISMO",
     0,
     283
@@ -465,7 +460,7 @@
    [
     "HEADOUT EXPERIENCES",
     0,
-    206
+    203
    ],
    [
     "GUSTAVO ELIAS ANDOLPHI LIZCANO",
@@ -510,7 +505,7 @@
    [
     "ANDREWS MARQUES DE SOUZA",
     0,
-    143
+    141
    ],
    [
     "MARCIO SALLES SERRA LIMA",
@@ -556,11 +551,6 @@
     "WALLACE DIAS MEDEIROS",
     0,
     109
-   ],
-   [
-    "RIO MAXIMO",
-    0,
-    107
    ],
    [
     "JOSE GUILHERME ALVES DE MORAES",
@@ -613,7 +603,7 @@
     92
    ],
    [
-    "RHUANN RODRIGUES",
+    "RIO MAXIMO",
     0,
     92
    ],
@@ -648,14 +638,14 @@
     86
    ],
    [
-    "YANN NASCIMENTO DOS SANTOS",
+    "RHUANN RODRIGUES",
     0,
     85
    ],
    [
-    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
+    "YANN NASCIMENTO DOS SANTOS",
     0,
-    84
+    85
    ],
    [
     "LUIZ CLAUDIO SILVA DOS SANTOS",
@@ -693,12 +683,12 @@
     0
    ],
    [
-    "FABRICIO PLACIDES ARTULANO",
+    "CREW ONLY LTDA",
     0,
-    71
+    70
    ],
    [
-    "CREW ONLY LTDA",
+    "FABRICIO PLACIDES ARTULANO",
     0,
     70
    ],
@@ -723,19 +713,24 @@
     67
    ],
    [
+    "CITY TOUR RJ FRETAMENTO E TURISMO LTDA",
+    0,
+    65
+   ],
+   [
     "JULIO CESAR SALVATTO CHANCA",
     0,
     65
    ],
    [
-    "MARIA JESUS DE ARAUJO GUZMAN",
-    0,
-    64
-   ],
-   [
     "VINICIUS GOMES PANTALIAO",
     0,
     62
+   ],
+   [
+    "MARIA JESUS DE ARAUJO GUZMAN",
+    0,
+    60
    ],
    [
     "VINICIUS ROCHA DE SOUSA",
@@ -853,11 +848,6 @@
     47
    ],
    [
-    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
-    0,
-    46
-   ],
-   [
     "ROBSON DA COSTA PINTO",
     0,
     46
@@ -933,11 +923,6 @@
     32
    ],
    [
-    "FABIO SILVA RIBEIRO",
-    24,
-    16
-   ],
-   [
     "THIAGO ALVES DA SILVA",
     0,
     40
@@ -968,12 +953,12 @@
     32
    ],
    [
-    "JOAO VITOR CAMPOS BARBOSA",
+    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
     0,
     37
    ],
    [
-    "JUAN SALVADOR ECHEVERRIA MARZAN",
+    "JOAO VITOR CAMPOS BARBOSA",
     0,
     37
    ],
@@ -988,9 +973,9 @@
     36
    ],
    [
-    "WALTER MACHADO JUNIOR",
-    0,
-    35
+    "FABIO SILVA RIBEIRO",
+    24,
+    12
    ],
    [
     "CARLOS HENRIQUE ROSA DOS SANTOS",
@@ -1053,6 +1038,11 @@
     32
    ],
    [
+    "WALTER MACHADO JUNIOR",
+    0,
+    32
+   ],
+   [
     "EMERSON ALVES DA SILVA",
     0,
     31
@@ -1073,11 +1063,6 @@
     31
    ],
    [
-    "MARCOS SEQUEIRA",
-    0,
-    31
-   ],
-   [
     "MATHEUS WAGNER DOS SANTOS",
     0,
     31
@@ -1086,11 +1071,6 @@
     "RAPHAEL SOUSA CORREA",
     0,
     31
-   ],
-   [
-    "CONEXOES OPERADORA DE TURISMO LTDA",
-    0,
-    30
    ],
    [
     "FABIO SEBASTIAO FIGUEIREDO MELO",
@@ -1106,6 +1086,11 @@
     "CLEITON VIEIRA MONTEIRO",
     29,
     0
+   ],
+   [
+    "MARCOS SEQUEIRA",
+    0,
+    29
    ],
    [
     "NASCENTE DOS BUZIOS TURISMO LTDA - ME",
@@ -1144,6 +1129,11 @@
    ],
    [
     "ANDRE ZAVA FERNANDES",
+    0,
+    26
+   ],
+   [
+    "JUAN SALVADOR ECHEVERRIA MARZAN",
     0,
     26
    ],
@@ -1193,11 +1183,6 @@
     23
    ],
    [
-    "ANDERSON BARBOSA PEREIRA",
-    0,
-    23
-   ],
-   [
     "ARENA VIPS",
     0,
     23
@@ -1221,6 +1206,11 @@
     "RUBENS GLAUCIO DA SILVA",
     0,
     23
+   ],
+   [
+    "ANDERSON BARBOSA PEREIRA",
+    0,
+    22
    ],
    [
     "FERNANDA COELHO DA SILVA",
@@ -1273,6 +1263,11 @@
     21
    ],
    [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA",
+    0,
+    20
+   ],
+   [
     "DANIEL DE SOUZA MARINS",
     0,
     20
@@ -1318,11 +1313,6 @@
     19
    ],
    [
-    "DOUGLAS FERNANDES DE CARVALHO",
-    0,
-    18
-   ],
-   [
     "FABIANO BERNARDO DA SILVA",
     0,
     18
@@ -1336,11 +1326,6 @@
     "VALDINEI DOS SANTOS NEVES",
     0,
     18
-   ],
-   [
-    "CARLOS EDUARDO MONTESINOS DE NAVARRO GIACOMOCARLOS",
-    0,
-    17
    ],
    [
     "INTERTOURING AG. DE VIAG. E TUR. LTDA.",
@@ -1358,19 +1343,24 @@
     0
    ],
    [
-    "BRUNO LUIZ DIAS",
-    1,
-    15
-   ],
-   [
     "COSME MAGALHÃES DE JESUS",
     16,
     0
    ],
    [
+    "DOUGLAS FERNANDES DE CARVALHO",
+    0,
+    16
+   ],
+   [
     "MARCIO TORRES CORREIA",
     0,
     16
+   ],
+   [
+    "BRUNO LUIZ DIAS",
+    1,
+    14
    ],
    [
     "DESCETOUR AGENCIA E TRANSPORTE TURISTICO LTDA",
@@ -1478,6 +1468,11 @@
     11
    ],
    [
+    "CARLOS EDUARDO MONTESINOS DE NAVARRO GIACOMOCARLOS",
+    0,
+    11
+   ],
+   [
     "ELIAS VIEIRA DA SILVA",
     11,
     0
@@ -1554,6 +1549,11 @@
    ],
    [
     "CARLOS ALBERTO SOARES DA SILVA",
+    0,
+    9
+   ],
+   [
+    "CONEXOES OPERADORA DE TURISMO LTDA",
     0,
     9
    ],
@@ -1643,11 +1643,6 @@
     4
    ],
    [
-    "PEDRO LIBER ECHEVERRIA MARZAN",
-    1,
-    6
-   ],
-   [
     "RIO ALTERNATIVE TOUR",
     0,
     7
@@ -1669,11 +1664,6 @@
    ],
    [
     "GUSTAVO GOMES NUNES",
-    0,
-    6
-   ],
-   [
-    "LEONARDO ROBERTO DE GOIS PINHEIRO",
     0,
     6
    ],
@@ -1736,6 +1726,11 @@
     "ORINTER TOUR & TRAVEL",
     5,
     0
+   ],
+   [
+    "PEDRO LIBER ECHEVERRIA MARZAN",
+    1,
+    4
    ],
    [
     "PHILIPPE ALVES TEIXEIRA",
@@ -1904,6 +1899,11 @@
    ],
    [
     "LEANDRO DE MELLO FERRAO",
+    0,
+    3
+   ],
+   [
+    "LEONARDO ROBERTO DE GOIS PINHEIRO",
     0,
     3
    ],
