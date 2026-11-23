@@ -118,15 +118,15 @@
       var x = mesAtualD(), t = x.m.topClientesPainel, dia = t && Number(t.diaAtual);
       return { tipo: 'dia', ate: dia ? iso(new Date(x.ano, x.mes, dia)) : null };
     } },
-    intel: { label: 'Cristo, Trem e Bondinho', get: function () {
+    intel: { label: 'Trem e Bondinho (Cristo = Paineiras + Trem)', get: function () {
       var imm = D.imm || {}, ano = mesAtualD().ano, det = {};
       // meses futuros vêm 0 ou null na planilha: só conta valor maior que zero
-      [['trem', 'Trem do Corcovado'], ['bondinho', 'Bondinho'], ['cristo', 'Cristo Redentor']].forEach(function (k) {
+      [['trem', 'Trem do Corcovado'], ['bondinho', 'Bondinho']].forEach(function (k) {
         var y = (imm[k[0]] || {}).y26 || [], ult = -1;
         y.forEach(function (v, i) { if (v) ult = i; });
         det[k[1]] = ult >= 0 ? ano + '-' + pad(ult + 1) : null;
       });
-      return { tipo: 'mes', det: det, nota: 'Planilha externa, atualizada manualmente. Mensal: em dia = tem o mês anterior. A captação do Cristo usa o último mês com dado nos 3 lados.' };
+      return { tipo: 'mes', det: det, nota: 'Planilha externa, atualizada manualmente. Mensal: em dia = tem o mês anterior. O Cristo Redentor é a soma de Paineiras + Trem do Corcovado (23/11/2026), então depende do Trem e da Paineiras.' };
     } },
     brutos: { label: 'Bilheteria (brutos)', parques: PARQUES, get: function () {
       var r = dos(PARQUES, ultimoDiaMesIndicadores);

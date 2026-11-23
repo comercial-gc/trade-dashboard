@@ -672,11 +672,30 @@
     var hp25 = (D.histPar25 || {}).pai, hp26 = (D.histPar26 || {}).pai;
     var ult = (D.meses || []).slice(-1)[0] || {};
     var idxAberto = (!ult.isFechado && ult.diaAtual > 0 && typeof ult.mesIdx === 'number') ? ult.mesIdx : -1;
+    // 23/11/2026 (Paulo): o total do monumento (Cristo Redentor) é a SOMA de Paineiras (visitação total do parque) + Trem do
+    // Corcovado, mês a mês; o total da planilha externa (D.imm.cristo) deixa de ser usado. 2025 usa a Paineiras do mês inteiro:
+    // a do Dash, exceto no mês em andamento (cortada no mesmo dia) e nos meses sem valor, onde vale a de trade_indicadores.json
+    // (parque2025). Mês em andamento de 2026 fica sem total do monumento (parcial nunca contra mês inteiro).
+    var hp25L = limpa(hp25), hp26L = limpa(hp26), trem25 = limpa((imm.trem || vazio).y25), trem26 = limpa((imm.trem || vazio).y26);
+    var ind = ((window.__tv2 || {}).dados || {}).ind, p25cheio = (ind && ind.parque2025 && ind.parque2025.Paineiras) || {};
+    var pai25Cheio = function (i) {
+      if (i !== idxAberto && hp25L[i] !== null) return hp25L[i];
+      var v = p25cheio['2025-' + String(i + 1).padStart(2, '0')];
+      return (typeof v === 'number' && v > 0) ? v : null;
+    };
+    var soma = function (a, b) { return (a === null || b === null) ? null : a + b; };
+    var cr25 = [], cr26 = [];
+    for (var kc = 0; kc < 12; kc++) { cr25.push(soma(pai25Cheio(kc), trem25[kc])); cr26.push(kc === idxAberto ? null : soma(hp26L[kc], trem26[kc])); }
+    // o total de 2025 do mês corrente e dos seguintes depende de trade_indicadores.json: se ainda não chegou, redesenha quando chegar
+    if (!ind && window.__tv2 && window.__tv2.promessa && !window.__tvImmEsperando) {
+      window.__tvImmEsperando = true;
+      window.__tv2.promessa.then(function () { try { initImm(mesData); } catch (e) { } });
+    }
     var entidades = [
       { nome: 'Paineiras (visitação total)', cor: 'var(--pai)', y25: limpa(hp25), y26: limpa(hp26), parcial: idxAberto },
       { nome: 'Trem do Corcovado', cor: 'var(--aqua)', y25: limpa((imm.trem || vazio).y25), y26: limpa((imm.trem || vazio).y26) },
       { nome: 'Bondinho Pão de Açúcar', cor: 'var(--bio)', y25: limpa((imm.bondinho || vazio).y25), y26: limpa((imm.bondinho || vazio).y26) },
-      { nome: 'Cristo Redentor (monumento)', cor: 'var(--muted)', y25: limpa((imm.cristo || vazio).y25), y26: limpa((imm.cristo || vazio).y26) }
+      { nome: 'Cristo Redentor (Paineiras + Trem)', cor: 'var(--muted)', y25: cr25, y26: cr26 }
     ];
     // 2025 da Paineiras no mês em andamento vem cortado no mesmo dia (mesmo período): marca com *
     var fmtV = function (v, star) { return v === null ? '-' : n0(v) + (star ? '*' : ''); };
@@ -693,8 +712,14 @@
         + '<tr class="se-row-delta"><td class="se-td-label">Δ% vs 2025</td>' + MESES.map(function (m, i) { return '<td>' + fmtD(e.y25[i], e.y26[i]) + '</td>'; }).join('') + '</tr>';
     }).join('');
     var nota = idxAberto >= 0 ? '<div style="font-size:10px;color:var(--muted);margin-top:6px">* ' + MESES[idxAberto] + ': mês em andamento. Paineiras compara 2026 e 2025 até o mesmo dia (' + (ult.diaAtual < 10 ? '0' : '') + ult.diaAtual + '/' + MESES[idxAberto].toLowerCase() + '). Paineiras = visitação total do parque (todos os canais), não só Trade.</div>' : '';
+    var notaCr = '<div style="font-size:10px;color:var(--muted);margin-top:6px"><strong>Cristo Redentor = Paineiras (visitação total do parque) + Trem do Corcovado</strong>, mês a mês. ' +
+      (idxAberto >= 0 ? MESES[idxAberto] + ' em andamento fica sem total do monumento (o mês parcial não é somado ao do Trem).' : '') + '</div>';
     var wrap = $('immReguaWrap');
-    if (wrap) wrap.innerHTML = '<table class="se-regua"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>' + nota;
+    if (wrap) wrap.innerHTML = '<table class="se-regua"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>' + nota + notaCr;
+    // subtítulo da aba (HTML estático do index.html) acompanha a regra nova
+    document.querySelectorAll('#pg-imm .cc-s').forEach(function (e) {
+      if (/fonte oficial do Corcovado/.test(e.textContent)) e.textContent = 'Cristo Redentor = Paineiras (visitação total do parque) + Trem do Corcovado, a soma dos dois acessos ao monumento.';
+    });
 
     // Captação: último mês FECHADO (até o mês selecionado) com Paineiras, Trem e Cristo
     var pai = entidades[0], trem = entidades[1], cristo = entidades[3];
