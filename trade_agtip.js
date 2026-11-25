@@ -120,7 +120,7 @@
     var ctr = window.__tvContrato && !/Três Pescadores/.test(d.s || '') ? window.__tvContrato.de(d.t) : '';
     if (ctr) h += '<div class="tv-agtip-f">Contrato: <strong>' + esc(ctr) + '</strong></div>';
     var dsc = window.__tvDesconto && !/Três Pescadores/.test(d.s || '') ? window.__tvDesconto.de(d.t) : null;
-    if (dsc) h += '<div class="tv-agtip-f">Desconto AquaRio (2026): <strong>' + esc(dsc.rot) + '</strong>' + (dsc.rot === 'Misto' ? ' (' + esc(dsc.det) + ')' : '') + '</div>';
+    if (dsc) h += '<div class="tv-agtip-f">Desconto atual (AquaRio): <strong>' + esc(dsc.rot) + '</strong></div>';
     if (d.c.length > 1) h += '<div class="tv-agtip-f">' + d.c.length + ' nomes formam esta agência</div>';
     return h;
   }

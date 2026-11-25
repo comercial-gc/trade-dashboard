@@ -110,8 +110,8 @@
   // ---------------------------------------------------------------- faixa de desconto Trade (25/11/2026, ideia do Paulo)
   // trade_desconto.json (CARD Robo\trade_desconto.py): por agência e mês, bilhetes Trade do AquaRio pagos no preço do tarifário
   // Trade 10, do Trade 20, do balcão (sem desconto) ou em outro preço (acordo especial). Paineiras não tem faixa de desconto.
-  var DESC_ROT = ['10%', '20%', 'Sem desconto', 'Acordo especial'];
-  var FILTRO_DESC = ['10%', '20%', 'Sem desconto', 'Acordo especial', 'Misto', 'Sem informação'];
+  var DESC_ROT = ['10%', '20%'];
+  var FILTRO_DESC = ['10%', '20%', 'Sem informação'];
   var mapaDesc = null;
   DADOS.desc = null;
   function montaMapaDesc() {
@@ -136,41 +136,33 @@
     }
     return cacheDesc[c];
   }
-  // faixa do cliente nos meses pedidos (índices 0-11 de 2026; sem lista = todos): predominante com 85% ou mais dos bilhetes, senão "Misto"
+  // faixa ATUAL do cliente (26/11/2026, pedido do Paulo: so 10% ou 20%, o que vale hoje): no ultimo mes do periodo em que ele comprou
+  // pelo preco da faixa 10 ou da faixa 20 do tarifario, a faixa com mais bilhetes. Preco de balcao ou outro preco (acordo, escolar,
+  // categoria diferente) nao conta e nao vira "desconto quebrado".
   function descontoDe(nome, idxs) {
     if (!DADOS.desc) return null;
     if (!mapaDesc) montaMapaDesc();
     var o = mapaDesc[chave(alias(nome))] || mapaDesc[chave(nome)] || achaDesc(nome);
     if (!o) return null;
-    var c = [0, 0, 0, 0], ultM = '';
+    var mUlt = '';
     Object.keys(o).sort().forEach(function (m) {
       if (idxs && idxs.indexOf(Number(m.slice(5, 7)) - 1) < 0) return;
-      var t = o[m][0] + o[m][1] + o[m][2] + o[m][3];
-      if (t) ultM = m;
-      for (var i = 0; i < 4; i++) c[i] += o[m][i];
+      var f = o[m][0] + o[m][1];
+      if (f > 0 && f >= 0.5 * (f + o[m][2] + o[m][3])) mUlt = m;
     });
-    var tot = c[0] + c[1] + c[2] + c[3];
-    if (!tot) return null;
-    var dom = c.indexOf(Math.max.apply(null, c)), pc = c.map(function (x) { return x / tot; });
-    var rot = pc[dom] >= 0.85 ? DESC_ROT[dom] : 'Misto';
-    var det = DESC_ROT.map(function (r, i) { return c[i] ? r + ': ' + nf(c[i]) + ' (' + Math.round(pc[i] * 100) + '%)' : ''; }).filter(Boolean).join(' · ');
-    // faixa do último mês com venda no período (mostra a faixa de hoje quando a agência mudou de faixa no meio do período)
-    var u = ultM ? o[ultM] : null, ut = u ? u[0] + u[1] + u[2] + u[3] : 0, ud = u ? u.indexOf(Math.max.apply(null, u)) : 0;
-    var ult = u ? { rot: u[ud] / ut >= 0.85 ? DESC_ROT[ud] : 'Misto', mes: MES[Number(ultM.slice(5, 7)) - 1] } : null;
-    return { c: c, tot: tot, rot: rot, det: det, dom: dom, pdom: pc[dom], ult: ult };
+    if (!mUlt) return null;
+    var q10 = o[mUlt][0], q20 = o[mUlt][1];
+    var rot = q20 >= q10 ? '20%' : '10%';
+    return { rot: rot, mes: MES[Number(mUlt.slice(5, 7)) - 1] + '/' + mUlt.slice(2, 4), q10: q10, q20: q20,
+      det: 'Em ' + MES[Number(mUlt.slice(5, 7)) - 1] + '/' + mUlt.slice(2, 4) + ': ' + nf(q10) + ' bilhetes a 10% e ' + nf(q20) + ' a 20%' };
   }
   function rotDesc(d) { return d ? d.rot : 'Sem informação'; }
-  // texto do Excel: a faixa, e no misto a divisão
-  function txtDesc(d) { return !d ? 'Sem informação' : d.rot === 'Misto' ? 'Misto (' + d.det + (d.ult ? ' · último mês, ' + d.ult.mes + ': ' + d.ult.rot : '') + ')' : d.rot; }
+  function txtDesc(d) { return d ? d.rot : ''; }
   function pillDesc(d) {
     if (!d) return '<span style="color:var(--muted);font-size:10.5px">-</span>';
     var cor = d.rot === '20%' ? ['color-mix(in srgb,#1f7a4d 15%,var(--white))', 'color-mix(in srgb,#1f7a4d 70%,var(--text))']
-      : d.rot === '10%' ? ['color-mix(in srgb,var(--aqua) 14%,var(--white))', 'color-mix(in srgb,var(--aqua) 70%,var(--text))']
-        : d.rot === 'Acordo especial' ? ['color-mix(in srgb,#E8A820 20%,var(--white))', 'color-mix(in srgb,#B45309 55%,var(--text))']
-          : d.rot === 'Misto' ? ['color-mix(in srgb,#7a5aa6 14%,var(--white))', 'color-mix(in srgb,#7a5aa6 70%,var(--text))']
-            : ['color-mix(in srgb,var(--muted) 14%,var(--white))', 'var(--muted)'];
-    return '<span class="cli-pill" style="background:' + cor[0] + ';color:' + cor[1] + ';white-space:nowrap" title="' + esc(d.det) + '">' + esc(d.rot) + '</span>' +
-      (d.rot === 'Misto' ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + Math.round(d.pdom * 100) + '% ' + (DESC_ROT[d.dom] === 'Sem desconto' ? 'sem desconto' : 'a ' + DESC_ROT[d.dom]) + (d.ult ? ' · ' + d.ult.mes + ': ' + d.ult.rot : '') + '</div>' : '');
+      : ['color-mix(in srgb,var(--aqua) 14%,var(--white))', 'color-mix(in srgb,var(--aqua) 70%,var(--text))'];
+    return '<span class="cli-pill" style="background:' + cor[0] + ';color:' + cor[1] + ';white-space:nowrap" title="' + esc(d.det) + '">' + esc(d.rot) + '</span>';
   }
   function ctrlDesc(id, valor, cnt) {
     return controle('Desconto', '<select class="cli-select" id="' + id + '"><option value="">Todos</option>' + FILTRO_DESC.map(function (c) {
@@ -1046,8 +1038,8 @@
           '<div style="margin-top:6px;font-size:10.5px;color:var(--muted)">Estão na lista de contratos, mas não têm bilhete Trade no recorte escolhido (ou nunca apareceram nas bases do Dash). Entram na tabela assim que comprarem.</div>'
           : ' todos os clientes desta categoria tiveram compra no recorte.'));
     }
-    if (DADOS.desc) html += aviso('ℹ️ <strong>Desconto:</strong> faixa Trade do <strong>AquaRio</strong> em ' + P.lblAtual + ', pelo preço pago por bilhete contra o tarifário (Trade 10, Trade 20, balcão sem desconto; outro preço = acordo especial). ' +
-      '"Misto" = nenhuma faixa passa de 85% dos bilhetes da agência no período (passe o mouse no selo para ver a divisão). O Paineiras não tem faixa de desconto, e "Sem informação" é agência sem bilhete Trade no AquaRio no período. ' +
+    if (DADOS.desc) html += aviso('ℹ️ <strong>Desconto:</strong> faixa Trade <strong>atual</strong> da agência no <strong>AquaRio</strong> (10% ou 20%), pelo preço pago por bilhete contra o tarifário, no último mês de ' + P.lblAtual + ' em que pelo menos metade dos bilhetes dela estava na faixa 10 ou 20. ' +
+      'Bilhete em outro preço (balcão, escolar, acordo ou categoria diferente) não entra na conta. O Paineiras não tem faixa de desconto, e "-" é agência cujos bilhetes ficaram em outros preços no período. ' +
       'Dados de 2026 (gerado em ' + esc(String(DADOS.desc.geradoEm || '').slice(0, 10).split('-').reverse().join('/')) + ').');
     if (!DADOS.cad) html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia</strong> entram aqui quando o cadastro oficial de agências for carregado ' +
       '(código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso). Nenhuma base do Dash traz esses campos: a UF/PAIS do bruto é do visitante, não da agência.');
