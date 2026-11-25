@@ -1692,6 +1692,117 @@
     box.innerHTML = html;
   }
 
+  // ================================================================ CUPONS DE DESCONTO (AquaRio)
+  // 25/11/2026 (pedido do Paulo): todos os cupons usados no AquaRio, com os do Trade em destaque (só BUSER e DUOGOURMET, pelo começo
+  // do código). trade_cupons.json (CARD Robo\trade_cupons.py): bilhete com cupom, aprovado e utilizado, por dia de utilização.
+  var cupEstado = { mes: '', tipo: 't' };
+  DADOS.cup = null;
+  getJSON('trade_cupons.json', true).then(function (j) { DADOS.cup = j; if (window.__tv2Pagina === 'cup') renderCup(); });
+  // total de um cupom nos dias escolhidos: bilhetes, valor, primeiro e último uso
+  function cupSoma(c, mes) {
+    var o = { b: 0, v: 0, pri: '', ult: '' };
+    Object.keys(c.dias).sort().forEach(function (d) {
+      if (mes && d.slice(0, 7) !== mes) return;
+      o.b += c.dias[d][0]; o.v += c.dias[d][2];
+      if (!o.pri) o.pri = d;
+      o.ult = d;
+    });
+    return o;
+  }
+  function brl(v) { return 'R$ ' + (v == null || isNaN(v) ? '-' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })); }
+  function pillCup(trade) {
+    return trade ? '<span class="cli-pill" style="background:#E8A820;color:#3b2a00;font-weight:800;letter-spacing:.4px;white-space:nowrap">TRADE</span>'
+      : '<span class="cli-pill" style="background:color-mix(in srgb,var(--muted) 14%,var(--white));color:var(--muted);white-space:nowrap">Outros</span>';
+  }
+  function cupMeses(J) {
+    var m = {};
+    Object.keys(J.cupons).forEach(function (k) { Object.keys(J.cupons[k].dias).forEach(function (d) { m[d.slice(0, 7)] = 1; }); });
+    return Object.keys(m).sort();
+  }
+  function renderCup() {
+    var corpo = el('tv2-cup-corpo');
+    if (!corpo) return;
+    var J = DADOS.cup;
+    if (!J) { carregando('tv2-cup-corpo', 'trade_cupons.json'); return; }
+    var meses = cupMeses(J), mes = meses.indexOf(cupEstado.mes) >= 0 ? cupEstado.mes : '';
+    var sel = el('tv2-cup-mes');
+    if (sel) {
+      sel.innerHTML = '<option value="">Todo o período (' + mesLbl(meses[0]) + ' a ' + mesLbl(meses[meses.length - 1]) + ')</option>' +
+        meses.slice().reverse().map(function (m) { return '<option value="' + m + '"' + (m === mes ? ' selected' : '') + '>' + mesLbl(m) + '</option>'; }).join('');
+      sel.onchange = function () { cupEstado.mes = this.value; renderCup(); };
+    }
+    var linhas = Object.keys(J.cupons).map(function (k) { var c = J.cupons[k], t = cupSoma(c, mes); return { k: k, c: c, t: t, trade: !!c.trade }; })
+      .filter(function (l) { return l.t.b > 0; });
+    var tot = linhas.reduce(function (a, l) { return { b: a.b + l.t.b, v: a.v + l.t.v }; }, { b: 0, v: 0 });
+    var trd = linhas.filter(function (l) { return l.trade; });
+    var tb = trd.reduce(function (a, l) { return a + l.t.b; }, 0), tv = trd.reduce(function (a, l) { return a + l.t.v; }, 0);
+    var vis = linhas.filter(function (l) { return cupEstado.tipo === 't' || (cupEstado.tipo === 'trade' ? l.trade : !l.trade); })
+      .sort(function (a, b) { return (b.trade - a.trade) || (b.t.b - a.t.b); });
+    var per = mes ? mesLbl(mes) : mesLbl(meses[0]) + ' a ' + mesLbl(meses[meses.length - 1]);
+    var html = '<div class="cli-kpis-ag">' + kpi('Cupons usados', nf(linhas.length), per + ' · AquaRio') +
+      kpi('Bilhetes com cupom', nf(tot.b), 'aprovados e utilizados') + kpi('Valor pago nesses bilhetes', brl(tot.v), 'já com o desconto aplicado') +
+      kpi('Cupons do Trade', nf(tb) + ' bilhetes', trd.length ? pf(tot.b ? tb / tot.b : null) + ' dos bilhetes com cupom · ' + brl(tv) : 'nenhum uso em ' + per, null, '#B45309') + '</div>';
+    // destaque do Trade
+    html += '<div class="cc" style="border:2px solid #E8A820;background:color-mix(in srgb,#E8A820 9%,var(--white));margin-bottom:14px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">' +
+      pillCup(true) + '<strong style="font-size:14px">Cupons do Trade: ' + (J.tradePrefixos || []).join(' e ') + '</strong></div>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap">' + (function () {
+        var ls = Object.keys(J.cupons).filter(function (k) { return J.cupons[k].trade; }).map(function (k) { return { k: k, t: cupSoma(J.cupons[k], mes), c: J.cupons[k] }; })
+          .sort(function (a, b) { return b.t.b - a.t.b; });
+        return ls.length ? ls.map(function (l) {
+          return '<div style="flex:1 1 220px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px"><div style="font-weight:800;font-size:13px">' + esc(l.k) + '</div>' +
+            '<div style="font-family:Bebas Neue,sans-serif;font-size:26px;line-height:1.1">' + nf(l.t.b) + ' <span style="font-size:13px;font-family:inherit;color:var(--muted)">bilhetes</span></div>' +
+            '<div class="cc-s">' + brl(l.t.v) + (l.t.b ? ' · de ' + dataBR(l.t.pri) + ' a ' + dataBR(l.t.ult) : ' · sem uso em ' + per) + '</div></div>';
+        }).join('') : '<div class="cc-s">Nenhum cupom do Trade com uso.</div>';
+      })() + '</div></div>';
+    // controles da tabela
+    html += '<div class="cc" style="padding:12px 14px;margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">' +
+      controle('Mostrar', seg('tv2-cup-tipo', [['t', 'Todos'], ['trade', 'Só Trade'], ['out', 'Outros']], cupEstado.tipo, function (v) { cupEstado.tipo = v; renderCup(); })) +
+      '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);margin-left:auto;min-height:32px;padding:6px 14px" id="tv2-cup-xls">⬇️ Excel</button></div>';
+    // gráfico por mês
+    html += '<div class="cc" style="margin-bottom:14px"><div class="cc-t">Bilhetes com cupom por mês</div><div class="cc-s">Dia da utilização · cupons do Trade em cores quentes</div>' +
+      '<div style="position:relative;height:260px;margin-top:8px"><canvas id="tv2-cup-g"></canvas></div></div>';
+    // tabela
+    html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Cupom</th><th>Tipo</th><th style="text-align:right">Desconto no nome</th><th style="text-align:right">Bilhetes</th>' +
+      '<th style="text-align:right">% dos bilhetes com cupom</th><th style="text-align:right">Valor pago</th><th>Primeiro uso</th><th>Último uso</th></tr></thead><tbody>' +
+      (vis.length ? vis : [null]).map(function (l) {
+        if (!l) return '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px">Nenhum cupom para este filtro em ' + per + '.</td></tr>';
+        var st = l.trade ? ' style="background:color-mix(in srgb,#E8A820 14%,var(--white));box-shadow:inset 4px 0 0 #E8A820"' : '';
+        return '<tr' + st + '><td><strong>' + esc(l.k) + '</strong></td><td>' + pillCup(l.trade) + '</td><td style="text-align:right">' + (l.c.pct ? l.c.pct + '%' : '-') + '</td>' +
+          '<td style="text-align:right"><strong>' + nf(l.t.b) + '</strong></td><td style="text-align:right">' + pf(tot.b ? l.t.b / tot.b : null) + '</td><td style="text-align:right">' + brl(l.t.v) + '</td>' +
+          '<td style="white-space:nowrap">' + dataBR(l.t.pri) + '</td><td style="white-space:nowrap">' + dataBR(l.t.ult) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    html += aviso('ℹ️ <strong>Como ler:</strong> só o <strong>AquaRio</strong>. Conta bilhete com cupom de desconto, aprovado e já utilizado, pelo dia da utilização (mesma regra da planilha de cupons enviada em 25/11/2026, que bate com este painel até 26/08). ' +
+      'Valor = o que o cliente pagou, já com o desconto. "Desconto no nome" é o número que está no código do cupom, e não um desconto calculado. ' +
+      'São do Trade só os cupons que começam com <strong>' + (J.tradePrefixos || []).join('</strong> ou <strong>') + '</strong>; os demais ficam como "Outros" até serem sinalizados. ' +
+      'Dados de 2026 (jan/26 em diante), lidos do CARD até ' + dataBR(J.ate) + '.');
+    corpo.innerHTML = html;
+    // gráfico empilhado por mês e por cupom
+    var ordem = Object.keys(J.cupons).sort(function (a, b) { return (J.cupons[b].trade - J.cupons[a].trade) || (cupSoma(J.cupons[b]).b - cupSoma(J.cupons[a]).b); })
+      .filter(function (k) { return cupEstado.tipo === 't' || (cupEstado.tipo === 'trade' ? J.cupons[k].trade : !J.cupons[k].trade); });
+    var QUENTES = ['#E8A820', '#B45309', '#F2C14E', '#8A4B08'], FRIAS = ['#1F7A8C', '#6B8A9E', '#56C354', '#9AA9B4', '#005F8E', '#2D6A2B', '#7a5aa6', '#B8C4CC'], qi = 0, fi = 0;
+    var ds = ordem.map(function (k) {
+      var c = J.cupons[k], cor = c.trade ? QUENTES[qi++ % QUENTES.length] : FRIAS[fi++ % FRIAS.length];
+      return { label: k + (c.trade ? ' (Trade)' : ''), backgroundColor: cor, data: meses.map(function (m) { return cupSoma(c, m).b; }), stack: 's' };
+    });
+    var EX = eixos(); EX.x.stacked = true; EX.y.stacked = true;
+    grafico('tv2-cup-g', { type: 'bar', data: { labels: meses.map(mesLbl), datasets: ds },
+      options: { scales: EX, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10.5 }, color: grade().txt } } } } });
+    el('tv2-cup-xls').onclick = function () {
+      if (typeof XLSX === 'undefined') return;
+      var wb = XLSX.utils.book_new();
+      var r1 = [['Cupom', 'Tipo', 'Desconto no nome (%)', 'Bilhetes', '% dos bilhetes com cupom', 'Valor pago (R$)', 'Primeiro uso', 'Último uso']];
+      vis.forEach(function (l) { r1.push([l.k, l.trade ? 'TRADE' : 'Outros', l.c.pct || '', l.t.b, tot.b ? Math.round(l.t.b / tot.b * 1000) / 10 : '', Math.round(l.t.v * 100) / 100, dataBR(l.t.pri), dataBR(l.t.ult)]); });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(r1), 'Cupons');
+      var r2 = [['Cupom', 'Tipo'].concat(meses.map(mesLbl))];
+      ordem.forEach(function (k) { r2.push([k, J.cupons[k].trade ? 'TRADE' : 'Outros'].concat(meses.map(function (m) { return cupSoma(J.cupons[k], m).b; }))); });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(r2), 'Bilhetes por mês');
+      var r3 = [['Cupom', 'Tipo', 'Dia da utilização', 'Bilhetes', 'Pedidos', 'Valor pago (R$)']];
+      ordem.forEach(function (k) { Object.keys(J.cupons[k].dias).sort().forEach(function (d) { var v = J.cupons[k].dias[d]; r3.push([k, J.cupons[k].trade ? 'TRADE' : 'Outros', dataBR(d), v[0], v[1], v[2]]); }); });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(r3), 'Por dia');
+      XLSX.writeFile(wb, 'cupons_aquario_' + (mes || 'todo_periodo') + '.xlsx');
+    };
+  }
+
   // ================================================================ páginas e navegação
   var PAGINAS = [
     ['obz', '🎯 OBZ', '🎯 OBZ', 'OBZ · TRADE E ESCOLAR', 'Realizado x meta OBZ, comparativos e quanto falta para a meta do mês'],
@@ -1699,10 +1810,11 @@
     ['ori', '🌎 Origem', '🌎 Origem', 'ORIGEM DOS VISITANTES', 'Share e antecedência por país e feriados dos mercados principais'],
     ['op', '💡 Oportunidades', '💡 Oport.', 'OPORTUNIDADES', 'Agências que já compraram e estão paradas há mais de 6 meses'],
     ['canc', '🚫 Cancelamento', '🚫 Cancel.', 'CANCELAMENTO E NO-SHOW · TRADE', '% de bilhetes Trade cancelados e não utilizados, por mês, agência e clima'],
-    ['tres', '⛵ Três Pescadores', '⛵ 3P', 'TRÊS PESCADORES · B2B E B2C', 'Visitação do parque de Aparecida separada em Trade (B2B) e demais canais (B2C)']
+    ['tres', '⛵ Três Pescadores', '⛵ 3P', 'TRÊS PESCADORES · B2B E B2C', 'Visitação do parque de Aparecida separada em Trade (B2B) e demais canais (B2C)'],
+    ['cup', '🎟️ Cupons', '🎟️ Cupons', 'CUPONS DE DESCONTO · AQUARIO', 'Todos os cupons usados no AquaRio, com os do Trade (BUSER e DUOGOURMET) em destaque']
   ];
   window.__tv2CancMes = function (v) { cancEstado.mes = v; renderCanc(); };
-  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp, canc: renderCanc, tres: renderTres };
+  var RENDER = { obz: renderOBZ, ind: renderInd, ori: renderOri, op: renderOp, canc: renderCanc, tres: renderTres, cup: renderCup };
   function filtros(id) {
     if (id === 'obz') return controle('Parque do gráfico', seg('tv2-obz-k', [['t', 'AquaRio + Paineiras'], ['a', 'AquaRio'], ['p', 'Paineiras']], obzEstado.k, function (v) { obzEstado.k = v; renderOBZ(); }));
     if (id === 'ind') return controle('Parque', seg('tv2-ind-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], indEstado.k, function (v) { indEstado.k = v; renderInd(); })) +
@@ -1711,6 +1823,7 @@
       controle('Mês dos indicadores', '<select class="cli-select" id="tv2-canc-mes" onchange="window.__tv2CancMes(this.value)"></select>');
     if (id === 'tres') return controle('Período', seg('tv2-tres-per', PERIODOS, tresEstado.per, function (v) { tresEstado.per = v; renderTres(); })) +
       controle('Mês em foco', '<select class="cli-select" id="tv2-tres-mes" onchange="window.__tv2TresMes(this.value)"></select>');
+    if (id === 'cup') return controle('Período', '<select class="cli-select" id="tv2-cup-mes"></select>');
     if (id === 'ori') return controle('Parque', seg('tv2-ori-k', [['t', 'Os dois'], ['a', 'AquaRio'], ['p', 'Paineiras']], oriEstado.k, function (v) { oriEstado.k = v; renderOri(); })) +
       controle('Período', seg('tv2-ori-per', PERIODOS, oriEstado.per, function (v) { oriEstado.per = v; renderOri(); })) +
       controle('Canal', seg('tv2-ori-seg', [['tot', 'Total'], ['b2b', 'B2B'], ['b2c', 'B2C']], oriEstado.seg, function (v) { oriEstado.seg = v; renderOri(); })) +
@@ -2090,7 +2203,7 @@
     var SECOES = [
       ['res', 'Resultado', [['mar', '📅 Mês'], ['acum', '📊 Acumulado'], ['obz', '🎯 OBZ'], ['hist', '📈 Histórico']]],
       ['cli', 'Clientes', [['cli', '🏆 Top Clientes'], ['op', '💡 Oportunidades'], ['canc', '🚫 Cancelamento']]],
-      ['mer', 'Mercado', [['share', '🔄 Share Trade'], ['imm', '🗻 Intel. Mercado'], ['ori', '🌎 Origem']]],
+      ['mer', 'Mercado', [['share', '🔄 Share Trade'], ['imm', '🗻 Intel. Mercado'], ['ori', '🌎 Origem'], ['cup', '🎟️ Cupons']]],
       ['par', 'Parques', [['ind', '🏞️ Indicadores Parques'], ['tres', '⛵ Três Pescadores']]]
     ];
     var topo = document.querySelector('.topbar');

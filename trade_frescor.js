@@ -40,7 +40,7 @@
   function maxIso(a) { var u = null; a.forEach(function (x) { if (x && (!u || x > u)) u = x; }); return u; }
 
   // ---------------------------------------------------------------- carga dos JSONs (todos opcionais)
-  var JS = { trade_diario: null, trade_indicadores: null, trade_extra: null, trade_cancelamento: null, trade_3p: null };
+  var JS = { trade_diario: null, trade_indicadores: null, trade_extra: null, trade_cancelamento: null, trade_3p: null, trade_cupons: null };
   var carregadoEm = 0, carregando = null;
   function getJSON(nome) {
     return fetch(BASE + nome + '.json?v=' + Date.now()).then(function (r) {
@@ -152,11 +152,16 @@
     var j = JS.trade_3p;
     return { tipo: 'dia', ate: j && j.ate ? String(j.ate).slice(0, 10) : null, nota: 'Total pela planilha de visitação e canal pelo bruto/tratado. Lido em ' + (j && j.geradoEm ? dm(String(j.geradoEm).slice(0, 10)) : 'sem leitura') + '.' };
   } };
+  // Cupons do AquaRio (25/11/2026): trade_cupons.json, campo "ate" = último dia de utilização coberto pelos arquivos do CARD
+  FONTES.cup = { label: 'Cupons (CARD)', get: function () {
+    var j = JS.trade_cupons;
+    return { tipo: 'dia', ate: j && j.ate ? String(j.ate).slice(0, 10) : null, nota: 'Bilhetes com cupom do AquaRio, por dia de utilização. Lido em ' + (j && j.geradoEm ? dm(String(j.geradoEm).slice(0, 10)) : 'sem leitura') + '.' };
+  } };
   // cada aba: fontes que ela realmente usa
   var ABAS = {
     mar: ['trade'], acum: ['trade'], hist: ['trade'], share: ['trade'],
     cli: ['topcli'], imm: ['intel', 'tradePai'],
-    obz: ['trade', 'escolar'], ind: ['brutos'], ori: ['brutos'], op: ['compras'], canc: ['canc'], tres: ['t3p']
+    obz: ['trade', 'escolar'], ind: ['brutos'], ori: ['brutos'], op: ['compras'], canc: ['canc'], tres: ['t3p'], cup: ['cup']
   };
   FONTES.tradePai = { label: 'Paineiras (Trade e visitação)', get: function () { return FONTES.trade.get(['Paineiras']); } };
 
