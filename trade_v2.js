@@ -107,6 +107,84 @@
       if (window.curPage === 'cli' && typeof window.cliRenderAtivo === 'function') window.cliRenderAtivo();
     } catch (e) { }
   });
+  // ---------------------------------------------------------------- faixa de desconto Trade (25/11/2026, ideia do Paulo)
+  // trade_desconto.json (CARD Robo\trade_desconto.py): por agência e mês, bilhetes Trade do AquaRio pagos no preço do tarifário
+  // Trade 10, do Trade 20, do balcão (sem desconto) ou em outro preço (acordo especial). Paineiras não tem faixa de desconto.
+  var DESC_ROT = ['10%', '20%', 'Sem desconto', 'Acordo especial'];
+  var FILTRO_DESC = ['10%', '20%', 'Sem desconto', 'Acordo especial', 'Misto', 'Sem informação'];
+  var mapaDesc = null;
+  DADOS.desc = null;
+  function montaMapaDesc() {
+    mapaDesc = {};
+    var ms = (DADOS.desc || {}).meses || {};
+    Object.keys(ms).forEach(function (m) {
+      Object.keys(ms[m]).forEach(function (n) {
+        var k = chave(alias(n)), o = mapaDesc[k] = mapaDesc[k] || {};
+        o[m] = (o[m] || [0, 0, 0, 0]).map(function (x, i) { return x + (ms[m][n][i] || 0); });
+      });
+    });
+  }
+  // grafia do Top Clientes (planilha) x grafia do Local de Venda do CARD: sem nome igual, aceita o nome que começa com o outro
+  // (ex.: "Go Now" e "GO NOW TOURS") ou que o contém (8+ letras), desde que haja um candidato só
+  var cacheDesc = {};
+  function achaDesc(nome) {
+    var c = chave(alias(nome));
+    if (c.length < 5) return null;
+    if (!(c in cacheDesc)) {
+      var ach = Object.keys(mapaDesc).filter(function (K) { return K.length >= 5 && (K.indexOf(c) === 0 || c.indexOf(K) === 0 || (c.length >= 8 && K.indexOf(c) >= 0)); });
+      cacheDesc[c] = ach.length === 1 ? mapaDesc[ach[0]] : null;
+    }
+    return cacheDesc[c];
+  }
+  // faixa do cliente nos meses pedidos (índices 0-11 de 2026; sem lista = todos): predominante com 85% ou mais dos bilhetes, senão "Misto"
+  function descontoDe(nome, idxs) {
+    if (!DADOS.desc) return null;
+    if (!mapaDesc) montaMapaDesc();
+    var o = mapaDesc[chave(alias(nome))] || mapaDesc[chave(nome)] || achaDesc(nome);
+    if (!o) return null;
+    var c = [0, 0, 0, 0], ultM = '';
+    Object.keys(o).sort().forEach(function (m) {
+      if (idxs && idxs.indexOf(Number(m.slice(5, 7)) - 1) < 0) return;
+      var t = o[m][0] + o[m][1] + o[m][2] + o[m][3];
+      if (t) ultM = m;
+      for (var i = 0; i < 4; i++) c[i] += o[m][i];
+    });
+    var tot = c[0] + c[1] + c[2] + c[3];
+    if (!tot) return null;
+    var dom = c.indexOf(Math.max.apply(null, c)), pc = c.map(function (x) { return x / tot; });
+    var rot = pc[dom] >= 0.85 ? DESC_ROT[dom] : 'Misto';
+    var det = DESC_ROT.map(function (r, i) { return c[i] ? r + ': ' + nf(c[i]) + ' (' + Math.round(pc[i] * 100) + '%)' : ''; }).filter(Boolean).join(' · ');
+    // faixa do último mês com venda no período (mostra a faixa de hoje quando a agência mudou de faixa no meio do período)
+    var u = ultM ? o[ultM] : null, ut = u ? u[0] + u[1] + u[2] + u[3] : 0, ud = u ? u.indexOf(Math.max.apply(null, u)) : 0;
+    var ult = u ? { rot: u[ud] / ut >= 0.85 ? DESC_ROT[ud] : 'Misto', mes: MES[Number(ultM.slice(5, 7)) - 1] } : null;
+    return { c: c, tot: tot, rot: rot, det: det, dom: dom, pdom: pc[dom], ult: ult };
+  }
+  function rotDesc(d) { return d ? d.rot : 'Sem informação'; }
+  // texto do Excel: a faixa, e no misto a divisão
+  function txtDesc(d) { return !d ? 'Sem informação' : d.rot === 'Misto' ? 'Misto (' + d.det + (d.ult ? ' · último mês, ' + d.ult.mes + ': ' + d.ult.rot : '') + ')' : d.rot; }
+  function pillDesc(d) {
+    if (!d) return '<span style="color:var(--muted);font-size:10.5px">-</span>';
+    var cor = d.rot === '20%' ? ['color-mix(in srgb,#1f7a4d 15%,var(--white))', 'color-mix(in srgb,#1f7a4d 70%,var(--text))']
+      : d.rot === '10%' ? ['color-mix(in srgb,var(--aqua) 14%,var(--white))', 'color-mix(in srgb,var(--aqua) 70%,var(--text))']
+        : d.rot === 'Acordo especial' ? ['color-mix(in srgb,#E8A820 20%,var(--white))', 'color-mix(in srgb,#B45309 55%,var(--text))']
+          : d.rot === 'Misto' ? ['color-mix(in srgb,#7a5aa6 14%,var(--white))', 'color-mix(in srgb,#7a5aa6 70%,var(--text))']
+            : ['color-mix(in srgb,var(--muted) 14%,var(--white))', 'var(--muted)'];
+    return '<span class="cli-pill" style="background:' + cor[0] + ';color:' + cor[1] + ';white-space:nowrap" title="' + esc(d.det) + '">' + esc(d.rot) + '</span>' +
+      (d.rot === 'Misto' ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + Math.round(d.pdom * 100) + '% ' + (DESC_ROT[d.dom] === 'Sem desconto' ? 'sem desconto' : 'a ' + DESC_ROT[d.dom]) + (d.ult ? ' · ' + d.ult.mes + ': ' + d.ult.rot : '') + '</div>' : '');
+  }
+  function ctrlDesc(id, valor, cnt) {
+    return controle('Desconto', '<select class="cli-select" id="' + id + '"><option value="">Todos</option>' + FILTRO_DESC.map(function (c) {
+      return '<option value="' + c + '"' + (c === valor ? ' selected' : '') + '>' + c + (cnt ? ' (' + nf(cnt[c] || 0) + ')' : '') + '</option>';
+    }).join('') + '</select>');
+  }
+  window.__tvDesconto = { de: descontoDe };
+  getJSON('trade_desconto.json', false).then(function (j) {
+    DADOS.desc = j; mapaDesc = null; cacheDesc = {};
+    try {
+      var pg = window.__tv2Pagina;
+      if (pg && RENDER[pg]) RENDER[pg]();
+    } catch (e) { }
+  });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function chave(n) {
     return String(n || '').replace(/�/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
@@ -849,7 +927,7 @@
   // 13/11/2026 (e-mail da Paula Bottino): a Carteira virou a visão principal de Clientes. Ela absorveu o Ranking + Delta
   // (filtro de mês, com comparativo contra o mês anterior além do ano contra ano) e o filtro de parque; a subaba
   // "Por Agência" saiu. Sem filtro de mês, a visão é a de sempre: acumulado jan até o último mês fechado x mesmo período de 2025.
-  var carEstado = { grupo: '', contrato: '', busca: '', loc: '0', k: 't', mes: '', comp: 'ano' };
+  var carEstado = { grupo: '', contrato: '', desc: '', busca: '', loc: '0', k: 't', mes: '', comp: 'ano' };
   var GRUPOS = [['Defender e acelerar', 'Volume alto + crescimento', 'color-mix(in srgb, var(--up) 62%, var(--text))', 'color-mix(in srgb, var(--up) 13%, var(--white))'], ['Recuperar volume', 'Volume alto + queda ou estável', 'color-mix(in srgb, var(--dn) 62%, var(--text))', 'color-mix(in srgb, var(--dn) 11%, var(--white))'],
     ['Desenvolver potencial', 'Volume menor + crescimento', 'color-mix(in srgb, var(--aqua) 62%, var(--text))', 'color-mix(in srgb, var(--aqua) 11%, var(--white))'], ['Reavaliar esforço', 'Volume menor + queda ou estável', 'color-mix(in srgb, #B45309 45%, var(--text))', 'color-mix(in srgb, #E8A820 17%, var(--white))']];
   // só meses fechados: o mês em andamento entra quando fechar (parcial nunca é comparado com mês inteiro)
@@ -905,6 +983,9 @@
     if (carUltFechado() < 0) { box.innerHTML = aviso('Ainda não há mês fechado em 2026 para montar a Carteira.'); return; }
     var c = carteira(), arr = c.arr, P = c.P, k = carEstado.k;
     var cntCar = contaContrato(arr, function (a) { return a.n; });
+    // faixa de desconto (AquaRio): nos meses do período atual; Paineiras não tem
+    var cntDesc = {};
+    arr.forEach(function (a) { a.d = k === 'p' ? null : descontoDe(a.n, P.atual); var r = rotDesc(a.d); cntDesc[r] = (cntDesc[r] || 0) + 1; });
     var tb = arr.reduce(function (s, a) { return s + a.vb; }, 0), ta = arr.reduce(function (s, a) { return s + a.va; }, 0);
     var html = '<div class="cc" style="padding:12px 14px;margin-bottom:14px"><div class="tv2-car-bar" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">' +
       controle('Período', '<select class="cli-select" id="tv2-car-mes"><option value=""' + (P.m < 0 ? ' selected' : '') + '>Acumulado ' + P.acum + '/26</option>' +
@@ -930,9 +1011,10 @@
       controle('Buscar', '<input id="tv2-car-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome da agência" value="' + esc(carEstado.busca) + '">') +
       controle('Grupo', '<select class="cli-select" id="tv2-car-grupo"><option value="">Todos</option>' + GRUPOS.map(function (g) { return '<option' + (g[0] === carEstado.grupo ? ' selected' : '') + '>' + g[0] + '</option>'; }).join('') + '</select>') +
       ctrlContrato('tv2-car-contrato', carEstado.contrato, DADOS.contr ? cntCar : null) +
+      ctrlDesc('tv2-car-desc', carEstado.desc, DADOS.desc ? cntDesc : null) +
       (DADOS.cad ? controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') : '') + '</div>';
     if (!DADOS.cad) carEstado.loc = '0';
-    var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.contrato || contratoDe(a.n) === carEstado.contrato) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
+    var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.contrato || contratoDe(a.n) === carEstado.contrato) && (!carEstado.desc || rotDesc(a.d) === carEstado.desc) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
     // composição de cada nome no período atual (mesmos meses e parques da tabela)
     var CM = window.__tvAgTip ? window.__tvAgTip.compMap(P.atual.map(function (i) { return (D.meses[i] || {}).label; }), k === 'a' ? ['a'] : k === 'p' ? ['p'] : ['a', 'p']) : {};
     var subCar = P.lblAtual + ' · ' + (k === 't' ? 'AquaRio + Paineiras' : NOME[k]);
@@ -947,10 +1029,10 @@
       ls.sort(function (a, b) { return b.va - a.va; });
       var flag = function (v) { return v == null ? '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>' : v === true || v === 'sim' ? '✔' : v === false || v === 'não' ? '-' : esc(v); };
       var cad = !!DADOS.cad;
-      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Contrato</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
-        (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 10 : 7) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
+      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Contrato</th><th>Desconto</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
+        (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 11 : 8) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
           var g = GRUPOS.filter(function (x) { return x[0] === a.g; })[0];
-          return '<tr><td><strong' + tipAg(a.n, subCar, dicComps(CM[a.n])) + '>' + esc(a.n) + '</strong></td><td>' + pillContr(contratoDe(a.n)) + '</td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
+          return '<tr><td><strong' + tipAg(a.n, subCar, dicComps(CM[a.n])) + '>' + esc(a.n) + '</strong></td><td>' + pillContr(contratoDe(a.n)) + '</td><td>' + pillDesc(a.d) + '</td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
             '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' : '') +
             '<td style="text-align:right">' + nf(a.vb) + '</td><td style="text-align:right"><strong>' + nf(a.va) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
@@ -964,6 +1046,9 @@
           '<div style="margin-top:6px;font-size:10.5px;color:var(--muted)">Estão na lista de contratos, mas não têm bilhete Trade no recorte escolhido (ou nunca apareceram nas bases do Dash). Entram na tabela assim que comprarem.</div>'
           : ' todos os clientes desta categoria tiveram compra no recorte.'));
     }
+    if (DADOS.desc) html += aviso('ℹ️ <strong>Desconto:</strong> faixa Trade do <strong>AquaRio</strong> em ' + P.lblAtual + ', pelo preço pago por bilhete contra o tarifário (Trade 10, Trade 20, balcão sem desconto; outro preço = acordo especial). ' +
+      '"Misto" = nenhuma faixa passa de 85% dos bilhetes da agência no período (passe o mouse no selo para ver a divisão). O Paineiras não tem faixa de desconto, e "Sem informação" é agência sem bilhete Trade no AquaRio no período. ' +
+      'Dados de 2026 (gerado em ' + esc(String(DADOS.desc.geradoEm || '').slice(0, 10).split('-').reverse().join('/')) + ').');
     if (!DADOS.cad) html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia</strong> entram aqui quando o cadastro oficial de agências for carregado ' +
       '(código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso). Nenhuma base do Dash traz esses campos: a UF/PAIS do bruto é do visitante, não da agência.');
     // a lista de agências do Paineiras mudou de método em ago/26 (índice 7): avisa só se o período atual ou o de comparação cruza essa data
@@ -979,14 +1064,15 @@
     el('tv2-car-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { carEstado.busca = v; renderCarteira(); var b = el('tv2-car-busca'); b.focus(); b.setSelectionRange(v.length, v.length); }, 300); };
     el('tv2-car-grupo').onchange = function () { carEstado.grupo = this.value; renderCarteira(); };
     el('tv2-car-contrato').onchange = function () { carEstado.contrato = this.value; renderCarteira(); };
+    el('tv2-car-desc').onchange = function () { carEstado.desc = this.value; renderCarteira(); };
     el('tv2-car-mes').onchange = function () { carEstado.mes = this.value; if (this.value === '') carEstado.comp = 'ano'; renderCarteira(); };
     if (el('tv2-car-loc')) el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
     el('tv2-car-xls').onclick = function () {
       if (typeof XLSX === 'undefined') return;
       var cadX = !!DADOS.cad;
-      var rows = [['Agência', 'Contrato'].concat(cadX ? ['Cidade', 'UF'] : []).concat([P.lblBase, P.lblAtual, 'Δ volume', 'Δ %', 'Prioridade sugerida'])];
+      var rows = [['Agência', 'Contrato', 'Desconto (AquaRio)'].concat(cadX ? ['Cidade', 'UF'] : []).concat([P.lblBase, P.lblAtual, 'Δ volume', 'Δ %', 'Prioridade sugerida'])];
       ls.slice().sort(function (a, b) { return b.va - a.va; }).forEach(function (a) {
-        rows.push([a.n, contratoDe(a.n)].concat(cadX ? [a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : ''] : []).concat([Math.round(a.vb), Math.round(a.va), Math.round(a.diff), a.pct == null ? 'novo' : Math.round(a.pct * 1000) / 10, a.g]));
+        rows.push([a.n, contratoDe(a.n), txtDesc(a.d)].concat(cadX ? [a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : ''] : []).concat([Math.round(a.vb), Math.round(a.va), Math.round(a.diff), a.pct == null ? 'novo' : Math.round(a.pct * 1000) / 10, a.g]));
       });
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Carteira');
