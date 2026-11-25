@@ -116,6 +116,9 @@
     h += '</div>';
     var extras = extrasRegra(d);
     if (extras.length) h += '<div class="tv-agtip-r"><div class="tv-agtip-rt">Unificada na origem com:</div>' + extras.map(function (n) { return '<div>' + esc(n) + '</div>'; }).join('') + '</div>';
+    // contrato do cliente (trade_contratos.json, resolvido no trade_v2.js); o Três Pescadores não tem essa informação
+    var ctr = window.__tvContrato && !/Três Pescadores/.test(d.s || '') ? window.__tvContrato.de(d.t) : '';
+    if (ctr) h += '<div class="tv-agtip-f">Contrato: <strong>' + esc(ctr) + '</strong></div>';
     if (d.c.length > 1) h += '<div class="tv-agtip-f">' + d.c.length + ' nomes formam esta agência</div>';
     return h;
   }

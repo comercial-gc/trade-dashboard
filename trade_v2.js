@@ -56,6 +56,49 @@
   // balão com os nomes que compõem a agência (trade_agtip.js): atributo data-agtip do nome
   function tipAg(titulo, sub, comps, unid) { return window.__tvAgTip ? window.__tvAgTip.attr(titulo, sub, comps, unid) : ''; }
   function dicComps(o) { return Object.keys(o || {}).map(function (n) { return { n: n, v: o[n] }; }); }
+  // ---------------------------------------------------------------- contrato do cliente (25/11/2026, e-mail da Paula Bottino)
+  // trade_contratos.json: Faturados (lista da GEFIT), Adiantamento Fixo (GRAMADO PARKS e W40) e Sem Categoria (os demais).
+  // O Dash não tem CNPJ: o cliente é reconhecido pelo nome, em qualquer das grafias listadas no arquivo (e pelo nome que o
+  // agrupamento de agências do Top Clientes dá a elas).
+  var CONTRATOS = ['Faturados', 'Adiantamento Fixo', 'Sem Categoria'];
+  var mapaContr = null;
+  DADOS.contr = null;
+  function montaMapaContr() {
+    mapaContr = {};
+    ((DADOS.contr || {}).clientes || []).forEach(function (c) {
+      [c.razao].concat(c.nomes || []).forEach(function (n) {
+        [chave(n), chave(alias(n))].forEach(function (k) { if (k && !mapaContr[k]) mapaContr[k] = c.contrato; });
+      });
+    });
+  }
+  function contratoDe(nome) {
+    if (!DADOS.contr) return '';
+    if (!mapaContr) montaMapaContr();
+    return mapaContr[chave(nome)] || mapaContr[chave(alias(nome))] || 'Sem Categoria';
+  }
+  window.__tvContrato = { de: contratoDe };
+  function pillContr(c) {
+    if (!c) return '<span style="color:var(--muted)">-</span>';
+    var cor = c === 'Faturados' ? ['color-mix(in srgb,#1f7a4d 15%,var(--white))', 'color-mix(in srgb,#1f7a4d 70%,var(--text))']
+      : c === 'Adiantamento Fixo' ? ['color-mix(in srgb,#E8A820 20%,var(--white))', 'color-mix(in srgb,#B45309 55%,var(--text))']
+        : ['color-mix(in srgb,var(--muted) 14%,var(--white))', 'var(--muted)'];
+    return '<span class="cli-pill" style="background:' + cor[0] + ';color:' + cor[1] + ';white-space:nowrap">' + esc(c) + '</span>';
+  }
+  // dropdown "Contrato" com a contagem de agências de cada categoria no recorte da tela
+  function ctrlContrato(id, valor, cnt) {
+    return controle('Contrato', '<select class="cli-select" id="' + id + '"><option value="">Todos</option>' + CONTRATOS.map(function (c) {
+      return '<option value="' + c + '"' + (c === valor ? ' selected' : '') + '>' + c + (cnt ? ' (' + nf(cnt[c] || 0) + ')' : '') + '</option>';
+    }).join('') + '</select>');
+  }
+  function contaContrato(lista, nomeDe) { var o = {}; lista.forEach(function (x) { var c = contratoDe(nomeDe(x)); o[c] = (o[c] || 0) + 1; }); return o; }
+  getJSON('trade_contratos.json', false).then(function (j) {
+    DADOS.contr = j; mapaContr = null;
+    try {
+      var pg = window.__tv2Pagina;
+      if (pg && RENDER[pg]) RENDER[pg]();
+      if (window.curPage === 'cli' && typeof window.cliRenderAtivo === 'function') window.cliRenderAtivo();
+    } catch (e) { }
+  });
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function chave(n) {
     return String(n || '').replace(/�/g, '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase()
@@ -671,7 +714,7 @@
   }
 
   // ================================================================ OPORTUNIDADES
-  var opEstado = { min: '10', ord: 'hist', busca: '' };
+  var opEstado = { min: '10', ord: 'hist', busca: '', contrato: '' };
   var INTERNOS = /AQUA RIO AQUARIO|AQUARIO MARINHO|PAINEIRAS|BINAMIK|BIOPARQUE|^TESTE/;
   function ultimaPlanilha() { // chave do nome -> último mês (AAAA-MM) com venda no Top Clientes da planilha TRADE
     var u = {};
@@ -743,7 +786,8 @@
     });
     var minQ = Number(opEstado.min);
     var busca = chave(opEstado.busca);
-    var ls = lista.filter(function (a) { return a.q >= minQ && (!busca || chave(a.n).indexOf(busca) >= 0 || a.cod.indexOf(opEstado.busca) >= 0); });
+    var ls = lista.filter(function (a) { return a.q >= minQ && (!opEstado.contrato || contratoDe(a.n) === opEstado.contrato) && (!busca || chave(a.n).indexOf(busca) >= 0 || a.cod.indexOf(opEstado.busca) >= 0); });
+    var cntOp = contaContrato(lista.filter(function (a) { return a.q >= minQ; }), function (a) { return a.n; });
     var ord = { dias: function (a, b) { return b.diasSem - a.diasSem; }, hist: function (a, b) { return b.q - a.q; }, media: function (a, b) { return b.mediaAtiva - a.mediaAtiva; },
       local: function (a, b) { var x = a.cad ? (a.cad.uf || '') + (a.cad.cidade || '') : '~', y = b.cad ? (b.cad.uf || '') + (b.cad.cidade || '') : '~'; return x < y ? -1 : x > y ? 1 : b.q - a.q; } }[opEstado.ord];
     ls.sort(ord);
@@ -761,12 +805,13 @@
       controle('Buscar', '<input id="tv2-op-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome ou código" value="' + esc(opEstado.busca) + '">') +
       controle('Mínimo no histórico', '<select class="cli-select" id="tv2-op-min">' + ['1', '10', '50', '100', '500'].map(function (v) { return '<option value="' + v + '"' + (v === opEstado.min ? ' selected' : '') + '>' + v + '+ bilhetes</option>'; }).join('') + '</select>') +
       controle('Ordenar por', '<select class="cli-select" id="tv2-op-ord">' + [['dias', 'Tempo sem vender'], ['hist', 'Histórico de vendas'], ['media', 'Média mensal quando ativa']].concat(DADOS.cad ? [['local', 'Localização']] : []).map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === opEstado.ord ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>') +
+      ctrlContrato('tv2-op-contrato', opEstado.contrato, DADOS.contr ? cntOp : null) +
       '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" id="tv2-op-xls">⬇️ Excel</button></div>';
     var cadOp = !!DADOS.cad;
-    html += '<table class="cli-tbl"><thead><tr><th>Agência</th><th>Código</th>' + (cadOp ? '<th>Cidade / UF</th>' : '') + '<th>Última venda</th><th style="text-align:right">Sem vender</th><th style="text-align:right">Bilhetes (hist.)</th>' +
+    html += '<table class="cli-tbl"><thead><tr><th>Agência</th><th>Contrato</th><th>Código</th>' + (cadOp ? '<th>Cidade / UF</th>' : '') + '<th>Última venda</th><th style="text-align:right">Sem vender</th><th style="text-align:right">Bilhetes (hist.)</th>' +
       '<th style="text-align:right">Média/mês ativa</th><th>Parques</th><th>Meses com venda</th></tr></thead><tbody>';
     ls.slice(0, 300).forEach(function (a) {
-      html += '<tr><td><strong' + tipAg(a.n, 'Histórico desde jan/25 · AquaRio + Paineiras', dicComps(a.nm)) + '>' + esc(a.n) + '</strong></td><td style="font-size:10.5px;color:var(--muted)">' + esc(/^\d/.test(a.cod) ? a.cod : '-') + '</td>' +
+      html += '<tr><td><strong' + tipAg(a.n, 'Histórico desde jan/25 · AquaRio + Paineiras', dicComps(a.nm)) + '>' + esc(a.n) + '</strong></td><td>' + pillContr(contratoDe(a.n)) + '</td><td style="font-size:10.5px;color:var(--muted)">' + esc(/^\d/.test(a.cod) ? a.cod : '-') + '</td>' +
         (cadOp ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' : '') +
         '<td style="white-space:nowrap">' + dataBR(a.uv) + '</td><td style="text-align:right"><strong>' + a.mesesSem + ' meses</strong></td><td style="text-align:right">' + nf(a.q) + '</td>' +
         '<td style="text-align:right">' + nf(a.mediaAtiva) + '</td><td>' + Object.keys(a.pq).map(function (x) { return '<span class="cli-pill" style="background:' + (x === 'a' ? 'var(--aqua-pale);color:var(--aqua)' : 'var(--pai-pale);color:var(--pai)') + '">' + NOME[x] + '</span>'; }).join(' ') + '</td>' +
@@ -777,12 +822,13 @@
     var t;
     el('tv2-op-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { opEstado.busca = v; renderOp(); var b = el('tv2-op-busca'); b.focus(); b.setSelectionRange(v.length, v.length); }, 300); };
     el('tv2-op-min').onchange = function () { opEstado.min = this.value; renderOp(); };
+    el('tv2-op-contrato').onchange = function () { opEstado.contrato = this.value; renderOp(); };
     el('tv2-op-ord').onchange = function () { opEstado.ord = this.value; renderOp(); };
     el('tv2-op-xls').onclick = function () {
       if (typeof XLSX === 'undefined') return;
-      var rows = [['Agência', 'Código', 'Cidade', 'UF', 'Última venda', 'Dias sem vender', 'Meses sem vender', 'Bilhetes no histórico', 'Média mensal quando ativa', 'AquaRio', 'Paineiras', 'Meses com venda', 'Primeira venda']];
+      var rows = [['Agência', 'Contrato', 'Código', 'Cidade', 'UF', 'Última venda', 'Dias sem vender', 'Meses sem vender', 'Bilhetes no histórico', 'Média mensal quando ativa', 'AquaRio', 'Paineiras', 'Meses com venda', 'Primeira venda']];
       ls.forEach(function (a) {
-        rows.push([a.n, /^\d/.test(a.cod) ? a.cod : '', a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : '', dataBR(a.uv), a.diasSem, a.mesesSem, Math.round(a.q),
+        rows.push([a.n, contratoDe(a.n), /^\d/.test(a.cod) ? a.cod : '', a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : '', dataBR(a.uv), a.diasSem, a.mesesSem, Math.round(a.q),
           Math.round(a.mediaAtiva), Math.round(a.pq.a || 0), Math.round(a.pq.p || 0), a.mesesAtivos, dataBR(a.pv)]);
       });
       var wb = XLSX.utils.book_new();
@@ -795,7 +841,7 @@
   // 13/11/2026 (e-mail da Paula Bottino): a Carteira virou a visão principal de Clientes. Ela absorveu o Ranking + Delta
   // (filtro de mês, com comparativo contra o mês anterior além do ano contra ano) e o filtro de parque; a subaba
   // "Por Agência" saiu. Sem filtro de mês, a visão é a de sempre: acumulado jan até o último mês fechado x mesmo período de 2025.
-  var carEstado = { grupo: '', busca: '', loc: '0', k: 't', mes: '', comp: 'ano' };
+  var carEstado = { grupo: '', contrato: '', busca: '', loc: '0', k: 't', mes: '', comp: 'ano' };
   var GRUPOS = [['Defender e acelerar', 'Volume alto + crescimento', 'color-mix(in srgb, var(--up) 62%, var(--text))', 'color-mix(in srgb, var(--up) 13%, var(--white))'], ['Recuperar volume', 'Volume alto + queda ou estável', 'color-mix(in srgb, var(--dn) 62%, var(--text))', 'color-mix(in srgb, var(--dn) 11%, var(--white))'],
     ['Desenvolver potencial', 'Volume menor + crescimento', 'color-mix(in srgb, var(--aqua) 62%, var(--text))', 'color-mix(in srgb, var(--aqua) 11%, var(--white))'], ['Reavaliar esforço', 'Volume menor + queda ou estável', 'color-mix(in srgb, #B45309 45%, var(--text))', 'color-mix(in srgb, #E8A820 17%, var(--white))']];
   // só meses fechados: o mês em andamento entra quando fechar (parcial nunca é comparado com mês inteiro)
@@ -850,6 +896,7 @@
     if (!box) return;
     if (carUltFechado() < 0) { box.innerHTML = aviso('Ainda não há mês fechado em 2026 para montar a Carteira.'); return; }
     var c = carteira(), arr = c.arr, P = c.P, k = carEstado.k;
+    var cntCar = contaContrato(arr, function (a) { return a.n; });
     var tb = arr.reduce(function (s, a) { return s + a.vb; }, 0), ta = arr.reduce(function (s, a) { return s + a.va; }, 0);
     var html = '<div class="cc" style="padding:12px 14px;margin-bottom:14px"><div class="tv2-car-bar" style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">' +
       controle('Período', '<select class="cli-select" id="tv2-car-mes"><option value=""' + (P.m < 0 ? ' selected' : '') + '>Acumulado ' + P.acum + '/26</option>' +
@@ -874,9 +921,10 @@
     html += '<div class="tv2-car-bar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">' +
       controle('Buscar', '<input id="tv2-car-busca" class="cli-select" style="background-image:none;padding-right:11px;min-width:200px" placeholder="nome da agência" value="' + esc(carEstado.busca) + '">') +
       controle('Grupo', '<select class="cli-select" id="tv2-car-grupo"><option value="">Todos</option>' + GRUPOS.map(function (g) { return '<option' + (g[0] === carEstado.grupo ? ' selected' : '') + '>' + g[0] + '</option>'; }).join('') + '</select>') +
+      ctrlContrato('tv2-car-contrato', carEstado.contrato, DADOS.contr ? cntCar : null) +
       (DADOS.cad ? controle('Visão', '<select class="cli-select" id="tv2-car-loc"><option value="0"' + (carEstado.loc === '0' ? ' selected' : '') + '>Por agência</option><option value="1"' + (carEstado.loc === '1' ? ' selected' : '') + '>Por cidade</option></select>') : '') + '</div>';
     if (!DADOS.cad) carEstado.loc = '0';
-    var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
+    var ls = arr.filter(function (a) { return (!carEstado.grupo || a.g === carEstado.grupo) && (!carEstado.contrato || contratoDe(a.n) === carEstado.contrato) && (!carEstado.busca || chave(a.n).indexOf(chave(carEstado.busca)) >= 0); });
     // composição de cada nome no período atual (mesmos meses e parques da tabela)
     var CM = window.__tvAgTip ? window.__tvAgTip.compMap(P.atual.map(function (i) { return (D.meses[i] || {}).label; }), k === 'a' ? ['a'] : k === 'p' ? ['p'] : ['a', 'p']) : {};
     var subCar = P.lblAtual + ' · ' + (k === 't' ? 'AquaRio + Paineiras' : NOME[k]);
@@ -891,10 +939,10 @@
       ls.sort(function (a, b) { return b.va - a.va; });
       var flag = function (v) { return v == null ? '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>' : v === true || v === 'sim' ? '✔' : v === false || v === 'não' ? '-' : esc(v); };
       var cad = !!DADOS.cad;
-      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
-        (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 9 : 6) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
+      html += '<div class="cc" style="overflow-x:auto"><table class="cli-tbl"><thead><tr><th>Agência</th><th>Contrato</th>' + (cad ? '<th>Cidade / UF</th><th>Portal do Agente</th><th>Portal do Guia</th>' : '') + '<th style="text-align:right">' + P.lblBase + '</th><th style="text-align:right">' + P.lblAtual + '</th><th style="text-align:right">Δ volume</th><th style="text-align:right">Δ %</th><th>Prioridade sugerida</th></tr></thead><tbody>' +
+        (ls.length ? ls.slice(0, 300) : [null]).map(function (a) { if (!a) return '<tr><td colspan="' + (cad ? 10 : 7) + '" style="text-align:center;color:var(--muted);padding:18px">Nenhuma agência para este filtro em ' + P.lblAtual + ' / ' + P.lblBase + '. Limpe a busca ou escolha outro grupo ou parque.</td></tr>';
           var g = GRUPOS.filter(function (x) { return x[0] === a.g; })[0];
-          return '<tr><td><strong' + tipAg(a.n, subCar, dicComps(CM[a.n])) + '>' + esc(a.n) + '</strong></td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
+          return '<tr><td><strong' + tipAg(a.n, subCar, dicComps(CM[a.n])) + '>' + esc(a.n) + '</strong></td><td>' + pillContr(contratoDe(a.n)) + '</td>' + (cad ? '<td>' + (a.cad ? esc((a.cad.cidade || '-') + ' / ' + (a.cad.uf || '-')) : '<span style="color:var(--muted);font-size:10.5px">sem cadastro</span>') + '</td>' +
             '<td>' + flag(a.cad ? a.cad.portalAgente : null) + '</td><td>' + flag(a.cad ? a.cad.portalGuia : null) + '</td>' : '') +
             '<td style="text-align:right">' + nf(a.vb) + '</td><td style="text-align:right"><strong>' + nf(a.va) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
@@ -914,14 +962,15 @@
     var t;
     el('tv2-car-busca').oninput = function () { clearTimeout(t); var v = this.value; t = setTimeout(function () { carEstado.busca = v; renderCarteira(); var b = el('tv2-car-busca'); b.focus(); b.setSelectionRange(v.length, v.length); }, 300); };
     el('tv2-car-grupo').onchange = function () { carEstado.grupo = this.value; renderCarteira(); };
+    el('tv2-car-contrato').onchange = function () { carEstado.contrato = this.value; renderCarteira(); };
     el('tv2-car-mes').onchange = function () { carEstado.mes = this.value; if (this.value === '') carEstado.comp = 'ano'; renderCarteira(); };
     if (el('tv2-car-loc')) el('tv2-car-loc').onchange = function () { carEstado.loc = this.value; renderCarteira(); };
     el('tv2-car-xls').onclick = function () {
       if (typeof XLSX === 'undefined') return;
       var cadX = !!DADOS.cad;
-      var rows = [['Agência'].concat(cadX ? ['Cidade', 'UF'] : []).concat([P.lblBase, P.lblAtual, 'Δ volume', 'Δ %', 'Prioridade sugerida'])];
+      var rows = [['Agência', 'Contrato'].concat(cadX ? ['Cidade', 'UF'] : []).concat([P.lblBase, P.lblAtual, 'Δ volume', 'Δ %', 'Prioridade sugerida'])];
       ls.slice().sort(function (a, b) { return b.va - a.va; }).forEach(function (a) {
-        rows.push([a.n].concat(cadX ? [a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : ''] : []).concat([Math.round(a.vb), Math.round(a.va), Math.round(a.diff), a.pct == null ? 'novo' : Math.round(a.pct * 1000) / 10, a.g]));
+        rows.push([a.n, contratoDe(a.n)].concat(cadX ? [a.cad ? a.cad.cidade || '' : 'sem cadastro', a.cad ? a.cad.uf || '' : ''] : []).concat([Math.round(a.vb), Math.round(a.va), Math.round(a.diff), a.pct == null ? 'novo' : Math.round(a.pct * 1000) / 10, a.g]));
       });
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Carteira');
@@ -929,12 +978,38 @@
     };
   }
 
+  // Excel geral do Top Clientes (exportarTopClientesXLSX, do index.html): ganha a coluna "Contrato" depois de Dez, mesclada nas
+  // 3 linhas de cada agência como a coluna Agência
+  (function () {
+    var orig = window.exportarTopClientesXLSX;
+    if (typeof orig !== 'function') return;
+    window.exportarTopClientesXLSX = function () {
+      var wf = typeof XLSX !== 'undefined' ? XLSX.writeFile : null;
+      if (wf) XLSX.writeFile = function (wb) {
+        try {
+          var ws = wb.Sheets[wb.SheetNames[0]], rng = XLSX.utils.decode_range(ws['!ref']), col = rng.e.c + 1;
+          XLSX.utils.sheet_add_aoa(ws, [['Contrato']], { origin: { r: 0, c: col } });
+          ws['!merges'] = ws['!merges'] || [];
+          for (var r = 1; r <= rng.e.r; r += 3) {
+            var cel = ws[XLSX.utils.encode_cell({ r: r, c: 0 })];
+            XLSX.utils.sheet_add_aoa(ws, [[cel ? contratoDe(cel.v) : '']], { origin: { r: r, c: col } });
+            ws['!merges'].push({ s: { r: r, c: col }, e: { r: Math.min(r + 2, rng.e.r), c: col } });
+          }
+          (ws['!cols'] = ws['!cols'] || []).push({ wch: 18 });
+        } catch (e) { if (window.console) console.warn('trade_v2 contrato', e); }
+        XLSX.writeFile = wf;
+        return wf.apply(this, arguments);
+      };
+      try { return orig.apply(this, arguments); } finally { if (wf) XLSX.writeFile = wf; }
+    };
+  })();
+
   // ================================================================ Cancelamento (28/10/2026)
   // Pedido da gerente comercial (via Paulo): % de cancelamento mensal (os 2 parques, filtrável), % por agência mês a mês,
   // relação com o clima e cancelado em R$. Fonte: trade_cancelamento.json (CARD Robo\canc_agrega.py), CARD por período
   // de visita, só Trade. Cancelado = Cancelada (Estorno) + Cancelado gerou crédito; pedido de cancelamento à parte;
   // não pago fora; no-show = aprovado sem entrada com visita até ontem.
-  var cancEstado = { k: 't', mes: '', met: 'canc', min: '100' };
+  var cancEstado = { k: 't', mes: '', met: 'canc', min: '100', contrato: '' };
   DADOS.canc = null;
   var promessaCanc = getJSON('trade_cancelamento.json', true).then(function (j) {
     DADOS.canc = j;
@@ -1015,38 +1090,42 @@
       var t = cancSoma(ms.map(function (m) { return ag[a][m]; }));
       return { a: a, t: t, m: ag[a] };
     }).filter(function (l) { return l.t.ag >= min; });
+    var cntCanc = contaContrato(linhas, function (l) { return l.a; });
+    linhas = linhas.filter(function (l) { return !cancEstado.contrato || contratoDe(l.a) === cancEstado.contrato; });
     var tx = met === 'canc' ? txCanc : txNs;
     linhas.sort(function (x, y) { return (met === 'canc' ? y.t.canc - x.t.canc : y.t.ns - x.t.ns) || y.t.ag - x.t.ag; });
     var cor = function (v) { if (v == null) return ''; var a = Math.min(1, v / 0.15); return 'background:rgba(192,57,43,' + (0.08 + a * 0.55).toFixed(2) + ')'; };
     var h = '<div class="cc-h" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end"><div><div class="cc-t">% por agência, mês a mês</div><div class="cc-s">' + NOME[k] + ' · ' + linhas.length + ' agências com ' + nf(min) + '+ bilhetes agendados no período · ordenado por bilhetes ' + (met === 'canc' ? 'cancelados' : 'no-show') + '</div></div>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' + controle('Indicador', seg('tv2-canc-met', [['canc', '% cancelado'], ['ns', '% no-show']], met, function (v) { cancEstado.met = v; renderCancAg(ms); })) +
       controle('Mínimo', '<select class="cli-select" id="tv2-canc-min">' + ['10', '100', '500', '1000'].map(function (v) { return '<option value="' + v + '"' + (v === cancEstado.min ? ' selected' : '') + '>' + v + '+ bilhetes</option>'; }).join('') + '</select>') +
+      ctrlContrato('tv2-canc-contrato', cancEstado.contrato, DADOS.contr ? cntCanc : null) +
       '<button class="cli-seg-btn" style="background:var(--navy);color:#fff;border-color:var(--navy);align-self:flex-end" id="tv2-canc-xls">⬇️ Excel</button></div></div>';
-    h += '<table class="cli-table" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Agência</th>' + ms.map(function (m) { return '<th>' + mesLbl(m) + '</th>'; }).join('') +
+    h += '<table class="cli-table" style="width:100%;font-size:12px"><thead><tr><th style="text-align:left">Agência</th><th style="text-align:left">Contrato</th>' + ms.map(function (m) { return '<th>' + mesLbl(m) + '</th>'; }).join('') +
       '<th>Agendados</th><th>' + (met === 'canc' ? 'Cancelados' : 'No-show') + '</th><th>%</th><th>R$ perdido</th></tr></thead><tbody>';
     linhas.forEach(function (l) {
       var v = tx(l.t);
-      h += '<tr><td style="text-align:left;white-space:nowrap"><span' + tipAg(l.a, NOME[k] + ' · ' + mesLbl(ms[0]) + ' a ' + mesLbl(ms[ms.length - 1]), dicComps(agc[l.a]), 'agendados') + '>' + esc(l.a) + '</span></td>' + ms.map(function (m) { var o = l.m[m]; var x = o ? tx(o) : null; return '<td style="text-align:right;' + cor(x) + '" title="' + (o ? nf(o.ag) + ' agendados' : '') + '">' + (o && o.ag ? pf(x) : '-') + '</td>'; }).join('') +
+      h += '<tr><td style="text-align:left;white-space:nowrap"><span' + tipAg(l.a, NOME[k] + ' · ' + mesLbl(ms[0]) + ' a ' + mesLbl(ms[ms.length - 1]), dicComps(agc[l.a]), 'agendados') + '>' + esc(l.a) + '</span></td><td style="text-align:left">' + pillContr(contratoDe(l.a)) + '</td>' + ms.map(function (m) { var o = l.m[m]; var x = o ? tx(o) : null; return '<td style="text-align:right;' + cor(x) + '" title="' + (o ? nf(o.ag) + ' agendados' : '') + '">' + (o && o.ag ? pf(x) : '-') + '</td>'; }).join('') +
         '<td style="text-align:right">' + nf(l.t.ag) + '</td><td style="text-align:right">' + nf(met === 'canc' ? l.t.canc : l.t.ns) + '</td><td style="text-align:right;font-weight:700;' + cor(v) + '">' + pf(v) + '</td><td style="text-align:right">' + rs(met === 'canc' ? l.t.rs_canc : l.t.rs_ns) + '</td></tr>';
     });
     h += '</tbody></table>';
     var box = el('tv2-canc-ag');
     box.innerHTML = h;
     el('tv2-canc-min').onchange = function () { cancEstado.min = this.value; renderCancAg(ms); };
+    el('tv2-canc-contrato').onchange = function () { cancEstado.contrato = this.value; renderCancAg(ms); };
     el('tv2-canc-xls').onclick = function () {
       if (typeof XLSX === 'undefined') return;
       // mesma visão da tabela da tela: colunas e ordem iguais, com os filtros de parque, indicador e mínimo selecionados
-      var cabec = ['Agência'].concat(ms.map(mesLbl), ['Agendados', met === 'canc' ? 'Cancelados' : 'No-show', '%', 'R$ perdido']);
+      var cabec = ['Agência', 'Contrato'].concat(ms.map(mesLbl), ['Agendados', met === 'canc' ? 'Cancelados' : 'No-show', '%', 'R$ perdido']);
       var aoa = [cabec];
       linhas.forEach(function (l) {
-        var lin = [l.a];
+        var lin = [l.a, contratoDe(l.a)];
         ms.forEach(function (m) { var o = l.m[m]; lin.push(o && o.ag ? { t: 'n', v: tx(o), z: '0.0%' } : '-'); });
         lin.push(l.t.ag, met === 'canc' ? l.t.canc : l.t.ns, { t: 'n', v: tx(l.t) == null ? 0 : tx(l.t), z: '0.0%' }, { t: 'n', v: Math.round(met === 'canc' ? l.t.rs_canc : l.t.rs_ns), z: '"R$" #,##0' });
         aoa.push(lin);
       });
       var ws = XLSX.utils.aoa_to_sheet(aoa);
-      ws['!cols'] = [{ wch: 46 }].concat(ms.map(function () { return { wch: 9 }; }), [{ wch: 11 }, { wch: 11 }, { wch: 8 }, { wch: 14 }]);
-      ws['!freeze'] = { xSplit: 1, ySplit: 1 };
+      ws['!cols'] = [{ wch: 46 }, { wch: 18 }].concat(ms.map(function () { return { wch: 9 }; }), [{ wch: 11 }, { wch: 11 }, { wch: 8 }, { wch: 14 }]);
+      ws['!freeze'] = { xSplit: 2, ySplit: 1 };
       var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Cancelamento');
       XLSX.writeFile(wb, 'cancelamento_trade_' + (k === 't' ? 'AquaRio_Paineiras' : NOME[k]) + '_' + (met === 'canc' ? 'cancelado' : 'no-show') + '_min' + min + '.xlsx');
     };

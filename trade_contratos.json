@@ -1,0 +1,261 @@
+{
+ "_descricao": "Tipo de contrato dos clientes do Trade. Faturados = lista da GEFIT; Adiantamento Fixo = GRAMADO PARKS e W40; os demais são Sem Categoria (calculado na tela). Nomes = todas as grafias que o Dash usa para o cliente.",
+ "fonte": "E-mail de Thayane Araujo (GEFIT) de 24/11/2026, encaminhado por Paula Bottino em 25/11/2026 (assunto: Categoria de clientes)",
+ "geradoEm": "2026-11-25",
+ "contratos": [
+  "Faturados",
+  "Adiantamento Fixo",
+  "Sem Categoria"
+ ],
+ "clientes": [
+  {
+   "contrato": "Faturados",
+   "cnpj": "09.323.625/0001-69",
+   "razao": "Bealocal Tours Operadora Ltda",
+   "nomes": [
+    "BE A LOCAL TOURS",
+    "BEALOCAL TOURS OPERADORA LTDA",
+    "BE A LOCAL"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "01.365.194/0001-91",
+   "razao": "BEST WAY TRIPS AGENCIA DE VIAGENS E TURISMO LTDA",
+   "nomes": [
+    "BEST WAY TRIPS"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "07.741.441/0001-93",
+   "razao": "BILHETERIA.COM PRODUCOES E PROMOCOES LTDA ME",
+   "nomes": [
+    "BILHETERIA.COM PRODUÇÕES E PROMOÇÕES",
+    "BILHETERIA COM"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "20.345.191/0001-30",
+   "razao": "BRAZIL CONECTION AGENCIA DE VIAGENS LTDA - EPP",
+   "nomes": [
+    "BRAZIL CONNECTION TURISMO RECEPTIVO LTDA",
+    "BRAZIL CONNECTION",
+    "BRAZIL CONECTION"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "07.713.155/0001-14",
+   "razao": "Brazil Expedition Passeios Turísticos Me Ltda",
+   "nomes": [
+    "BRAZIL EXPEDITION PASSEIOS TURISTICOS LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "13.146.834/0001-51",
+   "razao": "CLUB WEB SERVICOS DIGITAIS LTDA - ME",
+   "nomes": [
+    "CLUB WEB SERVIÇOS DIGITAIS LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "27.361.663/0001-98",
+   "razao": "DIO BERKANA VIAGENS E TURISMO LTDA",
+   "nomes": []
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "11.428.529/0001-27",
+   "razao": "FERIAS RIO VIAGENS E TURISMO LTDA",
+   "nomes": [
+    "FERIAS TURISMO"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "02.447.633/0001-78",
+   "razao": "HYD BRAZILIAN TOURS VIAGENS LTDA",
+   "nomes": [
+    "IN BUZIOS",
+    "HYD BRAZILIAN TOURS / IN BUZIOS"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "01.957.456/0001-07",
+   "razao": "INTERTOURING RECEPTIVO AG DE VIAGENS E TURISMO LTDA",
+   "nomes": [
+    "INTERTOURING-AGENCIA DE VIAGEM E TURISMO LTDA",
+    "INTERTOURING AG. DE VIAG. E TUR. LTDA."
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "07.426.439/0001-20",
+   "razao": "JS AGENCIAS DE VIAGENS E TURISMO LTDA",
+   "nomes": [
+    "PASSEIO RIO",
+    "PASSEIO RIO TURISMO"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "06.166.683/0001-38",
+   "razao": "LATIN RIO TRAVEL - AGENCIA DE TURISMO LTDA",
+   "nomes": [
+    "LATIN RIO TRAVEL",
+    "LATIN RIO"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "40.434.458/0001-73",
+   "razao": "PROMOTIONAL TRAVEL VIAGENS E TURISMO LTDA",
+   "nomes": []
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "28.276.737/0001-50",
+   "razao": "RIO RADICAL ECOTURISMO LTDA.",
+   "nomes": [
+    "RIO RADICAL TURISMO DE AVENTURA LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "32.455.796/0001-63",
+   "razao": "SOBRE TERRA & CIA LTDA - ME",
+   "nomes": [
+    "JEEP TUOR / SOBRE TERRA",
+    "JEEP TUOR",
+    "SOBRE TERRA E CIA LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "31.675.132/0001-47",
+   "razao": "THE IFRIEND INTERMEDIACAO DE NEGOCIOS LTDA - EPP",
+   "nomes": []
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "51.977.055/0001-97",
+   "razao": "TRAVEL & EXPERIENCES RJ LTDA ME",
+   "nomes": [
+    "TRAVEL E EXPERIENCES RJ LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "00.358.207/0001-32",
+   "razao": "Via Capi Viagens e Turismo LTDA",
+   "nomes": [
+    "VIA CAPI",
+    "VIA-CAPI"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "05.873.416/0001-38",
+   "razao": "C2 RIO VIAGENS E TURISMO LTDA - ME",
+   "nomes": [
+    "C2 RIO VIAGENS E TURISMO S.A.",
+    "C2RIO TOURS & TRAVEL"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "51.919.821/0001-67",
+   "razao": "PROGRAMA DE PONTOS 6WINGS LTDA",
+   "nomes": []
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "25.276.911/0001-77",
+   "razao": "MARINA MASCARENHAS KNAUER PENEDO VIAGENS TURISMO E EVENTOS LTDA ME",
+   "nomes": [
+    "MARINA MASCARENHAS KNAUER PENEDO VIAGENS, TURISMO"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "37.766.450/0001-08",
+   "razao": "BRIAN LIMA DA SILVA CORRESPONDENTE FINANCEIRO LTDA ME",
+   "nomes": [
+    "Go Now",
+    "GO NOW TOURS",
+    "BRIAN LIMA DA SILVA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "10.335.415/0001-70",
+   "razao": "INGRESSO COM DESCONTO LTDA ME",
+   "nomes": [
+    "ICD - INGRESSO COM DESCONTO",
+    "ICD"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "54.801.401/0001-70",
+   "razao": "ONERIO PASS INGRESSOS E ACESSOS LTDA",
+   "nomes": [
+    "ONERIO PASS INGRESSOS E ACESSOS",
+    "API - ONE RIO"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "11.805.397/0021-59",
+   "razao": "BEACH PARK HOTEIS E TURISMO S/A",
+   "nomes": []
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "09.489.355/0001-60",
+   "razao": "BRAZIL4YOU OPERADORA RECEPTIVA LTDA",
+   "nomes": [
+    "Brazil4You",
+    "BRASIL SHOW TURISMO LTDA",
+    "BRASIL SHOW",
+    "BRAZIL SHOW TURISMO",
+    "GRAY LINE",
+    "GRAY LINE BRAZIL",
+    "BRASIL VIAGEM OPERADORA DE TURISMO LTDA"
+   ]
+  },
+  {
+   "contrato": "Faturados",
+   "cnpj": "05.949.330/0001-41",
+   "razao": "CARIOCA TROPICAL",
+   "nomes": [
+    "CARIOCA TROPICAL TURISMO LTDA"
+   ]
+  },
+  {
+   "contrato": "Adiantamento Fixo",
+   "razao": "GRAMADO PARKS",
+   "nomes": [
+    "GRAMADO PROMOÇÃO DE VENDAS",
+    "GRAMADO PROMOÇÃO DE VENDAS LTDA",
+    "GRAMADO PROMOCAO DE VENDAS S.A.",
+    "GRAMADO PROMOCAO DE VENDAS",
+    "GRAMADO PARKS"
+   ]
+  },
+  {
+   "contrato": "Adiantamento Fixo",
+   "razao": "W40",
+   "nomes": [
+    "W 40 EMPREENDIMENTOS IMOBILIARIOS LTDA",
+    "W 40 EMPREENDIMENTOS IMOBILIÁRIOS",
+    "W40"
+   ]
+  }
+ ]
+}
