@@ -61,15 +61,23 @@
   // O Dash não tem CNPJ: o cliente é reconhecido pelo nome, em qualquer das grafias listadas no arquivo (e pelo nome que o
   // agrupamento de agências do Top Clientes dá a elas).
   var CONTRATOS = ['Faturados', 'Adiantamento Fixo', 'Sem Categoria'];
-  var mapaContr = null;
+  var mapaContr = null, mapaClienteContr = null;
   DADOS.contr = null;
   function montaMapaContr() {
-    mapaContr = {};
-    ((DADOS.contr || {}).clientes || []).forEach(function (c) {
+    mapaContr = {}; mapaClienteContr = {};
+    ((DADOS.contr || {}).clientes || []).forEach(function (c, i) {
       [c.razao].concat(c.nomes || []).forEach(function (n) {
-        [chave(n), chave(alias(n))].forEach(function (k) { if (k && !mapaContr[k]) mapaContr[k] = c.contrato; });
+        [chave(n), chave(alias(n))].forEach(function (k) { if (k && !mapaContr[k]) { mapaContr[k] = c.contrato; mapaClienteContr[k] = i; } });
       });
     });
+  }
+  // clientes da categoria que NÃO aparecem na lista de agências do recorte (sem compra no período/parque, ou fora das bases do Dash)
+  function clientesSemCompra(contrato, agencias) {
+    if (!DADOS.contr) return [];
+    if (!mapaContr) montaMapaContr();
+    var achou = {};
+    agencias.forEach(function (a) { var i = mapaClienteContr[chave(a.n)]; if (i == null) i = mapaClienteContr[chave(alias(a.n))]; if (i != null) achou[i] = true; });
+    return DADOS.contr.clientes.filter(function (c, i) { return c.contrato === contrato && !achou[i]; });
   }
   function contratoDe(nome) {
     if (!DADOS.contr) return '';
@@ -947,6 +955,14 @@
             '<td style="text-align:right">' + nf(a.vb) + '</td><td style="text-align:right"><strong>' + nf(a.va) + '</strong></td><td style="text-align:right" class="' + cls(a.diff) + '">' + sinal(a.diff, nf) + '</td>' +
             '<td style="text-align:right">' + (a.pct == null ? '<span class="cli-pill novo">novo</span>' : pill(a.pct)) + '</td><td><span class="cli-pill" style="background:' + g[3] + ';color:' + g[2] + '">' + a.g + '</span></td></tr>';
         }).join('') + '</tbody></table>' + (ls.length > 300 ? '<div class="cc-s" style="margin-top:6px">Mostrando 300 de ' + ls.length + '. O Excel traz todas.</div>' : '') + '</div>';
+    }
+    // lista com marcadores dos clientes da categoria escolhida que não aparecem na tabela
+    if (carEstado.contrato && carEstado.contrato !== 'Sem Categoria' && DADOS.contr) {
+      var semCompra = clientesSemCompra(carEstado.contrato, arr);
+      html += aviso('ℹ️ <strong>' + carEstado.contrato + ' sem compra em ' + P.lblAtual + ' ' + (k === 't' ? '(AquaRio + Paineiras)' : '(' + NOME[k] + ')') + (semCompra.length ? ' (' + semCompra.length + ')' : '') + ':</strong>' +
+        (semCompra.length ? '<ul style="margin:6px 0 0 18px;padding:0">' + semCompra.map(function (c) { return '<li>' + esc(c.razao) + (c.cnpj ? ' <span style="color:var(--muted)">· CNPJ ' + esc(c.cnpj) + '</span>' : '') + '</li>'; }).join('') + '</ul>' +
+          '<div style="margin-top:6px;font-size:10.5px;color:var(--muted)">Estão na lista de contratos, mas não têm bilhete Trade no recorte escolhido (ou nunca apareceram nas bases do Dash). Entram na tabela assim que comprarem.</div>'
+          : ' todos os clientes desta categoria tiveram compra no recorte.'));
     }
     if (!DADOS.cad) html += aviso('ℹ️ <strong>Cidade, Portal do Agente e Portal do Guia</strong> entram aqui quando o cadastro oficial de agências for carregado ' +
       '(código, cidade, UF e as flags dos dois portais, separando acesso, habilitação e uso). Nenhuma base do Dash traz esses campos: a UF/PAIS do bruto é do visitante, não da agência.');
